@@ -1,11 +1,11 @@
-package com.example.finanse
+package com.example.finanse.states
 
+import com.example.finanse.sortTypes.IncomeSortType
 import com.example.finanse.entities.Income
-import java.time.LocalDateTime
 
 data class IncomeState(
     val income: List<Income> = emptyList(),
-    val amount: Double = 0.0,
+    val amount: String = "",
     val title: String = "",
     val date: String = "",
     val description: String? = null,

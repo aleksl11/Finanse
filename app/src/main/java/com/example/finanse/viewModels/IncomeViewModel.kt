@@ -1,9 +1,12 @@
-package com.example.finanse
+package com.example.finanse.viewModels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.finanse.sortTypes.IncomeSortType
+import com.example.finanse.events.IncomeEvent
 import com.example.finanse.dao.IncomeDao
 import com.example.finanse.entities.Income
+import com.example.finanse.states.IncomeState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -12,7 +15,8 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.LocalDateTime
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class IncomeViewModel(
     private val dao: IncomeDao
@@ -50,7 +54,7 @@ class IncomeViewModel(
                 )}
             }
             IncomeEvent.SaveIncome -> {
-                val amount = state.value.amount
+                val amount = state.value.amount.toDouble()
                 val title = state.value.title
                 val date = state.value.date
                 val description = state.value.description
@@ -62,7 +66,7 @@ class IncomeViewModel(
                 val income = Income(
                     amount = amount,
                     title = title,
-                    date = date,
+                    date = LocalDate.parse(date, DateTimeFormatter.ofPattern("dd.MM.yyyy")),
                     description = description
                 )
                 viewModelScope.launch {
@@ -70,7 +74,7 @@ class IncomeViewModel(
                 }
                 _state.update{it.copy(
                     isAddingIncome = false,
-                    amount = 0.0,
+                    amount = "",
                     title = "",
                     date = "",
                     description = ""

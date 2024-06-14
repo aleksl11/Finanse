@@ -7,13 +7,11 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -26,6 +24,8 @@ import com.example.finanse.ui.theme.FinanseTheme
 import com.example.finanse.screens.SummaryScreen
 import com.example.finanse.screens.Menu
 import com.example.finanse.screens.SettingsScreen
+import com.example.finanse.viewModels.IncomeViewModel
+import com.example.finanse.viewModels.ExpenseViewModel
 
 class MainActivity : ComponentActivity() {
 
@@ -37,11 +37,21 @@ class MainActivity : ComponentActivity() {
         ).build()
     }
 
-    private val viewModel by viewModels<IncomeViewModel>(
+    private val incomeViewModel by viewModels<IncomeViewModel>(
         factoryProducer = {
             object: ViewModelProvider.Factory {
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return IncomeViewModel(db.dao) as T
+                    return IncomeViewModel(db.incomeDao()) as T
+                }
+            }
+        }
+    )
+
+    private val expenseViewModel by viewModels<ExpenseViewModel>(
+        factoryProducer = {
+            object: ViewModelProvider.Factory {
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return ExpenseViewModel(db.expenseDao()) as T
                 }
             }
         }
@@ -51,7 +61,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             FinanseTheme {
-                val state by viewModel.state.collectAsState()
+                val incomeState by incomeViewModel.state.collectAsState()
+                val expenseState by expenseViewModel.state.collectAsState()
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -65,10 +76,10 @@ class MainActivity : ComponentActivity() {
                             SummaryScreen(navController)
                         }
                         composable("incomes"){
-                            IncomesScreen(navController, state, viewModel::onEvent)
+                            IncomesScreen(navController, incomeState, incomeViewModel::onEvent)
                         }
                         composable("expenses"){
-                            ExpensesScreen(navController)
+                            ExpensesScreen(navController, expenseState, expenseViewModel::onEvent)
                         }
                         composable("categories"){
                             CategoriesScreen(navController)

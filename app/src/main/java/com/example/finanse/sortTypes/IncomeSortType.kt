@@ -1,4 +1,4 @@
-package com.example.finanse
+package com.example.finanse.sortTypes
 
 enum class IncomeSortType {
     AMOUNT,

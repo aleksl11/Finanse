@@ -1,7 +1,7 @@
 package com.example.finanse.screens
 
-import android.provider.MediaStore.Audio.Radio
 import android.widget.CalendarView
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -21,7 +21,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.DatePicker
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -30,20 +29,22 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
-import com.example.finanse.IncomeEvent
-import com.example.finanse.IncomeSortType
-import com.example.finanse.IncomeState
+import com.example.finanse.events.IncomeEvent
+import com.example.finanse.sortTypes.IncomeSortType
+import com.example.finanse.states.IncomeState
 import com.example.finanse.TopNavBar
-import java.time.LocalDateTime
+import com.example.finanse.ValidateInputs
 import java.time.format.DateTimeFormatter
 
 @Composable
@@ -57,7 +58,7 @@ fun IncomesScreen(
             FloatingActionButton(onClick = {
                 onEvent(IncomeEvent.ShowDialog)
             }) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = "Add income")
+                Icon(imageVector = Icons.Default.Add, contentDescription = "Add an income")
             }
         },
         modifier = Modifier.padding(16.dp)
@@ -92,7 +93,7 @@ fun IncomesScreen(
                         ){
                             RadioButton(selected = state.incomeSortType == incomeSortType,
                                 onClick = {
-                                    onEvent(IncomeEvent.SortIncomes(incomeSortType)) 
+                                    onEvent(IncomeEvent.SortIncomes(incomeSortType))
                                 }
                             )
                             Text(text = incomeSortType.name)
@@ -122,20 +123,24 @@ fun IncomesScreen(
     }
 }
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddIncomeDialog(
     state: IncomeState,
     onEvent: (IncomeEvent) -> Unit,
 ){
+    val text = remember { mutableStateOf("") }
+    val validate = ValidateInputs()
     AlertDialog(
         onDismissRequest = { onEvent(IncomeEvent.HideDialog) },
         ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.background(Color.Gray)
+                .padding(8.dp)
         ) {
             Text(text = "Add income")
-            val formatter = DateTimeFormatter.ISO_LOCAL_DATE
             TextField(
                 value = state.title,
                 onValueChange = {
@@ -146,9 +151,9 @@ fun AddIncomeDialog(
                 }
             )
             TextField(
-                value = state.amount.toString(),
+                value = state.amount,
                 onValueChange = {
-                    onEvent(IncomeEvent.SetAmount(it.toDouble()))
+                    if(validate.isAmountValid(it))onEvent(IncomeEvent.SetAmount(it))
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 placeholder = {
@@ -162,7 +167,7 @@ fun AddIncomeDialog(
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 placeholder = {
-                    Text(text = "Date")
+                    Text(text = "DD.MM.YYYY")
                 }
             )
             TextField(
@@ -179,24 +184,20 @@ fun AddIncomeDialog(
                 modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.CenterEnd
             ) {
-                Button(onClick = { onEvent(IncomeEvent.SaveIncome) }) {
+                Button(onClick = {
+                    if (validate.isDateValid(state.date)){
+                        text.value = ""
+                        onEvent(IncomeEvent.SaveIncome)
+                    }
+                    else text.value = "Incorrect date. Make sure it is in DD.MM.YYYY format"
+                    if (state.title == "") text.value = "Title field must be filled in"
+                }) {
                     Text(text = "Save")
                 }
             }
+            Text(text = text.value, color = Color.Red)
         }
 
     }
     
-}
-
-@Composable
-fun ShowDatePicker() {
-    AndroidView(
-        { CalendarView(it) },
-        modifier = Modifier.wrapContentWidth(),
-        update = { views ->
-            views.setOnDateChangeListener { calendarView, year, month, dayOfMonth ->
-            }
-        }
-    )
 }
