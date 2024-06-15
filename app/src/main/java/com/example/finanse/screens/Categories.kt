@@ -101,7 +101,7 @@ fun CategoriesScreen(
                     ){
                         Text(text = category.name, fontSize = 20.sp)
                     }
-                    if (category.id>4) {
+                    if (category.id>5) {
                         IconButton(onClick = {
                             onEvent(CategoryEvent.DeleteCategory(category))
                         }) {

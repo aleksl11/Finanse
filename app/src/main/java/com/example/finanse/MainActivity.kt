@@ -15,12 +15,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.room.Room
 import com.example.finanse.screens.CategoriesScreen
 import com.example.finanse.screens.ExpensesScreen
 import com.example.finanse.screens.IncomesScreen
 import com.example.finanse.ui.theme.FinanseTheme
-
 import com.example.finanse.screens.SummaryScreen
 import com.example.finanse.screens.Menu
 import com.example.finanse.screens.SettingsScreen
@@ -31,11 +29,7 @@ import com.example.finanse.viewModels.ExpenseViewModel
 class MainActivity : ComponentActivity() {
 
     private val db by lazy{
-        Room.databaseBuilder(
-            applicationContext,
-            MainDatabase::class.java,
-            "main.db"
-        ).build()
+        MainDatabase.getInstance(applicationContext)
     }
 
     private val incomeViewModel by viewModels<IncomeViewModel>(

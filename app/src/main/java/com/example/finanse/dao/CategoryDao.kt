@@ -11,7 +11,8 @@ import kotlinx.coroutines.flow.Flow
 interface CategoryDao {
     @Insert
     suspend fun insertCategory(category: Category)
-
+    @Insert
+    suspend fun insertFirstCategories(categories: List<Category>)
     @Delete
     suspend fun deleteCategory(category: Category)
 
