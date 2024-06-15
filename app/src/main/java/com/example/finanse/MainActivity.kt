@@ -24,6 +24,7 @@ import com.example.finanse.ui.theme.FinanseTheme
 import com.example.finanse.screens.SummaryScreen
 import com.example.finanse.screens.Menu
 import com.example.finanse.screens.SettingsScreen
+import com.example.finanse.viewModels.CategoryViewModel
 import com.example.finanse.viewModels.IncomeViewModel
 import com.example.finanse.viewModels.ExpenseViewModel
 
@@ -57,12 +58,23 @@ class MainActivity : ComponentActivity() {
         }
     )
 
+    private val categoryViewModel by viewModels<CategoryViewModel>(
+        factoryProducer = {
+            object: ViewModelProvider.Factory {
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return CategoryViewModel(db.categoryDao()) as T
+                }
+            }
+        }
+    )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             FinanseTheme {
                 val incomeState by incomeViewModel.state.collectAsState()
                 val expenseState by expenseViewModel.state.collectAsState()
+                val categoryState by categoryViewModel.state.collectAsState()
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -82,7 +94,7 @@ class MainActivity : ComponentActivity() {
                             ExpensesScreen(navController, expenseState, expenseViewModel::onEvent)
                         }
                         composable("categories"){
-                            CategoriesScreen(navController)
+                            CategoriesScreen(navController, categoryState, categoryViewModel::onEvent)
                         }
                         composable("settings"){
                             SettingsScreen(navController)

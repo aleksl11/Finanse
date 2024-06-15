@@ -28,6 +28,7 @@ fun TopNavBar(navController: NavController, currentScreen: String, previousScree
         }
         Text(currentScreen)
         IconButton(onClick = {
+            //display side menu
         }) {
             Icon(imageVector = Icons.Filled.Menu, contentDescription = "Side Menu")
         }
