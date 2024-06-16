@@ -17,8 +17,12 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -28,8 +32,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,12 +47,14 @@ import com.example.finanse.TopNavBar
 import com.example.finanse.ValidateInputs
 import com.example.finanse.events.ExpenseEvent
 import com.example.finanse.sortTypes.ExpenseSortType
+import com.example.finanse.states.CategoryState
 import com.example.finanse.states.ExpenseState
 
 @Composable
 fun ExpensesScreen(
     navController: NavController,
     state: ExpenseState,
+    categoryState: CategoryState,
     onEvent: (ExpenseEvent) -> Unit
 ){
     Scaffold (
@@ -61,7 +69,7 @@ fun ExpensesScreen(
     ) {padding ->
 
         if(state.isAddingExpense) {
-            AddExpenseDialog(state = state, onEvent = onEvent)
+            AddExpenseDialog(state = state, categoryState = categoryState, onEvent = onEvent)
         }
 
         LazyColumn(
@@ -124,16 +132,25 @@ fun ExpensesScreen(
 @Composable
 fun AddExpenseDialog(
     state: ExpenseState,
+    categoryState: CategoryState,
     onEvent: (ExpenseEvent) -> Unit,
 ){
     val text = remember { mutableStateOf("") }
+    var expanded by remember { mutableStateOf(false) }
+    val mCategories = categoryState.category
+    val icon = if (expanded)
+        Icons.Filled.KeyboardArrowUp
+    else
+        Icons.Filled.KeyboardArrowDown
+
     val validate = ValidateInputs()
     AlertDialog(
         onDismissRequest = { onEvent(ExpenseEvent.HideDialog) },
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.background(Color.Gray)
+            modifier = Modifier
+                .background(Color.Gray)
                 .padding(8.dp)
         ) {
             Text(text = "Add expense")
@@ -172,10 +189,25 @@ fun AddExpenseDialog(
                 onValueChange = {
                     onEvent(ExpenseEvent.SetCategory(it))
                 },
-                placeholder = {
-                    Text(text = "Category")
+                label = {Text("Category")},
+                trailingIcon = {
+                    Icon(icon,"drop down menu arrow",
+                        Modifier.clickable { expanded = !expanded })
                 }
             )
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                mCategories.forEach { c ->
+                    DropdownMenuItem(onClick = {
+                        expanded = false
+                        onEvent(ExpenseEvent.SetCategory(c.name))
+                    },
+                        text = {Text(text = c.name)}
+                    )
+                }
+            }
             TextField(
                 value = state.description ?: "",
                 onValueChange = {

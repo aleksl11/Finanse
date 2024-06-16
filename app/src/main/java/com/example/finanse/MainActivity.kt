@@ -85,7 +85,7 @@ class MainActivity : ComponentActivity() {
                             IncomesScreen(navController, incomeState, incomeViewModel::onEvent)
                         }
                         composable("expenses"){
-                            ExpensesScreen(navController, expenseState, expenseViewModel::onEvent)
+                            ExpensesScreen(navController, expenseState,categoryState, expenseViewModel::onEvent)
                         }
                         composable("categories"){
                             CategoriesScreen(navController, categoryState, categoryViewModel::onEvent)
