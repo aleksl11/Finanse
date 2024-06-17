@@ -113,7 +113,7 @@ fun ExpensesScreen(
                         modifier = Modifier.weight(1f)
                     ){
                         Text(text = "${expense.title}: ${"%.2f".format(expense.amount)}", fontSize = 20.sp)
-                        Text(text = expense.date.toString(), fontSize = 16.sp)
+                        Text(text = "${expense.date.toString()}\n${expense.category}", fontSize = 16.sp)
                         expense.description?.let { Text(text = it, fontSize = 12.sp) }
                     }
                     IconButton(onClick = {
@@ -193,7 +193,9 @@ fun AddExpenseDialog(
                 trailingIcon = {
                     Icon(icon,"drop down menu arrow",
                         Modifier.clickable { expanded = !expanded })
-                }
+                },
+//                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.None),
+                readOnly = true
             )
             DropdownMenu(
                 expanded = expanded,

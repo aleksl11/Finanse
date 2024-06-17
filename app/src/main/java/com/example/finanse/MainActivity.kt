@@ -79,13 +79,13 @@ class MainActivity : ComponentActivity() {
                             Menu(navController)
                         }
                         composable("summary"){
-                            SummaryScreen(navController)
+                            SummaryScreen(navController, incomeState, expenseState, categoryState)
                         }
                         composable("incomes"){
                             IncomesScreen(navController, incomeState, incomeViewModel::onEvent)
                         }
                         composable("expenses"){
-                            ExpensesScreen(navController, expenseState,categoryState, expenseViewModel::onEvent)
+                            ExpensesScreen(navController, expenseState, categoryState, expenseViewModel::onEvent)
                         }
                         composable("categories"){
                             CategoriesScreen(navController, categoryState, categoryViewModel::onEvent)
