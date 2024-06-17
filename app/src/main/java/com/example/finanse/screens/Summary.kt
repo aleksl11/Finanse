@@ -30,6 +30,7 @@ import androidx.navigation.NavController
 import com.example.finanse.PieChart
 import com.example.finanse.PieChartInput
 import com.example.finanse.TopNavBar
+import com.example.finanse.entities.Category
 import com.example.finanse.entities.Expense
 import com.example.finanse.entities.Income
 import com.example.finanse.states.CategoryState
@@ -51,7 +52,7 @@ fun SummaryScreen(
     expenseState: ExpenseState,
     categoryState: CategoryState
     ){
-    var chosenTimePeriod by remember { mutableStateOf(summaryTimePeriod.THIS_MONTH)}
+    var chosenTimePeriod by remember { mutableStateOf(summaryTimePeriod.ALL_TIME)}
     val incomes = incomeState.income
     val expenses = expenseState.expense
 
@@ -96,7 +97,7 @@ fun SummaryScreen(
                         sortedIncomes = incomes.filter { i ->
                             i.date.month == dateNow.month && i.date.year == dateNow.year
                         }
-                        TimePeriodSummary(sortedExpenses = sortedExpenses, sortedIncomes = sortedIncomes)
+                        TimePeriodSummary(sortedExpenses = sortedExpenses, sortedIncomes = sortedIncomes, categoryState)
                     }
                     summaryTimePeriod.THIS_YEAR -> {
                         sortedExpenses = expenses.filter { e ->
@@ -105,12 +106,12 @@ fun SummaryScreen(
                         sortedIncomes = incomes.filter { i ->
                             i.date.year == dateNow.year
                         }
-                        TimePeriodSummary(sortedExpenses = sortedExpenses, sortedIncomes = sortedIncomes)
+                        TimePeriodSummary(sortedExpenses = sortedExpenses, sortedIncomes = sortedIncomes, categoryState)
                     }
                     summaryTimePeriod.ALL_TIME -> {
                         sortedExpenses = expenses
                         sortedIncomes = incomes
-                        TimePeriodSummary(sortedExpenses = sortedExpenses, sortedIncomes = sortedIncomes)
+                        TimePeriodSummary(sortedExpenses = sortedExpenses, sortedIncomes = sortedIncomes, categoryState)
                     }
 
                 }
@@ -126,7 +127,7 @@ fun NoRecordsInDb(){
 }
 
 @Composable
-fun TimePeriodSummary(sortedExpenses: List<Expense>, sortedIncomes: List<Income>){
+fun TimePeriodSummary(sortedExpenses: List<Expense>, sortedIncomes: List<Income>, categoryState: CategoryState){
     var incomesTotal = 0.0
     sortedIncomes.forEach{i ->
         incomesTotal += i.amount
@@ -142,12 +143,12 @@ fun TimePeriodSummary(sortedExpenses: List<Expense>, sortedIncomes: List<Income>
 
     val expensesGrouped = sortedExpenses.groupBy { it.category }
         .mapValues { e -> e.value.sumOf { it.amount } }
-
     val pieChartData: MutableList<PieChartInput> = mutableListOf()
+
     expensesGrouped.forEach { (category, sum) ->
         pieChartData.add(
             PieChartInput(
-            color = Color.Red,
+            color = Color(getColorByCategory(categoryState.category, category)),
             description = category,
             value = sum
             )
@@ -184,6 +185,11 @@ fun TimePeriodSummary(sortedExpenses: List<Expense>, sortedIncomes: List<Income>
             )
         }
     }
+}
 
+fun getColorByCategory(categories: List<Category>, categoryName: String): Int {
+    val category = categories.find { it.name == categoryName }
+    if (category != null) return category.color
+    return Color.Gray.hashCode()
 }
 

@@ -16,12 +16,12 @@ interface CategoryDao {
     @Delete
     suspend fun deleteCategory(category: Category)
 
-    @Query("SELECT * FROM category ORDER BY id ASC")
-    fun getCategoriesOrderedById(): Flow<List<Category>>
+    @Query("SELECT * FROM category")
+    fun getCategories(): Flow<List<Category>>
 
     @Query("SELECT * FROM category ORDER BY name ASC")
     fun getCategoriesOrderedByName(): Flow<List<Category>>
 
-    @Query("SELECT name FROM category where id = :id")
-    fun getNameFromId(id: Int): String
+    @Query("SELECT color FROM category WHERE name = :name ")
+    fun getColorValue(name: String): Int
 }

@@ -1,6 +1,7 @@
 package com.example.finanse
 
 import android.content.Context
+import androidx.compose.ui.graphics.Color
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
@@ -46,11 +47,11 @@ abstract class MainDatabase: RoomDatabase() {
                     CoroutineScope(Dispatchers.IO).launch {
                         getInstance(context).categoryDao().insertFirstCategories(
                             listOf(
-                                Category(1, "Bills"),
-                                Category(2, "Groceries"),
-                                Category(3, "Transport"),
-                                Category(4, "Entertainment"),
-                                Category(5, "Other")
+                                Category("Bills", Color.Red.hashCode()),
+                                Category("Groceries", Color.Green.hashCode()),
+                                Category("Transport", Color.Blue.hashCode()),
+                                Category("Entertainment", Color.Magenta.hashCode()),
+                                Category("Other", Color.Yellow.hashCode())
                             )
                         )
                     }

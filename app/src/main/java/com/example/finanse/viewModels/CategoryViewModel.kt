@@ -25,7 +25,7 @@ class CategoryViewModel(
     private val _categories = _categorySortType
         .flatMapLatest { categorySortType ->
             when(categorySortType){
-                CategorySortType.DATE_ADDED ->dao.getCategoriesOrderedById()
+                CategorySortType.DATE_ADDED ->dao.getCategories()
                 CategorySortType.NAME -> dao.getCategoriesOrderedByName()
             }
         }
@@ -38,6 +38,7 @@ class CategoryViewModel(
             categorySortType = categorySortType
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), CategoryState())
+
 
     fun onEvent(event: CategoryEvent){
         when(event){
@@ -53,14 +54,15 @@ class CategoryViewModel(
             }
             CategoryEvent.SaveCategory -> {
                 val name = state.value.name
-
+                val color = state.value.color
 
                 if(name.isBlank()){
                     return
                 }
 
                 val category = Category(
-                    name = name
+                    name = name,
+                    color = color
                 )
                 viewModelScope.launch {
                     dao.insertCategory(category)
@@ -73,6 +75,11 @@ class CategoryViewModel(
             is CategoryEvent.SetName -> {
                 _state.update { it.copy(
                     name = event.name
+                ) }
+            }
+            is CategoryEvent.SetColor -> {
+                _state.update { it.copy(
+                    color = event.color
                 ) }
             }
             is CategoryEvent.ShowDialog -> {

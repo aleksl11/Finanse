@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -37,6 +38,9 @@ import com.example.finanse.TopNavBar
 import com.example.finanse.events.CategoryEvent
 import com.example.finanse.sortTypes.CategorySortType
 import com.example.finanse.states.CategoryState
+import com.github.skydoves.colorpicker.compose.ColorEnvelope
+import com.github.skydoves.colorpicker.compose.HsvColorPicker
+import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 
 @Composable
 fun CategoriesScreen(
@@ -101,7 +105,8 @@ fun CategoriesScreen(
                     ){
                         Text(text = category.name, fontSize = 20.sp)
                     }
-                    if (category.id>5) {
+                    val defaultCategories = listOf("Bills", "Groceries", "Entertainment", "Transport", "Other")
+                    if (category.name !in defaultCategories) {
                         IconButton(onClick = {
                             onEvent(CategoryEvent.DeleteCategory(category))
                         }) {
@@ -128,7 +133,8 @@ fun AddCategoryDialog(
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.background(Color.Gray)
+            modifier = Modifier
+                .background(Color.Gray)
                 .padding(8.dp)
         ) {
             Text(text = "Add category")
@@ -139,6 +145,17 @@ fun AddCategoryDialog(
                 },
                 placeholder = {
                     Text(text = "Name")
+                }
+            )
+            val controller = rememberColorPickerController()
+            HsvColorPicker(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(450.dp)
+                    .padding(10.dp),
+                controller = controller,
+                onColorChanged = { colorEnvelope: ColorEnvelope ->
+                    onEvent(CategoryEvent.SetColor(colorEnvelope.color.hashCode()))
                 }
             )
             Box(

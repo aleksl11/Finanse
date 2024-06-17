@@ -7,6 +7,7 @@ sealed interface CategoryEvent {
     object SaveCategory: CategoryEvent
 
     data class  SetName(val name: String): CategoryEvent
+    data class  SetColor(val color: Int): CategoryEvent
 
     object ShowDialog: CategoryEvent
     object HideDialog: CategoryEvent

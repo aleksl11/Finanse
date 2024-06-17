@@ -194,7 +194,6 @@ fun AddExpenseDialog(
                     Icon(icon,"drop down menu arrow",
                         Modifier.clickable { expanded = !expanded })
                 },
-//                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.None),
                 readOnly = true
             )
             DropdownMenu(
