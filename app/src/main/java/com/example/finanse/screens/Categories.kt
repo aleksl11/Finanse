@@ -1,6 +1,7 @@
 package com.example.finanse.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -28,6 +30,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.finanse.TopNavBar
+import com.example.finanse.entities.Category
 import com.example.finanse.events.CategoryEvent
 import com.example.finanse.sortTypes.CategorySortType
 import com.example.finanse.states.CategoryState
@@ -91,15 +96,22 @@ fun CategoriesScreen(
                                     onEvent(CategoryEvent.SortCategories(categorySortType))
                                 }
                             )
-                            Text(text = categorySortType.name)
+                            Text(text = getSortTypeName(categorySortType))
                         }
                     }
                 }
             }
             items(state.category){category ->
                 Row(
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
                 ){
+                    Box(
+                        modifier = Modifier
+                            .background(Color(category.color))
+                            .size(20.dp)
+                            .border(1.dp, Color.Black)
+                    )
                     Column(
                         modifier = Modifier.weight(1f)
                     ){
@@ -128,6 +140,7 @@ fun AddCategoryDialog(
     state: CategoryState,
     onEvent: (CategoryEvent) -> Unit,
 ){
+    val text = remember { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = { onEvent(CategoryEvent.HideDialog) },
     ) {
@@ -145,8 +158,13 @@ fun AddCategoryDialog(
                 },
                 placeholder = {
                     Text(text = "Name")
-                }
+                },
+                modifier = Modifier.fillMaxWidth()
             )
+            Box(
+                modifier = Modifier.fillMaxWidth()
+                    .height(40.dp)
+                    .background(Color(state.color)))
             val controller = rememberColorPickerController()
             HsvColorPicker(
                 modifier = Modifier
@@ -163,11 +181,31 @@ fun AddCategoryDialog(
                 contentAlignment = Alignment.CenterEnd
             ) {
                 Button(onClick = {
-                    onEvent(CategoryEvent.SaveCategory)
+                    if  (isNameTaken(state.category, state.name)){
+                        text.value = "Category whith this name already exists"
+                    }else {
+                        text.value = ""
+                        onEvent(CategoryEvent.SaveCategory)
+                    }
                 }) {
                     Text(text = "Save")
                 }
             }
+            Text(text = text.value, color = Color.Red)
         }
+    }
+}
+
+fun isNameTaken(category: List<Category>, name: String): Boolean{
+    category.forEach{ c ->
+        if(c.name == name)return true
+    }
+    return false
+}
+
+fun getSortTypeName(name: CategorySortType): String{
+    return when (name) {
+        CategorySortType.NAME-> "Name"
+        CategorySortType.DATE_ADDED -> "Default"
     }
 }

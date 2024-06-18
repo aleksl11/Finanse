@@ -1,7 +1,7 @@
 package com.example.finanse.sortTypes
 
 enum class IncomeSortType {
-    AMOUNT,
     DATE_ADDED,
+    AMOUNT,
     DATE_OF_INCOME
 }

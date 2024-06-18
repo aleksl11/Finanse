@@ -1,6 +1,7 @@
 package com.example.finanse.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,7 +39,7 @@ import com.example.finanse.states.ExpenseState
 import com.example.finanse.states.IncomeState
 import java.time.LocalDate
 
-enum class summaryTimePeriod{
+enum class SummaryTimePeriod{
     THIS_MONTH,
     THIS_YEAR,
     ALL_TIME,
@@ -52,7 +53,7 @@ fun SummaryScreen(
     expenseState: ExpenseState,
     categoryState: CategoryState
     ){
-    var chosenTimePeriod by remember { mutableStateOf(summaryTimePeriod.ALL_TIME)}
+    var chosenTimePeriod by remember { mutableStateOf(SummaryTimePeriod.ALL_TIME)}
     val incomes = incomeState.income
     val expenses = expenseState.expense
 
@@ -70,18 +71,22 @@ fun SummaryScreen(
         if(incomes.isEmpty() && expenses.isEmpty()) NoRecordsInDb()
         else LazyColumn {
             item {
-                Row(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState()),
-                    verticalAlignment = Alignment.CenterVertically
+                        .horizontalScroll(rememberScrollState())
+                        .border(1.dp, Color.Black),
+                    horizontalAlignment = Alignment.Start
                 ) {
-                    summaryTimePeriod.entries.forEach { timePeriod ->
-                        RadioButton(
-                            selected = chosenTimePeriod == timePeriod,
-                            onClick = { chosenTimePeriod = timePeriod }
-                        )
-                        Text(text = timePeriod.name)
+
+                    SummaryTimePeriod.entries.forEach { timePeriod ->
+                        Row (verticalAlignment = Alignment.CenterVertically){
+                            RadioButton(
+                                selected = chosenTimePeriod == timePeriod,
+                                onClick = { chosenTimePeriod = timePeriod }
+                            )
+                            Text(text = getTimePeriodName(timePeriod))
+                        }
                     }
                 }
             }
@@ -90,28 +95,31 @@ fun SummaryScreen(
             var sortedIncomes: List<Income>
             item{
                 when(chosenTimePeriod){
-                    summaryTimePeriod.THIS_MONTH -> {
+                    SummaryTimePeriod.THIS_MONTH -> {
                         sortedExpenses = expenses.filter { e ->
                             e.date.month == dateNow.month && e.date.year == dateNow.year
                         }
                         sortedIncomes = incomes.filter { i ->
                             i.date.month == dateNow.month && i.date.year == dateNow.year
                         }
-                        TimePeriodSummary(sortedExpenses = sortedExpenses, sortedIncomes = sortedIncomes, categoryState)
+                        if(sortedExpenses.isEmpty() && sortedIncomes.isEmpty()) NoRecordsInLists()
+                        else TimePeriodSummary(sortedExpenses = sortedExpenses, sortedIncomes = sortedIncomes, categoryState)
                     }
-                    summaryTimePeriod.THIS_YEAR -> {
+                    SummaryTimePeriod.THIS_YEAR -> {
                         sortedExpenses = expenses.filter { e ->
                             e.date.year == dateNow.year
                         }
                         sortedIncomes = incomes.filter { i ->
                             i.date.year == dateNow.year
                         }
-                        TimePeriodSummary(sortedExpenses = sortedExpenses, sortedIncomes = sortedIncomes, categoryState)
+                        if(sortedExpenses.isEmpty() && sortedIncomes.isEmpty()) NoRecordsInLists()
+                        else TimePeriodSummary(sortedExpenses = sortedExpenses, sortedIncomes = sortedIncomes, categoryState)
                     }
-                    summaryTimePeriod.ALL_TIME -> {
+                    SummaryTimePeriod.ALL_TIME -> {
                         sortedExpenses = expenses
                         sortedIncomes = incomes
-                        TimePeriodSummary(sortedExpenses = sortedExpenses, sortedIncomes = sortedIncomes, categoryState)
+                        if(sortedExpenses.isEmpty() && sortedIncomes.isEmpty()) NoRecordsInLists()
+                        else TimePeriodSummary(sortedExpenses = sortedExpenses, sortedIncomes = sortedIncomes, categoryState)
                     }
 
                 }
@@ -127,6 +135,11 @@ fun NoRecordsInDb(){
 }
 
 @Composable
+fun NoRecordsInLists(){
+    Text(text = "No records added to database in selected time period")
+}
+
+@Composable
 fun TimePeriodSummary(sortedExpenses: List<Expense>, sortedIncomes: List<Income>, categoryState: CategoryState){
     var incomesTotal = 0.0
     sortedIncomes.forEach{i ->
@@ -136,10 +149,6 @@ fun TimePeriodSummary(sortedExpenses: List<Expense>, sortedIncomes: List<Income>
     sortedExpenses.forEach{e ->
         expensesTotal += e.amount
     }
-
-    Text("Total incomes: $incomesTotal PLN")
-    Text("Total time expenses: $expensesTotal PLN")
-    Text("Balance: ${incomesTotal-expensesTotal} PLN")
 
     val expensesGrouped = sortedExpenses.groupBy { it.category }
         .mapValues { e -> e.value.sumOf { it.amount } }
@@ -154,20 +163,22 @@ fun TimePeriodSummary(sortedExpenses: List<Expense>, sortedIncomes: List<Income>
             )
         )
     }
-    
-    Text(expensesGrouped.toString())
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.DarkGray)
             .padding(5.dp)
         ,
-        verticalArrangement = Arrangement.spacedBy(30.dp),
+        verticalArrangement = Arrangement.spacedBy(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ){
+        Text("Total incomes: $incomesTotal PLN", color = Color.White)
+        Text("Total time expenses: $expensesTotal PLN", color = Color.White)
+        Text("Balance: ${incomesTotal-expensesTotal} PLN", color = Color.White)
         Text(
             "Expenses by categories",
-            fontSize = 35.sp,
+            fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             color = Color.White,
             textAlign = TextAlign.Center,
@@ -179,10 +190,26 @@ fun TimePeriodSummary(sortedExpenses: List<Expense>, sortedIncomes: List<Income>
         ){
             PieChart(
                 modifier = Modifier
-                    .size(500.dp),
+                    .size(400.dp),
                 input = pieChartData
 
             )
+        }
+        ChartLegend(categories = categoryState.category)
+    }
+}
+
+@Composable
+fun ChartLegend(categories: List<Category>){
+    Column {
+        categories.forEach { c ->
+            Row (modifier = Modifier.align(Alignment.Start),
+                verticalAlignment = Alignment.CenterVertically){
+                Box(modifier = Modifier.background(Color(c.color))
+                    .size(15.dp)
+                    .border(1.dp, Color.Black))
+                Text(text = c.name, color = Color.White)
+            }
         }
     }
 }
@@ -193,3 +220,10 @@ fun getColorByCategory(categories: List<Category>, categoryName: String): Int {
     return Color.Gray.hashCode()
 }
 
+fun getTimePeriodName(time: SummaryTimePeriod): String{
+    return when (time) {
+        SummaryTimePeriod.ALL_TIME -> "All time"
+        SummaryTimePeriod.THIS_MONTH -> "This month"
+        SummaryTimePeriod.THIS_YEAR -> "This year"
+    }
+}

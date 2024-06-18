@@ -100,7 +100,7 @@ fun ExpensesScreen(
                                     onEvent(ExpenseEvent.SortExpenses(expenseSortType))
                                 }
                             )
-                            Text(text = expenseSortType.name)
+                            Text(text = getSortTypeName(expenseSortType))
                         }
                     }
                 }
@@ -240,4 +240,13 @@ fun AddExpenseDialog(
 
     }
 
+}
+
+fun getSortTypeName(name: ExpenseSortType): String{
+    return when (name) {
+        ExpenseSortType.AMOUNT-> "Amount"
+        ExpenseSortType.CATEGORY -> "Category"
+        ExpenseSortType.DATE_ADDED -> "Default"
+        ExpenseSortType.DATE_OF_INCOME -> "Date"
+    }
 }

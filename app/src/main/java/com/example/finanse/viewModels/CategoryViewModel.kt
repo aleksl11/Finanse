@@ -53,7 +53,7 @@ class CategoryViewModel(
                 )}
             }
             CategoryEvent.SaveCategory -> {
-                val name = state.value.name
+                val name = state.value.name.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
                 val color = state.value.color
 
                 if(name.isBlank()){
