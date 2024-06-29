@@ -34,18 +34,13 @@ import com.example.finanse.TopNavBar
 import com.example.finanse.entities.Category
 import com.example.finanse.entities.Expense
 import com.example.finanse.entities.Income
+import com.example.finanse.sortTypes.SummaryTimePeriod
 import com.example.finanse.states.CategoryState
 import com.example.finanse.states.ExpenseState
 import com.example.finanse.states.IncomeState
 import java.time.LocalDate
 
-enum class SummaryTimePeriod{
-    THIS_MONTH,
-    THIS_YEAR,
-    ALL_TIME,
 
-
-}
 @Composable
 fun SummaryScreen(
     navController: NavController,
