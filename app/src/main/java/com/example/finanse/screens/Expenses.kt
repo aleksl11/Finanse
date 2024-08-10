@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,9 +16,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -49,6 +49,7 @@ import com.example.finanse.events.ExpenseEvent
 import com.example.finanse.sortTypes.ExpenseSortType
 import com.example.finanse.states.CategoryState
 import com.example.finanse.states.ExpenseState
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun ExpensesScreen(
@@ -113,8 +114,15 @@ fun ExpensesScreen(
                         modifier = Modifier.weight(1f)
                     ){
                         Text(text = "${expense.title}: ${"%.2f".format(expense.amount)}", fontSize = 20.sp)
-                        Text(text = "${expense.date.toString()}\n${expense.category}", fontSize = 16.sp)
+                        Text(text = "${expense.date.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))}\n${expense.category}", fontSize = 16.sp)
                         expense.description?.let { Text(text = it, fontSize = 12.sp) }
+                    }
+                    IconButton(onClick = {
+                        onEvent(ExpenseEvent.SetId(expense.id))
+                        onEvent(ExpenseEvent.GetData(expense.id))
+                        onEvent(ExpenseEvent.ShowDialog)
+                    }) {
+                        Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit expense")
                     }
                     IconButton(onClick = {
                         onEvent(ExpenseEvent.DeleteExpense(expense))
@@ -144,16 +152,14 @@ fun AddExpenseDialog(
         Icons.Filled.KeyboardArrowDown
 
     val validate = ValidateInputs()
-    AlertDialog(
-        onDismissRequest = { onEvent(ExpenseEvent.HideDialog) },
-    ) {
+    BasicAlertDialog(onDismissRequest = { onEvent(ExpenseEvent.HideDialog) }) {
         Column(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier
                 .background(Color.Gray)
                 .padding(8.dp)
         ) {
-            Text(text = "Add expense")
+            Text(text = "Expense")
 
             TextField(
                 value = state.title,
@@ -167,7 +173,7 @@ fun AddExpenseDialog(
             TextField(
                 value = state.amount,
                 onValueChange = {
-                    if(validate.isAmountValid(it))onEvent(ExpenseEvent.SetAmount(it))
+                    if (validate.isAmountValid(it)) onEvent(ExpenseEvent.SetAmount(it))
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 placeholder = {
@@ -189,9 +195,9 @@ fun AddExpenseDialog(
                 onValueChange = {
                     onEvent(ExpenseEvent.SetCategory(it))
                 },
-                label = {Text("Category")},
+                label = { Text("Category") },
                 trailingIcon = {
-                    Icon(icon,"drop down menu arrow",
+                    Icon(icon, "drop down menu arrow",
                         Modifier.clickable { expanded = !expanded })
                 },
                 readOnly = true
@@ -205,7 +211,7 @@ fun AddExpenseDialog(
                         expanded = false
                         onEvent(ExpenseEvent.SetCategory(c.name))
                     },
-                        text = {Text(text = c.name)}
+                        text = { Text(text = c.name) }
                     )
                 }
             }
@@ -219,20 +225,24 @@ fun AddExpenseDialog(
                     Text(text = "Description")
                 }
             )
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.CenterEnd
+            Row(
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Button(onClick = {
-                    if (validate.isDateValid(state.date)){
+                    if (validate.isDateValid(state.date)) {
                         text.value = ""
                         onEvent(ExpenseEvent.SaveExpense)
-                    }
-                    else text.value = "Incorrect date. Make sure it is in DD.MM.YYYY format"
+                    } else text.value = "Incorrect date. Make sure it is in DD.MM.YYYY format"
                     if (state.category == "") text.value = "Category field must be filled in"
                     if (state.title == "") text.value = "Title field must be filled in"
                 }) {
                     Text(text = "Save")
+                }
+                Button(onClick = {
+                    onEvent(ExpenseEvent.HideDialog)
+
+                }) {
+                    Text(text = "Cancel")
                 }
             }
             Text(text = text.value, color = Color.Red)

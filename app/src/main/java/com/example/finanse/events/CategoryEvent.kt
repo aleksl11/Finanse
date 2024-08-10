@@ -12,6 +12,7 @@ sealed interface CategoryEvent {
     object ShowDialog: CategoryEvent
     object HideDialog: CategoryEvent
 
+    data class GetData(val name: String): CategoryEvent
     data class SortCategories(val categorySortType: CategorySortType): CategoryEvent
     data class DeleteCategory(val category: Category): CategoryEvent
 }

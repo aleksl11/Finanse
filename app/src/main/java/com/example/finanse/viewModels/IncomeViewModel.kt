@@ -2,10 +2,10 @@ package com.example.finanse.viewModels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.finanse.sortTypes.IncomeSortType
-import com.example.finanse.events.IncomeEvent
 import com.example.finanse.dao.IncomeDao
 import com.example.finanse.entities.Income
+import com.example.finanse.events.IncomeEvent
+import com.example.finanse.sortTypes.IncomeSortType
 import com.example.finanse.states.IncomeState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -62,23 +62,52 @@ class IncomeViewModel(
                 if(amount.isNaN() || title.isBlank()){
                     return
                 }
-
-                val income = Income(
-                    amount = amount,
-                    title = title,
-                    date = LocalDate.parse(date, DateTimeFormatter.ofPattern("dd.MM.yyyy")),
-                    description = description
-                )
-                viewModelScope.launch {
-                    dao.insertIncome(income)
+                if (state.value.id == -1) {
+                    val income = Income(
+                        amount = amount,
+                        title = title,
+                        date = LocalDate.parse(date, DateTimeFormatter.ofPattern("dd.MM.yyyy")),
+                        description = description
+                    )
+                    viewModelScope.launch {
+                        dao.insertIncome(income)
+                    }
+                }else {
+                    val income = Income(
+                        id = state.value.id,
+                        amount = amount,
+                        title = title,
+                        date = LocalDate.parse(date, DateTimeFormatter.ofPattern("dd.MM.yyyy")),
+                        description = description
+                    )
+                    viewModelScope.launch {
+                        dao.insertIncome(income)
+                    }
                 }
                 _state.update{it.copy(
                     isAddingIncome = false,
                     amount = "",
                     title = "",
                     date = "",
-                    description = ""
+                    description = "",
+                    id = -1
                 )}
+            }
+            is IncomeEvent.GetData -> {
+                val id = event.id
+                Thread {
+                    _state.update { it.copy(
+                        title = dao.getTitle(id),
+                        amount = dao.getAmount(id).toString(),
+                        date = dao.getDate(id).format(DateTimeFormatter.ofPattern("dd.MM.yyyy")),
+                        description = dao.getDescription(id),
+                    )}
+                }.start()
+            }
+            is IncomeEvent.SetId -> {
+                _state.update { it.copy(
+                    id = event.id
+                ) }
             }
             is IncomeEvent.SetAmount -> {
                 _state.update { it.copy(

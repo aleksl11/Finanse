@@ -1,5 +1,6 @@
 package com.example.finanse.viewModels
 
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.finanse.dao.CategoryDao
@@ -70,7 +71,17 @@ class CategoryViewModel(
                 _state.update{it.copy(
                     isAddingCategory = false,
                     name = "",
+                    color = Color.White.hashCode()
                 )}
+            }
+            is CategoryEvent.GetData -> {
+                val name = event.name
+                Thread {
+                    _state.update { it.copy(
+                        name = name,
+                        color = dao.getColor(name),
+                    )}
+                }.start()
             }
             is CategoryEvent.SetName -> {
                 _state.update { it.copy(

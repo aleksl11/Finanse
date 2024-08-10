@@ -19,7 +19,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.AlertDialog
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -39,7 +40,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.finanse.TopNavBar
-import com.example.finanse.entities.Category
 import com.example.finanse.events.CategoryEvent
 import com.example.finanse.sortTypes.CategorySortType
 import com.example.finanse.states.CategoryState
@@ -120,6 +120,12 @@ fun CategoriesScreen(
                     val defaultCategories = listOf("Bills", "Groceries", "Entertainment", "Transport", "Other")
                     if (category.name !in defaultCategories) {
                         IconButton(onClick = {
+                            onEvent(CategoryEvent.GetData(category.name))
+                            onEvent(CategoryEvent.ShowDialog)
+                        }) {
+                            Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit expense")
+                        }
+                        IconButton(onClick = {
                             onEvent(CategoryEvent.DeleteCategory(category))
                         }) {
                             Icon(
@@ -141,16 +147,14 @@ fun AddCategoryDialog(
     onEvent: (CategoryEvent) -> Unit,
 ){
     val text = remember { mutableStateOf("") }
-    AlertDialog(
-        onDismissRequest = { onEvent(CategoryEvent.HideDialog) },
-    ) {
+    BasicAlertDialog(onDismissRequest = { onEvent(CategoryEvent.HideDialog) }) {
         Column(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier
                 .background(Color.Gray)
                 .padding(8.dp)
         ) {
-            Text(text = "Add category")
+            Text(text = "Category")
             TextField(
                 value = state.name,
                 onValueChange = {
@@ -164,7 +168,8 @@ fun AddCategoryDialog(
             Box(
                 modifier = Modifier.fillMaxWidth()
                     .height(40.dp)
-                    .background(Color(state.color)))
+                    .background(Color(state.color))
+            )
             val controller = rememberColorPickerController()
             HsvColorPicker(
                 modifier = Modifier
@@ -172,6 +177,7 @@ fun AddCategoryDialog(
                     .height(450.dp)
                     .padding(10.dp),
                 controller = controller,
+                initialColor = Color(state.color),
                 onColorChanged = { colorEnvelope: ColorEnvelope ->
                     onEvent(CategoryEvent.SetColor(colorEnvelope.color.hashCode()))
                 }
@@ -181,9 +187,9 @@ fun AddCategoryDialog(
                 contentAlignment = Alignment.CenterEnd
             ) {
                 Button(onClick = {
-                    if  (isNameTaken(state.category, state.name)){
-                        text.value = "Category whith this name already exists"
-                    }else {
+                    if (state.name == "") {
+                        text.value = "Category must have a name"
+                    } else {
                         text.value = ""
                         onEvent(CategoryEvent.SaveCategory)
                     }
@@ -195,14 +201,6 @@ fun AddCategoryDialog(
         }
     }
 }
-
-fun isNameTaken(category: List<Category>, name: String): Boolean{
-    category.forEach{ c ->
-        if(c.name == name)return true
-    }
-    return false
-}
-
 fun getSortTypeName(name: CategorySortType): String{
     return when (name) {
         CategorySortType.NAME-> "Name"

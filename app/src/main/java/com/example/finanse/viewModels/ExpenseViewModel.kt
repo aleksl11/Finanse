@@ -3,15 +3,10 @@ package com.example.finanse.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.finanse.dao.ExpenseDao
-import com.example.finanse.dao.IncomeDao
 import com.example.finanse.entities.Expense
-import com.example.finanse.entities.Income
 import com.example.finanse.events.ExpenseEvent
-import com.example.finanse.events.IncomeEvent
 import com.example.finanse.sortTypes.ExpenseSortType
-import com.example.finanse.sortTypes.IncomeSortType
 import com.example.finanse.states.ExpenseState
-import com.example.finanse.states.IncomeState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -56,7 +51,7 @@ class ExpenseViewModel(
             }
             ExpenseEvent.HideDialog -> {
                 _state.update { it.copy(
-                    isAddingExpense = false
+                    isAddingExpense = false,
                 )}
             }
             ExpenseEvent.SaveExpense -> {
@@ -70,25 +65,57 @@ class ExpenseViewModel(
                 if(amount.isNaN() || title.isBlank() || category.isBlank()){
                     return
                 }
-
-                val expense = Expense(
-                    amount = amount,
-                    title = title,
-                    date = LocalDate.parse(date, DateTimeFormatter.ofPattern("dd.MM.yyyy")),
-                    category = category,
-                    description = description
-                )
-                viewModelScope.launch {
-                    dao.insertExpense(expense)
+                if (state.value.id == -1) {
+                    val expense = Expense(
+                        amount = amount,
+                        title = title,
+                        date = LocalDate.parse(date, DateTimeFormatter.ofPattern("dd.MM.yyyy")),
+                        category = category,
+                        description = description
+                    )
+                    viewModelScope.launch {
+                        dao.insertExpense(expense)
+                    }
+                }else {
+                    val expense = Expense(
+                        id = state.value.id,
+                        amount = amount,
+                        title = title,
+                        date = LocalDate.parse(date, DateTimeFormatter.ofPattern("dd.MM.yyyy")),
+                        category = category,
+                        description = description
+                    )
+                    viewModelScope.launch {
+                        dao.insertExpense(expense)
+                    }
                 }
+
                 _state.update{it.copy(
                     isAddingExpense = false,
                     amount = "",
                     title = "",
                     date = "",
                     category = "",
-                    description = ""
+                    description = "",
+                    id = -1
                 )}
+            }
+            is ExpenseEvent.GetData -> {
+                val id = event.id
+                Thread {
+                    _state.update { it.copy(
+                        title = dao.getTitle(id),
+                        amount = dao.getAmount(id).toString(),
+                        date = dao.getDate(id).format(DateTimeFormatter.ofPattern("dd.MM.yyyy")),
+                        category = dao.getCategory(id),
+                        description = dao.getDescription(id),
+                    )}
+                }.start()
+            }
+            is ExpenseEvent.SetId -> {
+                _state.update { it.copy(
+                    id = event.id
+                ) }
             }
             is ExpenseEvent.SetAmount -> {
                 _state.update { it.copy(

@@ -17,7 +17,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.AlertDialog
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -37,11 +38,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.finanse.TopNavBar
+import com.example.finanse.ValidateInputs
 import com.example.finanse.events.IncomeEvent
 import com.example.finanse.sortTypes.IncomeSortType
 import com.example.finanse.states.IncomeState
-import com.example.finanse.TopNavBar
-import com.example.finanse.ValidateInputs
 
 @Composable
 fun IncomesScreen(
@@ -109,6 +110,13 @@ fun IncomesScreen(
                         income.description?.let { Text(text = it, fontSize = 12.sp) }
                     }
                     IconButton(onClick = {
+                        onEvent(IncomeEvent.SetId(income.id))
+                        onEvent(IncomeEvent.GetData(income.id))
+                        onEvent(IncomeEvent.ShowDialog)
+                    }) {
+                        Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit income")
+                    }
+                    IconButton(onClick = {
                         onEvent(IncomeEvent.DeleteIncome(income))
                     }) {
                         Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete income")
@@ -128,15 +136,13 @@ fun AddIncomeDialog(
 ){
     val text = remember { mutableStateOf("") }
     val validate = ValidateInputs()
-    AlertDialog(
-        onDismissRequest = { onEvent(IncomeEvent.HideDialog) },
-        ) {
+    BasicAlertDialog(onDismissRequest = { onEvent(IncomeEvent.HideDialog) }) {
         Column(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.background(Color.Gray)
                 .padding(8.dp)
         ) {
-            Text(text = "Add income")
+            Text(text = "Income")
             TextField(
                 value = state.title,
                 onValueChange = {
@@ -149,7 +155,7 @@ fun AddIncomeDialog(
             TextField(
                 value = state.amount,
                 onValueChange = {
-                    if(validate.isAmountValid(it))onEvent(IncomeEvent.SetAmount(it))
+                    if (validate.isAmountValid(it)) onEvent(IncomeEvent.SetAmount(it))
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 placeholder = {
@@ -181,11 +187,10 @@ fun AddIncomeDialog(
                 contentAlignment = Alignment.CenterEnd
             ) {
                 Button(onClick = {
-                    if (validate.isDateValid(state.date)){
+                    if (validate.isDateValid(state.date)) {
                         text.value = ""
                         onEvent(IncomeEvent.SaveIncome)
-                    }
-                    else text.value = "Incorrect date. Make sure it is in DD.MM.YYYY format"
+                    } else text.value = "Incorrect date. Make sure it is in DD.MM.YYYY format"
                     if (state.title == "") text.value = "Title field must be filled in"
                 }) {
                     Text(text = "Save")
