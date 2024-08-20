@@ -79,5 +79,6 @@ dependencies {
     ksp("androidx.room:room-compiler:${room_version}")
 
     implementation("com.github.skydoves:colorpicker-compose:1.0.8")
+    implementation("co.yml:ycharts:2.1.0")
 
 }

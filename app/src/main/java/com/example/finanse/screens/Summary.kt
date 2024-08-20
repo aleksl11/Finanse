@@ -7,10 +7,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.RadioButton
@@ -28,8 +31,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.finanse.PieChart
-import com.example.finanse.PieChartInput
+import co.yml.charts.common.model.PlotType
+import co.yml.charts.ui.piechart.charts.DonutPieChart
+import co.yml.charts.ui.piechart.models.PieChartConfig
+import co.yml.charts.ui.piechart.models.PieChartData
 import com.example.finanse.TopNavBar
 import com.example.finanse.entities.Category
 import com.example.finanse.entities.Expense
@@ -147,64 +152,76 @@ fun TimePeriodSummary(sortedExpenses: List<Expense>, sortedIncomes: List<Income>
 
     val expensesGrouped = sortedExpenses.groupBy { it.category }
         .mapValues { e -> e.value.sumOf { it.amount } }
-    val pieChartData: MutableList<PieChartInput> = mutableListOf()
 
+    val pieChartDataList: MutableList<PieChartData.Slice> = mutableListOf()
     expensesGrouped.forEach { (category, sum) ->
-        pieChartData.add(
-            PieChartInput(
+        pieChartDataList.add(PieChartData.Slice(
             color = Color(getColorByCategory(categoryState.category, category)),
-            description = category,
-            value = sum
+            label = category,
+            value = ((sum/expensesTotal)*100).toFloat()
             )
         )
     }
 
+    val pieChartData = PieChartData(
+        slices = pieChartDataList,
+        plotType = PlotType.Pie
+    )
+
+    val pieChartConfig = PieChartConfig(
+        labelColor = Color.Black,
+        labelVisible = true,
+        isAnimationEnable = true,
+        showSliceLabels = false,
+        animationDuration = 1500,
+        backgroundColor = Color.DarkGray
+    )
+
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.DarkGray)
             .padding(5.dp)
         ,
         verticalArrangement = Arrangement.spacedBy(20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.Start
     ){
-        Text("Total incomes: $incomesTotal PLN", color = Color.White)
-        Text("Total time expenses: $expensesTotal PLN", color = Color.White)
-        Text("Balance: ${incomesTotal-expensesTotal} PLN", color = Color.White)
+        Text("Total incomes: $incomesTotal PLN")
+        Text("Total time expenses: $expensesTotal PLN")
+        Text("Balance: ${incomesTotal-expensesTotal} PLN")
         Text(
             "Expenses by categories",
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
-            color = Color.White,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(top = 16.dp)
         )
-        Box(
+        DonutPieChart(
             modifier = Modifier
-                .fillMaxSize()
-        ){
-            PieChart(
-                modifier = Modifier
-                    .size(400.dp),
-                input = pieChartData
-
-            )
-        }
+                .width(400.dp)
+                .height(400.dp)
+                .padding(5.dp),
+            pieChartData,
+            pieChartConfig
+        )
         ChartLegend(categories = categoryState.category)
     }
 }
 
 @Composable
 fun ChartLegend(categories: List<Category>){
-    Column {
+    Column (
+        horizontalAlignment = Alignment.Start
+    ){
         categories.forEach { c ->
-            Row (modifier = Modifier.align(Alignment.Start),
-                verticalAlignment = Alignment.CenterVertically){
-                Box(modifier = Modifier.background(Color(c.color))
-                    .size(15.dp)
+            Row (verticalAlignment = Alignment.CenterVertically){
+                Box(modifier = Modifier
+                    .background(Color(c.color))
+                    .size(40.dp)
                     .border(1.dp, Color.Black))
-                Text(text = c.name, color = Color.White)
+                Spacer(modifier = Modifier.width(5.dp))
+                Text(text = c.name, color = Color.Black)
             }
+            Spacer(modifier = Modifier.height(5.dp))
         }
     }
 }
