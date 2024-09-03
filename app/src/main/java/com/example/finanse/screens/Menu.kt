@@ -23,6 +23,7 @@ fun Menu(navController: NavController) {
         MenuButton("Incomes", navController, "incomes")
         MenuButton("Expenses", navController, "expenses")
         MenuButton("Categories", navController, "categories")
+        MenuButton("Accounts", navController, "account")
         MenuButton("Settings", navController, "settings")
     }
 }

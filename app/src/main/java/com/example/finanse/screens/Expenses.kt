@@ -47,6 +47,7 @@ import com.example.finanse.TopNavBar
 import com.example.finanse.ValidateInputs
 import com.example.finanse.events.ExpenseEvent
 import com.example.finanse.sortTypes.ExpenseSortType
+import com.example.finanse.states.AccountState
 import com.example.finanse.states.CategoryState
 import com.example.finanse.states.ExpenseState
 import java.time.format.DateTimeFormatter
@@ -56,6 +57,7 @@ fun ExpensesScreen(
     navController: NavController,
     state: ExpenseState,
     categoryState: CategoryState,
+    accountState: AccountState,
     onEvent: (ExpenseEvent) -> Unit
 ){
     Scaffold (
@@ -70,7 +72,7 @@ fun ExpensesScreen(
     ) {padding ->
 
         if(state.isAddingExpense) {
-            AddExpenseDialog(state = state, categoryState = categoryState, onEvent = onEvent)
+            AddExpenseDialog(state = state, categoryState = categoryState, accountState = accountState, onEvent = onEvent)
         }
 
         LazyColumn(
@@ -141,11 +143,15 @@ fun ExpensesScreen(
 fun AddExpenseDialog(
     state: ExpenseState,
     categoryState: CategoryState,
+    accountState: AccountState,
     onEvent: (ExpenseEvent) -> Unit,
 ){
     val text = remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
+    var expandedAccount by remember { mutableStateOf(false) }
+    val accountName = remember { mutableStateOf("") }
     val mCategories = categoryState.category
+    val mAccounts = accountState.account
     val icon = if (expanded)
         Icons.Filled.KeyboardArrowUp
     else
@@ -212,6 +218,30 @@ fun AddExpenseDialog(
                         onEvent(ExpenseEvent.SetCategory(c.name))
                     },
                         text = { Text(text = c.name) }
+                    )
+                }
+            }
+            TextField(
+                value = accountName.value,
+                onValueChange = {},
+                label = { Text("Account") },
+                trailingIcon = {
+                    Icon(icon, "drop down menu arrow",
+                        Modifier.clickable { expandedAccount = !expandedAccount })
+                },
+                readOnly = true
+            )
+            DropdownMenu(
+                expanded = expandedAccount,
+                onDismissRequest = { expandedAccount = false }
+            ) {
+                mAccounts.forEach { a ->
+                    DropdownMenuItem(onClick = {
+                        expandedAccount = false
+                        onEvent(ExpenseEvent.SetAccount(a.id.toString()))
+                        accountName.value = a.name
+                    },
+                        text = { Text(text = a.name) }
                     )
                 }
             }

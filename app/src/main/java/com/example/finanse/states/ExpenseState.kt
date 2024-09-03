@@ -10,6 +10,7 @@ data class ExpenseState(
     val date: String = "",
     val category: String = "",
     val id: Int = -1,
+    val account: String = "1",
     val description: String? = null,
     val isAddingExpense: Boolean = false,
     val expenseSortType: ExpenseSortType = ExpenseSortType.DATE_ADDED

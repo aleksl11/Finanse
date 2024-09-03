@@ -12,6 +12,7 @@ sealed interface ExpenseEvent {
     data class  SetTitle(val title: String): ExpenseEvent
     data class  SetDate(val date: String): ExpenseEvent
     data class  SetCategory(val category: String): ExpenseEvent
+    data class  SetAccount(val account: String): ExpenseEvent
     data class  SetDescription(val description: String?): ExpenseEvent
 
     object ShowDialog: ExpenseEvent

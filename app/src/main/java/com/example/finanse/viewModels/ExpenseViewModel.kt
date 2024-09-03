@@ -2,11 +2,13 @@ package com.example.finanse.viewModels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.finanse.dao.AccountDao
 import com.example.finanse.dao.ExpenseDao
 import com.example.finanse.entities.Expense
 import com.example.finanse.events.ExpenseEvent
 import com.example.finanse.sortTypes.ExpenseSortType
 import com.example.finanse.states.ExpenseState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -15,11 +17,13 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 class ExpenseViewModel(
-    private val dao: ExpenseDao
+    private val dao: ExpenseDao,
+    private val accountDao: AccountDao
 ): ViewModel() {
 
     private val _expenseSortType = MutableStateFlow(ExpenseSortType.DATE_ADDED)
@@ -46,6 +50,16 @@ class ExpenseViewModel(
         when(event){
             is ExpenseEvent.DeleteExpense -> {
                 viewModelScope.launch {
+                    val amount = withContext(Dispatchers.IO) {
+                        dao.getAmount(event.expense.id)
+
+                    }
+                    val account = withContext(Dispatchers.IO) {
+                        dao.getAccount(event.expense.id)
+                    }
+                    withContext(Dispatchers.IO) {
+                        accountDao.updateAccountBalance(amount, account)
+                    }
                     dao.deleteExpense(event.expense)
                 }
             }
@@ -60,6 +74,7 @@ class ExpenseViewModel(
                 val date = state.value.date
                 val description = state.value.description
                 val category = state.value.category
+                val account = state.value.account.toInt()
 
 
                 if(amount.isNaN() || title.isBlank() || category.isBlank()){
@@ -71,10 +86,14 @@ class ExpenseViewModel(
                         title = title,
                         date = LocalDate.parse(date, DateTimeFormatter.ofPattern("dd.MM.yyyy")),
                         category = category,
+                        account = account,
                         description = description
                     )
                     viewModelScope.launch {
                         dao.insertExpense(expense)
+                        withContext(Dispatchers.IO) {
+                            accountDao.updateAccountBalance(-amount, account)
+                        }
                     }
                 }else {
                     val expense = Expense(
@@ -83,10 +102,18 @@ class ExpenseViewModel(
                         title = title,
                         date = LocalDate.parse(date, DateTimeFormatter.ofPattern("dd.MM.yyyy")),
                         category = category,
+                        account = account,
                         description = description
                     )
                     viewModelScope.launch {
+                        val difference = withContext(Dispatchers.IO) {
+                            val previousAmount = dao.getAmount(state.value.id)
+                            amount - previousAmount
+                        }
                         dao.insertExpense(expense)
+                        withContext(Dispatchers.IO) {
+                            accountDao.updateAccountBalance(-difference, account)
+                        }
                     }
                 }
 
@@ -130,6 +157,11 @@ class ExpenseViewModel(
             is ExpenseEvent.SetCategory -> {
                 _state.update { it.copy(
                     category = event.category
+                ) }
+            }
+            is ExpenseEvent.SetAccount -> {
+                _state.update { it.copy(
+                    account = event.account
                 ) }
             }
             is ExpenseEvent.SetDescription -> {

@@ -15,16 +15,18 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.finanse.screens.AccountsScreen
 import com.example.finanse.screens.CategoriesScreen
 import com.example.finanse.screens.ExpensesScreen
 import com.example.finanse.screens.IncomesScreen
-import com.example.finanse.ui.theme.FinanseTheme
-import com.example.finanse.screens.SummaryScreen
 import com.example.finanse.screens.Menu
 import com.example.finanse.screens.SettingsScreen
+import com.example.finanse.screens.SummaryScreen
+import com.example.finanse.ui.theme.FinanseTheme
+import com.example.finanse.viewModels.AccountViewModel
 import com.example.finanse.viewModels.CategoryViewModel
-import com.example.finanse.viewModels.IncomeViewModel
 import com.example.finanse.viewModels.ExpenseViewModel
+import com.example.finanse.viewModels.IncomeViewModel
 
 class MainActivity : ComponentActivity() {
 
@@ -36,7 +38,17 @@ class MainActivity : ComponentActivity() {
         factoryProducer = {
             object: ViewModelProvider.Factory {
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return IncomeViewModel(db.incomeDao()) as T
+                    return IncomeViewModel(db.incomeDao(), db.accountDao()) as T
+                }
+            }
+        }
+    )
+
+    private val accountViewModel by viewModels<AccountViewModel>(
+        factoryProducer = {
+            object: ViewModelProvider.Factory {
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return AccountViewModel(db.accountDao()) as T
                 }
             }
         }
@@ -46,7 +58,7 @@ class MainActivity : ComponentActivity() {
         factoryProducer = {
             object: ViewModelProvider.Factory {
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return ExpenseViewModel(db.expenseDao()) as T
+                    return ExpenseViewModel(db.expenseDao(), db.accountDao()) as T
                 }
             }
         }
@@ -69,6 +81,7 @@ class MainActivity : ComponentActivity() {
                 val incomeState by incomeViewModel.state.collectAsState()
                 val expenseState by expenseViewModel.state.collectAsState()
                 val categoryState by categoryViewModel.state.collectAsState()
+                val accountState by accountViewModel.state.collectAsState()
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -82,16 +95,19 @@ class MainActivity : ComponentActivity() {
                             SummaryScreen(navController, incomeState, expenseState, categoryState)
                         }
                         composable("incomes"){
-                            IncomesScreen(navController, incomeState, incomeViewModel::onEvent)
+                            IncomesScreen(navController, incomeState, accountState, incomeViewModel::onEvent)
                         }
                         composable("expenses"){
-                            ExpensesScreen(navController, expenseState, categoryState, expenseViewModel::onEvent)
+                            ExpensesScreen(navController, expenseState, categoryState, accountState, expenseViewModel::onEvent)
                         }
                         composable("categories"){
                             CategoriesScreen(navController, categoryState, categoryViewModel::onEvent)
                         }
                         composable("settings"){
                             SettingsScreen(navController)
+                        }
+                        composable("account"){
+                            AccountsScreen(navController, accountState, accountViewModel::onEvent)
                         }
                     }
                 }

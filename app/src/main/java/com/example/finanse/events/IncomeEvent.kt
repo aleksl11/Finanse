@@ -9,6 +9,7 @@ sealed interface IncomeEvent {
     data class  SetId(val id: Int): IncomeEvent
     data class  SetTitle(val title: String): IncomeEvent
     data class  SetDate(val date: String): IncomeEvent
+    data class  SetAccount(val account: String): IncomeEvent
     data class  SetDescription(val description: String?): IncomeEvent
 
     object ShowDialog: IncomeEvent

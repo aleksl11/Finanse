@@ -7,24 +7,27 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.example.finanse.dao.AccountDao
 import com.example.finanse.dao.CategoryDao
 import com.example.finanse.dao.ExpenseDao
 import com.example.finanse.dao.IncomeDao
+import com.example.finanse.entities.Account
+import com.example.finanse.entities.Category
 import com.example.finanse.entities.Expense
 import com.example.finanse.entities.Income
-import com.example.finanse.entities.Category
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Database(
-    entities = [Income::class, Expense::class, Category::class],
+    entities = [Income::class, Expense::class, Category::class, Account::class],
     version = 1
 )
 @TypeConverters(Converters::class)
 abstract class MainDatabase: RoomDatabase() {
 
     abstract fun incomeDao(): IncomeDao
+    abstract fun accountDao(): AccountDao
     abstract fun expenseDao(): ExpenseDao
     abstract fun categoryDao(): CategoryDao
 
@@ -41,7 +44,7 @@ abstract class MainDatabase: RoomDatabase() {
             Room.databaseBuilder(
                 context.applicationContext,
                 MainDatabase::class.java, "main.db"
-            ).addCallback(object : RoomDatabase.Callback() {
+            ).addCallback(object : Callback() {
                 override fun onCreate(db: SupportSQLiteDatabase) {
                     super.onCreate(db)
                     CoroutineScope(Dispatchers.IO).launch {
@@ -54,6 +57,7 @@ abstract class MainDatabase: RoomDatabase() {
                                 Category("Other", Color.Yellow.hashCode())
                             )
                         )
+                        getInstance(context).accountDao().insertAccount(Account(1,"Wallet",0.0))
                     }
                 }
             }).build()

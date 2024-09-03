@@ -22,6 +22,8 @@ interface IncomeDao {
     fun getDate(id: Int): LocalDate
     @Query("SELECT amount FROM income where id = :id ")
     fun getAmount(id: Int): Double
+    @Query("SELECT account FROM income where id = :id ")
+    fun getAccount(id: Int): Int
     @Query("SELECT description FROM income where id = :id ")
     fun getDescription(id: Int): String
 

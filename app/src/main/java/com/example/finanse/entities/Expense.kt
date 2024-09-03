@@ -11,7 +11,13 @@ import java.time.LocalDate
     parentColumns = arrayOf("name"),
     childColumns = arrayOf("category"),
     onDelete = ForeignKey.CASCADE
-)]
+),
+        ForeignKey(
+            entity = Account::class,
+            parentColumns = arrayOf("id"),
+            childColumns = arrayOf("account"),
+            onDelete = ForeignKey.CASCADE
+        )]
 )
 data class Expense(
     @PrimaryKey(autoGenerate = true)
@@ -21,5 +27,6 @@ data class Expense(
     val title: String,
     val date: LocalDate,
     val category: String,
+    val account: Int,
     val description: String? = null,
 )

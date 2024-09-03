@@ -24,6 +24,8 @@ interface ExpenseDao {
     fun getAmount(id: Int): Double
     @Query("SELECT category FROM expense where id = :id ")
     fun getCategory(id: Int): String
+    @Query("SELECT account FROM expense where id = :id ")
+    fun getAccount(id: Int): Int
     @Query("SELECT description FROM expense where id = :id ")
     fun getDescription(id: Int): String
 
