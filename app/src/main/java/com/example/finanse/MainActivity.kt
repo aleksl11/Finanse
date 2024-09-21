@@ -9,7 +9,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.compose.NavHost
@@ -23,10 +25,14 @@ import com.example.finanse.screens.Menu
 import com.example.finanse.screens.SettingsScreen
 import com.example.finanse.screens.SummaryScreen
 import com.example.finanse.ui.theme.FinanseTheme
+import com.example.finanse.ui.theme.ThemeMode
+import com.example.finanse.ui.theme.getThemeMode
+import com.example.finanse.ui.theme.saveThemeMode
 import com.example.finanse.viewModels.AccountViewModel
 import com.example.finanse.viewModels.CategoryViewModel
 import com.example.finanse.viewModels.ExpenseViewModel
 import com.example.finanse.viewModels.IncomeViewModel
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
@@ -77,11 +83,16 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            FinanseTheme {
+            val context = LocalContext.current
+            val themeModeFlow = getThemeMode(context)
+            val themeMode by themeModeFlow.collectAsState(initial = ThemeMode.SYSTEM)
+
+            FinanseTheme(themeMode = themeMode) {
                 val incomeState by incomeViewModel.state.collectAsState()
                 val expenseState by expenseViewModel.state.collectAsState()
                 val categoryState by categoryViewModel.state.collectAsState()
                 val accountState by accountViewModel.state.collectAsState()
+                val coroutineScope = rememberCoroutineScope()
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -104,7 +115,11 @@ class MainActivity : ComponentActivity() {
                             CategoriesScreen(navController, categoryState, categoryViewModel::onEvent)
                         }
                         composable("settings"){
-                            SettingsScreen(navController)
+                            SettingsScreen(navController, themeMode) { selectedTheme ->
+                                coroutineScope.launch {
+                                    saveThemeMode(context, selectedTheme) // Save the selected theme
+                                }
+                            }
                         }
                         composable("account"){
                             AccountsScreen(navController, accountState, accountViewModel::onEvent)
