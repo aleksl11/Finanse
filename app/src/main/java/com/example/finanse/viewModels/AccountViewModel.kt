@@ -52,6 +52,11 @@ class AccountViewModel(
                     isAddingAccount = false,
                 )}
             }
+            AccountEvent.HideTranserDialog -> {
+                _state.update { it.copy(
+                    isMakingATransfer = false
+                ) }
+            }
             AccountEvent.SaveAccount -> {
                 val name = state.value.name
                 val balance = if(state.value.balance != "")state.value.balance.toDouble() else 0.0
@@ -84,7 +89,19 @@ class AccountViewModel(
                     balance = ""
                 )}
             }
+            AccountEvent.MakeTransfer -> {
+                Thread{
+                    dao.makeTransferPartOne(state.value.accountOneName, state.value.transferAmount)
+                    dao.makeTransferPartTwo(state.value.accountTwoName, state.value.transferAmount)
+                }.start()
 
+                _state.update{it.copy(
+                    isMakingATransfer = false,
+                    accountTwoName = "",
+                    accountOneName = "",
+                    transferAmount = ""
+                )}
+            }
             is AccountEvent.SetId -> {
                 _state.update { it.copy(
                     id = event.id
@@ -105,8 +122,28 @@ class AccountViewModel(
                     isAddingAccount = true
                 )}
             }
+            is AccountEvent.ShowTranserDialog -> {
+                _state.update { it.copy(
+                    isMakingATransfer = true
+                ) }
+            }
             is AccountEvent.SortAccounts -> {
                 _accountSortType.value = event.accountSortType
+            }
+            is AccountEvent.SetAccountOneName -> {
+                _state.update { it.copy(
+                    accountOneName = event.name
+                ) }
+            }
+            is AccountEvent.SetAccountTwoName -> {
+                _state.update { it.copy(
+                    accountTwoName = event.name
+                ) }
+            }
+            is AccountEvent.SetTransferAmount -> {
+                _state.update { it.copy(
+                    transferAmount = event.amount
+                ) }
             }
 
             is AccountEvent.GetData -> {
@@ -114,7 +151,7 @@ class AccountViewModel(
                 Thread {
                     _state.update { it.copy(
                         name = dao.getName(id),
-                        balance = dao.getBalance(id),
+                        balance = dao.getBalance(id).toString(),
                     )}
                 }.start()
             }

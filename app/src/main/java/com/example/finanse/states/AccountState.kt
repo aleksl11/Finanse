@@ -9,5 +9,9 @@ data class AccountState(
     val name: String = "",
     val balance: String = "",
     val isAddingAccount: Boolean = false,
-    val accountSortType: AccountSortType = AccountSortType.DATE_ADDED
+    val isMakingATransfer: Boolean = false,
+    val accountSortType: AccountSortType = AccountSortType.DATE_ADDED,
+    val accountOneName: String = "",
+    val accountTwoName: String = "",
+    val transferAmount: String = "",
 )

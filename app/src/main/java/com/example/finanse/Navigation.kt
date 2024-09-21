@@ -5,9 +5,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
-
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,10 +26,8 @@ fun TopNavBar(navController: NavController, currentScreen: String, previousScree
             Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "Back arrow")
         }
         Text(currentScreen)
-        IconButton(onClick = {
-            //display side menu
-        }) {
-            Icon(imageVector = Icons.Filled.Menu, contentDescription = "Side Menu")
+        IconButton(onClick = { navController.navigate("settings") }) {
+            Icon(imageVector = Icons.Filled.Settings, contentDescription = "Side Menu")
         }
     }
 }

@@ -19,7 +19,7 @@ interface AccountDao {
     fun getName(id: Int): String
 
     @Query("SELECT balance FROM account where id = :id")
-    fun getBalance(id: Int): String
+    fun getBalance(id: Int): Int
 
     @Query("SELECT * FROM account")
     fun getAccounts(): Flow<List<Account>>
@@ -32,4 +32,9 @@ interface AccountDao {
 
     @Query("UPDATE account SET balance = balance + :amount where id = :accountId")
     fun updateAccountBalance(amount: Double, accountId: Int)
+
+    @Query("UPDATE account SET balance = balance - :transferAmount where name = :accountOneName ")
+    fun makeTransferPartOne(accountOneName: String, transferAmount: String)
+    @Query("UPDATE account SET balance = balance + :transferAmount where name = :accountTwoName ")
+    fun makeTransferPartTwo(accountTwoName: String, transferAmount: String)
 }
