@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -174,7 +175,7 @@ fun TimePeriodSummary(sortedExpenses: List<Expense>, sortedIncomes: List<Income>
         isAnimationEnable = true,
         showSliceLabels = false,
         animationDuration = 1500,
-        backgroundColor = Color.DarkGray
+        backgroundColor = MaterialTheme.colorScheme.background
     )
 
 
@@ -219,7 +220,7 @@ fun ChartLegend(categories: List<Category>){
                     .size(40.dp)
                     .border(1.dp, Color.Black))
                 Spacer(modifier = Modifier.width(5.dp))
-                Text(text = c.name, color = Color.Black)
+                Text(text = c.name)
             }
             Spacer(modifier = Modifier.height(5.dp))
         }
