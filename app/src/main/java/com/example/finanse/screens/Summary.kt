@@ -32,7 +32,19 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import co.yml.charts.axis.AxisData
+import co.yml.charts.common.components.Legends
+import co.yml.charts.common.model.LegendLabel
+import co.yml.charts.common.model.LegendsConfig
 import co.yml.charts.common.model.PlotType
+import co.yml.charts.common.model.Point
+import co.yml.charts.ui.barchart.GroupBarChart
+import co.yml.charts.ui.barchart.models.BarData
+import co.yml.charts.ui.barchart.models.BarPlotData
+import co.yml.charts.ui.barchart.models.BarStyle
+import co.yml.charts.ui.barchart.models.GroupBar
+import co.yml.charts.ui.barchart.models.GroupBarChartData
+import co.yml.charts.ui.barchart.models.GroupSeparatorConfig
 import co.yml.charts.ui.piechart.charts.DonutPieChart
 import co.yml.charts.ui.piechart.models.PieChartConfig
 import co.yml.charts.ui.piechart.models.PieChartData
@@ -45,6 +57,8 @@ import com.example.finanse.states.CategoryState
 import com.example.finanse.states.ExpenseState
 import com.example.finanse.states.IncomeState
 import java.time.LocalDate
+import java.time.Month
+import kotlin.math.roundToInt
 
 
 @Composable
@@ -125,6 +139,13 @@ fun SummaryScreen(
 
                 }
             }
+            item{
+                YearlyBarChart(incomes = incomes.filter { i ->
+                    i.date.year == dateNow.year
+                }, expenses = expenses.filter { e ->
+                    e.date.year == dateNow.year
+                })
+            }
 
         }
     }
@@ -178,6 +199,12 @@ fun TimePeriodSummary(sortedExpenses: List<Expense>, sortedIncomes: List<Income>
         backgroundColor = MaterialTheme.colorScheme.background
     )
 
+    val categories = categoryState.category
+    val legendsConfig = LegendsConfig(
+        legendLabelList = categories.map { c ->
+            LegendLabel(Color(c.color), c.name) },
+        gridColumnCount = categories.size
+    )
 
     Column(
         modifier = Modifier
@@ -205,6 +232,9 @@ fun TimePeriodSummary(sortedExpenses: List<Expense>, sortedIncomes: List<Income>
             pieChartConfig
         )
         ChartLegend(categories = categoryState.category)
+        /*Legends(
+            legendsConfig = legendsConfig
+        )*/
     }
 }
 
@@ -224,6 +254,111 @@ fun ChartLegend(categories: List<Category>){
             }
             Spacer(modifier = Modifier.height(5.dp))
         }
+    }
+}
+
+@Composable
+fun YearlyBarChart(incomes: List<Income>, expenses: List<Expense>){
+    val monthNames = mapOf(
+        Month.JANUARY to "styczeń",
+        Month.FEBRUARY to "luty",
+        Month.MARCH to "marzec",
+        Month.APRIL to "kwiecień",
+        Month.MAY to "maj",
+        Month.JUNE to "czerwiec",
+        Month.JULY to "lipiec",
+        Month.AUGUST to "sierpień",
+        Month.SEPTEMBER to "wrzesień",
+        Month.OCTOBER to "październik",
+        Month.NOVEMBER to "listopad",
+        Month.DECEMBER to "grudzień"
+    )
+    // Get unique months from both lists
+    val uniqueMonths = (incomes.map { it.date.month } + expenses.map { it.date.month })
+        .distinct() // Remove duplicates
+        .sorted()   // Sort by month
+
+    val monthlyIncomeMap = incomes
+        .groupBy { it.date.month }
+        .mapValues { (_, incomeList) ->
+            incomeList.sumOf { it.amount }
+        }
+    val monthlyExpenseMap = expenses
+        .groupBy { it.date.month }
+        .mapValues { (_, expenseList) ->
+            expenseList.sumOf { it.amount }
+        }
+
+    val uniqueMonthsMap: Map<Int, Month> = uniqueMonths.mapIndexed { index, month ->
+        index to (month ?: Month.DECEMBER)
+    }.toMap()
+    val monthIndexMap: Map<Int, String> = uniqueMonths.mapIndexed { index, month ->
+        index to (monthNames[month] ?: "error")
+    }.toMap()
+
+    val groupBarData: List<GroupBar> = uniqueMonthsMap.values.map { month ->
+        val monthName = monthNames[month] ?: "error"
+        val totalExpenses = monthlyExpenseMap[month] ?: 0f
+        val totalIncomes = monthlyIncomeMap[month] ?: 0f
+
+        GroupBar(
+            monthName,
+            listOf(
+                // First BarData corresponds to expenses
+                BarData(Point(5F, totalExpenses.toFloat(), "Expenses"), Color.Red),
+                // Second BarData corresponds to incomes
+                BarData(Point(5F, totalIncomes.toFloat(), "Incomes"), Color.Green)
+            )
+        )
+    }
+
+    val maxIncome = monthlyIncomeMap.values.maxOrNull() ?: 0.0
+    val maxExpense = monthlyExpenseMap.values.maxOrNull() ?: 0.0
+    val maxRange = if (maxIncome>maxExpense) maxIncome.roundToInt() else maxExpense.roundToInt()
+
+    val yStepSize = 10
+    val xAxisData = AxisData.Builder()
+        .axisStepSize(30.dp)
+        .bottomPadding(5.dp)
+        .startDrawPadding(48.dp)
+        .labelData { index -> monthIndexMap[index] ?: "error" }
+        .build()
+    val yAxisData = AxisData.Builder()
+        .steps(yStepSize)
+        .labelAndAxisLinePadding(20.dp)
+        .axisOffset(20.dp)
+        .labelData { index -> (index * (maxRange / yStepSize)).toString() }
+        .build()
+    val colorPaletteList =  listOf(Color.Green, Color.Red)
+
+    val legendsConfig = LegendsConfig(
+        legendLabelList = listOf(LegendLabel(Color.Green, "przychody"),LegendLabel(Color.Red, "wydatki")),
+        gridColumnCount = 2
+    )
+    val groupBarPlotData = BarPlotData(
+        groupBarList = groupBarData,
+        barStyle = BarStyle(barWidth = 35.dp),
+        barColorPaletteList = colorPaletteList
+    )
+    val groupBarChartData = GroupBarChartData(
+        barPlotData = groupBarPlotData,
+        xAxisData = xAxisData,
+        yAxisData = yAxisData,
+        groupSeparatorConfig = GroupSeparatorConfig(1.dp),
+        backgroundColor = MaterialTheme.colorScheme.background
+    )
+    Column(
+        Modifier
+            .height(450.dp)
+    ) {
+        GroupBarChart(
+            modifier = Modifier
+                .height(400.dp),
+            groupBarChartData = groupBarChartData
+        )
+        Legends(
+            legendsConfig = legendsConfig
+        )
     }
 }
 
