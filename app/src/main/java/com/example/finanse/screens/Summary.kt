@@ -2,7 +2,6 @@ package com.example.finanse.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
@@ -68,7 +66,7 @@ fun SummaryScreen(
     expenseState: ExpenseState,
     categoryState: CategoryState
     ){
-    var chosenTimePeriod by remember { mutableStateOf(SummaryTimePeriod.ALL_TIME)}
+    var chosenTimePeriod by remember { mutableStateOf(SummaryTimePeriod.THIS_MONTH)}
     val incomes = incomeState.income
     val expenses = expenseState.expense
 
@@ -81,15 +79,37 @@ fun SummaryScreen(
         expensesTotal += e.amount
     }
 
+    val dateNow = LocalDate.now()
+    var sortedExpenses: List<Expense>
+    var sortedIncomes: List<Income>
+
     Column{
         TopNavBar(navController, "summary","menu")
         if(incomes.isEmpty() && expenses.isEmpty()) NoRecordsInDb()
         else LazyColumn {
             item {
+                Text(text = "Yearly expenses and incomes",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,)
+            }
+            item {
+                YearlyBarChart(incomes = incomes.filter { i ->
+                    i.date.year == dateNow.year
+                }, expenses = expenses.filter { e ->
+                    e.date.year == dateNow.year
+                })
+            }
+            item {
+                Text(text = "Detailed summary",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,)
+            }
+            item {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState())
                         .border(1.dp, Color.Black),
                     horizontalAlignment = Alignment.Start
                 ) {
@@ -105,9 +125,6 @@ fun SummaryScreen(
                     }
                 }
             }
-            val dateNow = LocalDate.now()
-            var sortedExpenses: List<Expense>
-            var sortedIncomes: List<Income>
             item{
                 when(chosenTimePeriod){
                     SummaryTimePeriod.THIS_MONTH -> {
@@ -139,14 +156,6 @@ fun SummaryScreen(
 
                 }
             }
-            item{
-                YearlyBarChart(incomes = incomes.filter { i ->
-                    i.date.year == dateNow.year
-                }, expenses = expenses.filter { e ->
-                    e.date.year == dateNow.year
-                })
-            }
-
         }
     }
 }
@@ -199,12 +208,12 @@ fun TimePeriodSummary(sortedExpenses: List<Expense>, sortedIncomes: List<Income>
         backgroundColor = MaterialTheme.colorScheme.background
     )
 
-    val categories = categoryState.category
+/*    val categories = categoryState.category
     val legendsConfig = LegendsConfig(
         legendLabelList = categories.map { c ->
             LegendLabel(Color(c.color), c.name) },
         gridColumnCount = categories.size
-    )
+    )*/
 
     Column(
         modifier = Modifier
@@ -260,18 +269,18 @@ fun ChartLegend(categories: List<Category>){
 @Composable
 fun YearlyBarChart(incomes: List<Income>, expenses: List<Expense>){
     val monthNames = mapOf(
-        Month.JANUARY to "styczeń",
-        Month.FEBRUARY to "luty",
-        Month.MARCH to "marzec",
-        Month.APRIL to "kwiecień",
-        Month.MAY to "maj",
-        Month.JUNE to "czerwiec",
-        Month.JULY to "lipiec",
-        Month.AUGUST to "sierpień",
-        Month.SEPTEMBER to "wrzesień",
-        Month.OCTOBER to "październik",
-        Month.NOVEMBER to "listopad",
-        Month.DECEMBER to "grudzień"
+        Month.JANUARY to "January",
+        Month.FEBRUARY to "February",
+        Month.MARCH to "March",
+        Month.APRIL to "April",
+        Month.MAY to "May",
+        Month.JUNE to "June",
+        Month.JULY to "July",
+        Month.AUGUST to "August",
+        Month.SEPTEMBER to "September",
+        Month.OCTOBER to "October",
+        Month.NOVEMBER to "November",
+        Month.DECEMBER to "December"
     )
     // Get unique months from both lists
     val uniqueMonths = (incomes.map { it.date.month } + expenses.map { it.date.month })
@@ -298,8 +307,8 @@ fun YearlyBarChart(incomes: List<Income>, expenses: List<Expense>){
 
     val groupBarData: List<GroupBar> = uniqueMonthsMap.values.map { month ->
         val monthName = monthNames[month] ?: "error"
-        val totalExpenses = monthlyExpenseMap[month] ?: 0f
-        val totalIncomes = monthlyIncomeMap[month] ?: 0f
+        val totalExpenses = monthlyExpenseMap[month]?.times(100) ?: 0f
+        val totalIncomes = monthlyIncomeMap[month]?.times(100) ?: 0f
 
         GroupBar(
             monthName,
@@ -314,25 +323,29 @@ fun YearlyBarChart(incomes: List<Income>, expenses: List<Expense>){
 
     val maxIncome = monthlyIncomeMap.values.maxOrNull() ?: 0.0
     val maxExpense = monthlyExpenseMap.values.maxOrNull() ?: 0.0
-    val maxRange = if (maxIncome>maxExpense) maxIncome.roundToInt() else maxExpense.roundToInt()
+    val maxRange = if (maxIncome>maxExpense) maxIncome.roundToInt().times(10) else maxExpense.roundToInt().times(10)
 
     val yStepSize = 10
     val xAxisData = AxisData.Builder()
         .axisStepSize(30.dp)
         .bottomPadding(5.dp)
-        .startDrawPadding(48.dp)
+        .startDrawPadding(15.dp)
         .labelData { index -> monthIndexMap[index] ?: "error" }
+        .axisLabelColor(MaterialTheme.colorScheme.primary)
+        .axisLineColor(MaterialTheme.colorScheme.primary)
         .build()
     val yAxisData = AxisData.Builder()
         .steps(yStepSize)
         .labelAndAxisLinePadding(20.dp)
         .axisOffset(20.dp)
-        .labelData { index -> (index * (maxRange / yStepSize)).toString() }
+        .labelData { index -> (index * (maxRange / yStepSize)/10).toString() }
+        .axisLabelColor(MaterialTheme.colorScheme.primary)
+        .axisLineColor(MaterialTheme.colorScheme.primary)
         .build()
-    val colorPaletteList =  listOf(Color.Green, Color.Red)
+    val colorPaletteList =  listOf(Color.Red, Color.Green)
 
     val legendsConfig = LegendsConfig(
-        legendLabelList = listOf(LegendLabel(Color.Green, "przychody"),LegendLabel(Color.Red, "wydatki")),
+        legendLabelList = listOf(LegendLabel(Color.Green, "Incomes"),LegendLabel(Color.Red, "Expenses")),
         gridColumnCount = 2
     )
     val groupBarPlotData = BarPlotData(

@@ -22,10 +22,14 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -52,8 +56,8 @@ fun CategoriesScreen(
     navController: NavController,
     state: CategoryState,
     onEvent: (CategoryEvent) -> Unit
-){
-    Scaffold (
+) {
+    Scaffold(
         floatingActionButton = {
             FloatingActionButton(onClick = {
                 onEvent(CategoryEvent.ShowDialog)
@@ -62,36 +66,41 @@ fun CategoriesScreen(
             }
         },
         modifier = Modifier.padding(16.dp)
-    ) {padding ->
+    ) { padding ->
 
-        if(state.isAddingCategory) {
+        if (state.isAddingCategory) {
             AddCategoryDialog(state = state, onEvent = onEvent)
         }
 
         LazyColumn(
             contentPadding = padding,
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 16.dp), // Add consistent top padding
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            item{
-                TopNavBar(navController, "Categories","menu")
+            item {
+                TopNavBar(navController, "Categories", "menu")
             }
-            item{
+            item {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState()),
+                        .horizontalScroll(rememberScrollState())
+                        .padding(horizontal = 8.dp), // Add padding around sorting options
                     verticalAlignment = Alignment.CenterVertically
-                ){
+                ) {
                     CategorySortType.entries.forEach { categorySortType ->
                         Row(
                             modifier = Modifier
                                 .clickable {
                                     onEvent(CategoryEvent.SortCategories(categorySortType))
-                                },
+                                }
+                                .padding(end = 16.dp), // Add space between sorting options
                             verticalAlignment = Alignment.CenterVertically
-                        ){
-                            RadioButton(selected = state.categorySortType == categorySortType,
+                        ) {
+                            RadioButton(
+                                selected = state.categorySortType == categorySortType,
                                 onClick = {
                                     onEvent(CategoryEvent.SortCategories(categorySortType))
                                 }
@@ -101,37 +110,59 @@ fun CategoriesScreen(
                     }
                 }
             }
-            items(state.category){category ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ){
-                    Box(
+
+            items(state.category) { category ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp),
+                    elevation = CardDefaults.cardElevation(4.dp),
+                    shape = MaterialTheme.shapes.medium,
+//                    backgroundColor = MaterialTheme.colorScheme.surface
+                ) {
+                    Row(
                         modifier = Modifier
-                            .background(Color(category.color))
-                            .size(20.dp)
-                            .border(1.dp, Color.Black)
-                    )
-                    Column(
-                        modifier = Modifier.weight(1f)
-                    ){
-                        Text(text = category.name, fontSize = 20.sp)
-                    }
-                    val defaultCategories = listOf("Bills", "Groceries", "Entertainment", "Transport", "Other")
-                    if (category.name !in defaultCategories) {
-                        IconButton(onClick = {
-                            onEvent(CategoryEvent.GetData(category.name))
-                            onEvent(CategoryEvent.ShowDialog)
-                        }) {
-                            Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit expense")
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Card(
+                            modifier = Modifier// Transparent background
+                                .size(30.dp)
+                                .padding(2.dp), // Padding for spacing
+                            shape = MaterialTheme.shapes.small, // Add some elevation for shadow
+                            elevation = CardDefaults.cardElevation(2.dp),
+                            colors = CardColors(Color(category.color),Color(category.color),Color(category.color),Color(category.color))
+                        ){}
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(start = 12.dp) // Add space between color box and text
+                        ) {
+                            Text(text = category.name, fontSize = 20.sp)
                         }
-                        IconButton(onClick = {
-                            onEvent(CategoryEvent.DeleteCategory(category))
-                        }) {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = "Delete category"
-                            )
+
+                        // Default categories can't be edited or deleted
+                        val defaultCategories =
+                            listOf("Bills", "Groceries", "Entertainment", "Transport", "Other")
+                        if (category.name !in defaultCategories) {
+                            IconButton(onClick = {
+                                onEvent(CategoryEvent.GetData(category.name))
+                                onEvent(CategoryEvent.ShowDialog)
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.Edit,
+                                    contentDescription = "Edit category"
+                                )
+                            }
+                            IconButton(onClick = {
+                                onEvent(CategoryEvent.DeleteCategory(category))
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = "Delete category"
+                                )
+                            }
                         }
                     }
                 }
@@ -145,59 +176,85 @@ fun CategoriesScreen(
 fun AddCategoryDialog(
     state: CategoryState,
     onEvent: (CategoryEvent) -> Unit,
-){
-    val text = remember { mutableStateOf("") }
+) {
+    val errorMessage = remember { mutableStateOf("") }
     BasicAlertDialog(onDismissRequest = { onEvent(CategoryEvent.HideDialog) }) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp), // Increase space between elements
             modifier = Modifier
-                .background(Color.Gray)
-                .padding(8.dp)
+                .background(MaterialTheme.colorScheme.background)
+                .padding(16.dp)
         ) {
-            Text(text = "Category")
+            Text(text = "Add or Edit Category", fontSize = 20.sp, color = MaterialTheme.colorScheme.primary)
+
+            // Name Input Field
             TextField(
                 value = state.name,
                 onValueChange = {
                     onEvent(CategoryEvent.SetName(it))
                 },
                 placeholder = {
-                    Text(text = "Name")
+                    Text(text = "Category Name")
                 },
                 modifier = Modifier.fillMaxWidth()
             )
+
+            // Display current color
             Box(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
                     .height(40.dp)
                     .background(Color(state.color))
+                    .border(1.dp, Color.Black)
             )
+
+            // Color Picker
             val controller = rememberColorPickerController()
             HsvColorPicker(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(450.dp)
-                    .padding(10.dp),
+                    .height(300.dp)
+                    .padding(vertical = 10.dp),
                 controller = controller,
                 initialColor = Color(state.color),
                 onColorChanged = { colorEnvelope: ColorEnvelope ->
                     onEvent(CategoryEvent.SetColor(colorEnvelope.color.hashCode()))
                 }
             )
-            Box(
+
+            // Save and Cancel Buttons
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.CenterEnd
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Button(onClick = {
-                    if (state.name == "") {
-                        text.value = "Category must have a name"
-                    } else {
-                        text.value = ""
-                        onEvent(CategoryEvent.SaveCategory)
-                    }
-                }) {
+                Button(
+                    onClick = {
+                        onEvent(CategoryEvent.HideDialog)
+                    },
+                    modifier = Modifier.padding(8.dp)
+                ) {
+                    Text(text = "Cancel")
+                }
+
+                Button(
+                    onClick = {
+                        if (state.name.isEmpty()) {
+                            errorMessage.value = "Category must have a name"
+                        } else {
+                            errorMessage.value = ""
+                            onEvent(CategoryEvent.SaveCategory)
+                        }
+                    },
+                    modifier = Modifier.padding(8.dp)
+                ) {
                     Text(text = "Save")
                 }
             }
-            Text(text = text.value, color = Color.Red)
+
+            // Error message display
+            if (errorMessage.value.isNotEmpty()) {
+                Text(text = errorMessage.value, color = Color.Red)
+            }
         }
     }
 }

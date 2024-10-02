@@ -7,9 +7,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -23,16 +26,19 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.finanse.TopNavBar
+import com.example.finanse.ValidateInputs
 import com.example.finanse.entities.Account
 import com.example.finanse.events.AccountEvent
 import com.example.finanse.sortTypes.AccountSortType
@@ -61,26 +68,23 @@ fun AccountsScreen(
     Scaffold (
         floatingActionButton = {
             Box {
-                FloatingActionButton(onClick = {
-                    onEvent(AccountEvent.ShowDialog)
-                },
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(end = 8.dp, bottom = 8.dp)
+                FloatingActionButton(
+                    onClick = { onEvent(AccountEvent.ShowDialog) },
+                    shape = MaterialTheme.shapes.medium,
+                    contentColor = Color.White,
+                    modifier = Modifier.size(56.dp),
+                    containerColor = MaterialTheme.colorScheme.primary
                 ) {
                     Icon(imageVector = Icons.Default.Add, contentDescription = "Add an account")
                 }
-                FloatingActionButton(onClick = {
-                    onEvent(AccountEvent.ShowTranserDialog)
-                },
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(end = 8.dp, bottom = 80.dp)
-                    ) {
-                    Icon(
-                        imageVector = Icons.Default.PlayArrow,
-                        contentDescription = "Make a transfer"
-                    )
+                FloatingActionButton(
+                    onClick = { onEvent(AccountEvent.ShowTranserDialog) },
+                    shape = MaterialTheme.shapes.medium,
+                    contentColor = Color.White,
+                    modifier = Modifier.size(56.dp),
+                    containerColor = MaterialTheme.colorScheme.primary
+                ) {
+                    Icon(imageVector = Icons.Default.PlayArrow, contentDescription = "Make a transfer")
                 }
             }
         },
@@ -102,10 +106,12 @@ fun AccountsScreen(
                 TopNavBar(navController, "Accounts","menu")
             }
             item{
+                // Sort options row
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState()),
+                        .horizontalScroll(rememberScrollState())
+                        .padding(vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ){
                     AccountSortType.entries.forEach { accountSortType ->
@@ -113,42 +119,53 @@ fun AccountsScreen(
                             modifier = Modifier
                                 .clickable {
                                     onEvent(AccountEvent.SortAccounts(accountSortType))
-                                },
+                                }
+                                .padding(horizontal = 8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ){
-                            RadioButton(selected = state.accountSortType == accountSortType,
-                                onClick = {
-                                    onEvent(AccountEvent.SortAccounts(accountSortType))
-                                }
+                            RadioButton(
+                                selected = state.accountSortType == accountSortType,
+                                onClick = { onEvent(AccountEvent.SortAccounts(accountSortType)) }
                             )
-                            Text(text = getSortTypeName(accountSortType))
+                            Text(text = getSortTypeName(accountSortType), style = MaterialTheme.typography.bodyMedium)
                         }
                     }
                 }
             }
             items(state.account){account ->
-                Row(
-                    modifier = Modifier.fillMaxWidth()
-                ){
-                    Column(
-                        modifier = Modifier.weight(1f)
-                    ){
-                        Text(text = "${account.name}: ${account.balance}", fontSize = 20.sp)
-                    }
-                    IconButton(onClick = {
-                        onEvent(AccountEvent.GetData(account.id))
-                        onEvent(AccountEvent.ShowDialog)
-                    }) {
-                        Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit account")
-                    }
-                    if (numberOfAccounts(state) > 1) {
-                        IconButton(onClick = {
-                            onEvent(AccountEvent.DeleteAccount(account))
-                        }) {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = "Delete account"
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp),
+                    elevation = CardDefaults.cardElevation(4.dp),
+                    shape = MaterialTheme.shapes.medium,
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(
+                                text = "${account.name}: ${account.balance}",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onSurface
                             )
+                        }
+                        IconButton(onClick = {
+                            onEvent(AccountEvent.GetData(account.id))
+                            onEvent(AccountEvent.ShowDialog)
+                        }) {
+                            Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit account")
+                        }
+                        if (numberOfAccounts(state) > 1) {
+                            IconButton(onClick = {
+                                onEvent(AccountEvent.DeleteAccount(account))
+                            }) {
+                                Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete account")
+                            }
                         }
                     }
                 }
@@ -165,53 +182,65 @@ fun AddAccountDialog(
 ){
     val text = remember { mutableStateOf("") }
     val mAccounts = state.account
+    val validate = ValidateInputs()
+
     BasicAlertDialog(onDismissRequest = { onEvent(AccountEvent.HideDialog) }) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier
-                .background(Color.Gray)
-                .padding(8.dp)
+                .background(MaterialTheme.colorScheme.background, MaterialTheme.shapes.medium)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(text = "Account")
-            TextField(
+            Text(text = "Add or Edit Account", fontSize = 20.sp, color = MaterialTheme.colorScheme.primary)
+
+            OutlinedTextField(
                 value = state.name,
-                onValueChange = {
-                    onEvent(AccountEvent.SetName(it))
-                },
-                placeholder = {
-                    Text(text = "Name")
-                },
-                modifier = Modifier.fillMaxWidth()
+                onValueChange = { onEvent(AccountEvent.SetName(it)) },
+                label = { Text(text = "Name") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
             )
-            TextField(
+            OutlinedTextField(
                 value = state.balance,
                 onValueChange = {
-                    onEvent(AccountEvent.SetBalance(it))
+                    if (validate.isAmountValid(it)) onEvent(AccountEvent.SetBalance(it))
                 },
+                label = { Text(text = "Balance") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                placeholder = {
-                    Text(text = "0.00")
-                }
-            )
-            Box(
                 modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.CenterEnd
+                singleLine = true
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Button(onClick = {
-                    if (state.name == "") {
-                        text.value = "Account must have a name"
-                    }
-                    else if (isNameInDb(state.name, mAccounts)) {
-                        text.value = "Account with this name already exists"
-                    }else {
-                        text.value = ""
-                        onEvent(AccountEvent.SaveAccount)
-                    }
-                }) {
+                Button(
+                    onClick = {
+                        if (state.name.isEmpty()) text.value = "Name must be included"
+                        else if (isNameInDb(state.name, mAccounts)){
+                            text.value = "Account with this name already exists"
+                        }
+                        else if (state.balance.isEmpty()) text.value = "Balance field cannot be empty"
+                        else {
+                            text.value = ""
+                            onEvent(AccountEvent.SaveAccount)
+                        }
+                    },
+                    modifier = Modifier.weight(1f)
+                ) {
                     Text(text = "Save")
                 }
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                Button(onClick = { onEvent(AccountEvent.HideDialog) }, modifier = Modifier.weight(1f)) {
+                    Text(text = "Cancel")
+                }
             }
-            Text(text = text.value, color = Color.Red)
+
+            if (text.value.isNotEmpty()) {
+                Text(text = text.value, color = MaterialTheme.colorScheme.error)
+            }
         }
     }
 }
@@ -235,33 +264,36 @@ fun MakeTransferDialog(
         Icons.Filled.KeyboardArrowUp
     else
         Icons.Filled.KeyboardArrowDown
+    val validate = ValidateInputs()
+
     BasicAlertDialog(onDismissRequest = { onEvent(AccountEvent.HideTranserDialog) }) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier
-                .background(Color.Gray)
-                .padding(8.dp)
+                .background(MaterialTheme.colorScheme.background, MaterialTheme.shapes.medium)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(text = "Transfer")
-            TextField(
-                value = state.transferAmount,
+            Text(text = "Make a transfer", fontSize = 20.sp, color = MaterialTheme.colorScheme.primary)
+            OutlinedTextField(
+                value = state.balance,
                 onValueChange = {
-                    onEvent(AccountEvent.SetTransferAmount(it))
+                    if (validate.isAmountValid(it)) onEvent(AccountEvent.SetBalance(it))
                 },
+                label = { Text(text = "Balance") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                placeholder = {
-                    Text(text = "0.00")
-                }
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
             )
-            TextField(
+            OutlinedTextField(
                 value = state.accountOneName,
                 onValueChange = {},
-                label = { Text("Account One") },
+                label = { Text("Account one") },
                 trailingIcon = {
                     Icon(iconOne, "drop down menu arrow",
                         Modifier.clickable { expandedAccountOne = !expandedAccountOne })
                 },
-                readOnly = true
+                readOnly = true,
+                modifier = Modifier.fillMaxWidth()
             )
             DropdownMenu(
                 expanded = expandedAccountOne,
@@ -277,15 +309,16 @@ fun MakeTransferDialog(
                     )
                 }
             }
-            TextField(
+            OutlinedTextField(
                 value = state.accountTwoName,
                 onValueChange = {},
-                label = { Text("Account Two") },
+                label = { Text("Account two") },
                 trailingIcon = {
                     Icon(iconTwo, "drop down menu arrow",
                         Modifier.clickable { expandedAccountTwo = !expandedAccountTwo })
                 },
-                readOnly = true
+                readOnly = true,
+                modifier = Modifier.fillMaxWidth()
             )
             DropdownMenu(
                 expanded = expandedAccountTwo,
@@ -300,26 +333,37 @@ fun MakeTransferDialog(
                     )
                 }
             }
-            Box(
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.CenterEnd
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Button(onClick = {
-                    if (state.accountOneName == state.accountTwoName) {
-                        text.value = "Cannot make transfer to the same account"
-                    }
-                    else if (state.transferAmount.toDouble() > maxTransfer.value){
-                        text.value = "Not enough balance on ${state.accountOneName} to make the transfer"
-                    }
-                    else {
-                        text.value = ""
-                        onEvent(AccountEvent.MakeTransfer)
-                    }
-                }) {
+                Button(
+                    onClick = {
+                        if (state.accountOneName == state.accountTwoName) {
+                            text.value = "Cannot make transfer to the same account"
+                        }
+                        else if (state.transferAmount.toDouble() > maxTransfer.value){
+                            text.value = "Not enough balance on ${state.accountOneName} to make the transfer"
+                        }
+                        else {
+                            text.value = ""
+                            onEvent(AccountEvent.MakeTransfer)
+                        }
+                    },
+                    modifier = Modifier.weight(1f)
+                ) {
                     Text(text = "Transfer")
                 }
+                Spacer(modifier = Modifier.width(16.dp))
+
+                Button(onClick = { onEvent(AccountEvent.HideDialog) }, modifier = Modifier.weight(1f)) {
+                    Text(text = "Cancel")
+                }
             }
-            Text(text = text.value, color = Color.Red)
+
+            if (text.value.isNotEmpty()) {
+                Text(text = text.value, color = MaterialTheme.colorScheme.error)
+            }
         }
     }
 }

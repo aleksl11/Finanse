@@ -1,36 +1,44 @@
 package com.example.finanse.screens
 
+import android.app.DatePickerDialog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,6 +47,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -50,7 +59,9 @@ import com.example.finanse.sortTypes.ExpenseSortType
 import com.example.finanse.states.AccountState
 import com.example.finanse.states.CategoryState
 import com.example.finanse.states.ExpenseState
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.Calendar
 
 @Composable
 fun ExpensesScreen(
@@ -59,19 +70,22 @@ fun ExpensesScreen(
     categoryState: CategoryState,
     accountState: AccountState,
     onEvent: (ExpenseEvent) -> Unit
-){
-    Scaffold (
+) {
+    Scaffold(
         floatingActionButton = {
-            FloatingActionButton(onClick = {
-                onEvent(ExpenseEvent.ShowDialog)
-            }) {
+            FloatingActionButton(
+                onClick = { onEvent(ExpenseEvent.ShowDialog) },
+                shape = MaterialTheme.shapes.medium,
+                contentColor = Color.White,
+                modifier = Modifier.size(56.dp),
+                containerColor = MaterialTheme.colorScheme.primary
+            ) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Add an expense")
             }
         },
         modifier = Modifier.padding(16.dp)
-    ) {padding ->
-
-        if(state.isAddingExpense) {
+    ) { padding ->
+        if (state.isAddingExpense) {
             AddExpenseDialog(state = state, categoryState = categoryState, accountState = accountState, onEvent = onEvent)
         }
 
@@ -80,63 +94,86 @@ fun ExpensesScreen(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            item{
-                TopNavBar(navController, "Expenses","menu")
+            item {
+                TopNavBar(navController, "Expenses", "menu")
             }
-            item{
+            item {
+                // Sort options row
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState()),
+                        .horizontalScroll(rememberScrollState())
+                        .padding(vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
-                ){
+                ) {
                     ExpenseSortType.entries.forEach { expenseSortType ->
                         Row(
                             modifier = Modifier
                                 .clickable {
                                     onEvent(ExpenseEvent.SortExpenses(expenseSortType))
-                                },
-                            verticalAlignment = Alignment.CenterVertically
-                        ){
-                            RadioButton(selected = state.expenseSortType == expenseSortType,
-                                onClick = {
-                                    onEvent(ExpenseEvent.SortExpenses(expenseSortType))
                                 }
+                                .padding(horizontal = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = state.expenseSortType == expenseSortType,
+                                onClick = { onEvent(ExpenseEvent.SortExpenses(expenseSortType)) }
                             )
-                            Text(text = getSortTypeName(expenseSortType))
+                            Text(text = getSortTypeName(expenseSortType), style = MaterialTheme.typography.bodyMedium)
                         }
                     }
                 }
             }
-            items(state.expense){expense ->
-                Row(
-                    modifier = Modifier.fillMaxWidth()
-                ){
-                    Column(
-                        modifier = Modifier.weight(1f)
-                    ){
-                        Text(text = "${expense.title}: ${"%.2f".format(expense.amount)}", fontSize = 20.sp)
-                        Text(text = "${expense.date.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))}\n${expense.category}", fontSize = 16.sp)
-                        expense.description?.let { Text(text = it, fontSize = 12.sp) }
-                    }
-                    IconButton(onClick = {
-                        onEvent(ExpenseEvent.SetId(expense.id))
-                        onEvent(ExpenseEvent.GetData(expense.id))
-                        onEvent(ExpenseEvent.ShowDialog)
-                    }) {
-                        Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit expense")
-                    }
-                    IconButton(onClick = {
-                        onEvent(ExpenseEvent.DeleteExpense(expense))
-                    }) {
-                        Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete expense")
+            items(state.expense) { expense ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp),
+                    elevation = CardDefaults.cardElevation(4.dp),
+                    shape = MaterialTheme.shapes.medium,
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(
+                                text = "${expense.title}: ${"%.2f".format(expense.amount)}",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = expense.date.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")) +
+                                        "\n${expense.account}" +
+                                        "\n${expense.category}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            expense.description?.let {
+                                Text(text = it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
+                        IconButton(onClick = {
+                            onEvent(ExpenseEvent.SetId(expense.id))
+                            onEvent(ExpenseEvent.GetData(expense.id))
+                            onEvent(ExpenseEvent.ShowDialog)
+                        }) {
+                            Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit expense")
+                        }
+                        IconButton(onClick = {
+                            onEvent(ExpenseEvent.DeleteExpense(expense))
+                        }) {
+                            Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete expense")
+                        }
                     }
                 }
             }
         }
     }
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -145,141 +182,168 @@ fun AddExpenseDialog(
     categoryState: CategoryState,
     accountState: AccountState,
     onEvent: (ExpenseEvent) -> Unit,
-){
+) {
     val text = remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
     var expandedAccount by remember { mutableStateOf(false) }
-    val accountName = remember { mutableStateOf("") }
+    val accountName = remember { mutableStateOf(state.account) }
     val mCategories = categoryState.category
     val mAccounts = accountState.account
-    val icon = if (expanded)
-        Icons.Filled.KeyboardArrowUp
-    else
-        Icons.Filled.KeyboardArrowDown
+    val icon = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown
 
     val validate = ValidateInputs()
+
+    // Date Picker State
+    val calendar = Calendar.getInstance()
+    val dateFormatter = remember { DateTimeFormatter.ofPattern("dd.MM.yyyy") }
+    val datePickerDialog = DatePickerDialog(
+        LocalContext.current,
+        { _, year, month, dayOfMonth ->
+            val selectedDate = LocalDate.of(year, month + 1, dayOfMonth)
+
+            // Format the date to DD.MM.YYYY and update the state
+            onEvent(ExpenseEvent.SetDate(selectedDate.format(dateFormatter)))
+        },
+        calendar.get(Calendar.YEAR),
+        calendar.get(Calendar.MONTH),
+        calendar.get(Calendar.DAY_OF_MONTH)
+    )
+
     BasicAlertDialog(onDismissRequest = { onEvent(ExpenseEvent.HideDialog) }) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier
-                .background(Color.Gray)
-                .padding(8.dp)
+                .background(MaterialTheme.colorScheme.background, MaterialTheme.shapes.medium)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(text = "Expense")
+            Text(text = "Add or Edit Expense", fontSize = 20.sp, color = MaterialTheme.colorScheme.primary)
 
-            TextField(
+            OutlinedTextField(
                 value = state.title,
-                onValueChange = {
-                    onEvent(ExpenseEvent.SetTitle(it))
-                },
-                placeholder = {
-                    Text(text = "Title")
-                }
+                onValueChange = { onEvent(ExpenseEvent.SetTitle(it)) },
+                label = { Text(text = "Title") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
             )
-            TextField(
+
+            OutlinedTextField(
                 value = state.amount,
                 onValueChange = {
                     if (validate.isAmountValid(it)) onEvent(ExpenseEvent.SetAmount(it))
                 },
+                label = { Text(text = "Amount") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                placeholder = {
-                    Text(text = "0.00")
-                }
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
             )
-            TextField(
-                value = state.date,
-                onValueChange = {
-                    onEvent(ExpenseEvent.SetDate(it))
-                },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                placeholder = {
-                    Text(text = "DD.MM.YYYY")
-                }
-            )
-            TextField(
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { datePickerDialog.show() },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(text = state.date.ifEmpty { "Select Date" }, modifier = Modifier.padding(8.dp))
+                Icon(Icons.Default.DateRange, contentDescription = "Select Date")
+            }
+
+            OutlinedTextField(
                 value = state.category,
-                onValueChange = {
-                    onEvent(ExpenseEvent.SetCategory(it))
-                },
+                onValueChange = { onEvent(ExpenseEvent.SetCategory(it)) },
                 label = { Text("Category") },
                 trailingIcon = {
-                    Icon(icon, "drop down menu arrow",
-                        Modifier.clickable { expanded = !expanded })
+                    Icon(icon, "drop down menu arrow", Modifier.clickable { expanded = !expanded })
                 },
-                readOnly = true
+                readOnly = true,
+                modifier = Modifier.fillMaxWidth()
             )
+
             DropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false }
             ) {
                 mCategories.forEach { c ->
-                    DropdownMenuItem(onClick = {
-                        expanded = false
-                        onEvent(ExpenseEvent.SetCategory(c.name))
-                    },
+                    DropdownMenuItem(
+                        onClick = {
+                            expanded = false
+                            onEvent(ExpenseEvent.SetCategory(c.name))
+                        },
                         text = { Text(text = c.name) }
                     )
                 }
             }
-            TextField(
+
+            OutlinedTextField(
                 value = accountName.value,
                 onValueChange = {},
                 label = { Text("Account") },
                 trailingIcon = {
-                    Icon(icon, "drop down menu arrow",
-                        Modifier.clickable { expandedAccount = !expandedAccount })
+                    Icon(icon, "drop down menu arrow", Modifier.clickable { expandedAccount = !expandedAccount })
                 },
-                readOnly = true
+                readOnly = true,
+                modifier = Modifier.fillMaxWidth()
             )
+
             DropdownMenu(
                 expanded = expandedAccount,
                 onDismissRequest = { expandedAccount = false }
             ) {
                 mAccounts.forEach { a ->
-                    DropdownMenuItem(onClick = {
-                        expandedAccount = false
-                        onEvent(ExpenseEvent.SetAccount(a.id.toString()))
-                        accountName.value = a.name
-                    },
+                    DropdownMenuItem(
+                        onClick = {
+                            expandedAccount = false
+                            onEvent(ExpenseEvent.SetAccount(a.id.toString()))
+                            accountName.value = a.name
+                        },
                         text = { Text(text = a.name) }
                     )
                 }
             }
-            TextField(
+
+            OutlinedTextField(
                 value = state.description ?: "",
                 onValueChange = {
                     val description = it.ifEmpty { null }
                     onEvent(ExpenseEvent.SetDescription(description))
                 },
-                placeholder = {
-                    Text(text = "Description")
-                }
+                label = { Text(text = "Description") },
+                modifier = Modifier.fillMaxWidth(),
+                maxLines = 3
             )
+
             Row(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Button(onClick = {
-                    if (validate.isDateValid(state.date)) {
-                        text.value = ""
-                        onEvent(ExpenseEvent.SaveExpense)
-                    } else text.value = "Incorrect date. Make sure it is in DD.MM.YYYY format"
-                    if (state.category == "") text.value = "Category field must be filled in"
-                    if (state.title == "") text.value = "Title field must be filled in"
-                }) {
+                Button(
+                    onClick = {
+                        if (state.title.isEmpty()) text.value = "Title must be filled in"
+                        if (state.amount.isEmpty()) text.value = "Amount field cannot be empty"
+                        if (state.category.isEmpty()) text.value = "Category must be selected"
+                        if (state.account.isEmpty()) text.value = "Account must be selected"
+                        if (validate.isDateValid(state.date)) {
+                            text.value = ""
+                            onEvent(ExpenseEvent.SaveExpense)
+                        } else text.value = "Incorrect date format"
+                    },
+                    modifier = Modifier.weight(1f)
+                ) {
                     Text(text = "Save")
                 }
-                Button(onClick = {
-                    onEvent(ExpenseEvent.HideDialog)
 
-                }) {
+                Spacer(modifier = Modifier.width(16.dp))
+
+                Button(onClick = { onEvent(ExpenseEvent.HideDialog) }, modifier = Modifier.weight(1f)) {
                     Text(text = "Cancel")
                 }
             }
-            Text(text = text.value, color = Color.Red)
+
+            if (text.value.isNotEmpty()) {
+                Text(text = text.value, color = MaterialTheme.colorScheme.error)
+            }
         }
-
     }
-
 }
 
 fun getSortTypeName(name: ExpenseSortType): String{
