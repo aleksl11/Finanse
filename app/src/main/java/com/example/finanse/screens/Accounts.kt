@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -23,7 +22,6 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -47,10 +45,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.finanse.R
 import com.example.finanse.TopNavBar
 import com.example.finanse.ValidateInputs
 import com.example.finanse.entities.Account
@@ -67,7 +67,19 @@ fun AccountsScreen(
 ){
     Scaffold (
         floatingActionButton = {
-            Box {
+            Column(
+                horizontalAlignment = Alignment.End, // Align to the end of the screen
+                verticalArrangement = Arrangement.spacedBy(16.dp) // Add space between buttons
+            ) {
+                FloatingActionButton(
+                    onClick = { onEvent(AccountEvent.ShowTranserDialog) },
+                    shape = MaterialTheme.shapes.medium,
+                    contentColor = Color.White,
+                    modifier = Modifier.size(56.dp),
+                    containerColor = MaterialTheme.colorScheme.primary
+                ) {
+                    Icon(painter = painterResource(R.drawable.transfer_icon), contentDescription = "Make a transfer", modifier = Modifier.size(24.dp))
+                }
                 FloatingActionButton(
                     onClick = { onEvent(AccountEvent.ShowDialog) },
                     shape = MaterialTheme.shapes.medium,
@@ -76,15 +88,6 @@ fun AccountsScreen(
                     containerColor = MaterialTheme.colorScheme.primary
                 ) {
                     Icon(imageVector = Icons.Default.Add, contentDescription = "Add an account")
-                }
-                FloatingActionButton(
-                    onClick = { onEvent(AccountEvent.ShowTranserDialog) },
-                    shape = MaterialTheme.shapes.medium,
-                    contentColor = Color.White,
-                    modifier = Modifier.size(56.dp),
-                    containerColor = MaterialTheme.colorScheme.primary
-                ) {
-                    Icon(imageVector = Icons.Default.PlayArrow, contentDescription = "Make a transfer")
                 }
             }
         },
@@ -275,11 +278,11 @@ fun MakeTransferDialog(
         ) {
             Text(text = "Make a transfer", fontSize = 20.sp, color = MaterialTheme.colorScheme.primary)
             OutlinedTextField(
-                value = state.balance,
+                value = state.transferAmount,
                 onValueChange = {
-                    if (validate.isAmountValid(it)) onEvent(AccountEvent.SetBalance(it))
+                    if (validate.isAmountValid(it)) onEvent(AccountEvent.SetTransferAmount(it))
                 },
-                label = { Text(text = "Balance") },
+                label = { Text(text = "Amount") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
@@ -347,6 +350,8 @@ fun MakeTransferDialog(
                         }
                         else {
                             text.value = ""
+                            System.out.println(maxTransfer.value)
+                            System.out.println(state.transferAmount)
                             onEvent(AccountEvent.MakeTransfer)
                         }
                     },
@@ -356,7 +361,7 @@ fun MakeTransferDialog(
                 }
                 Spacer(modifier = Modifier.width(16.dp))
 
-                Button(onClick = { onEvent(AccountEvent.HideDialog) }, modifier = Modifier.weight(1f)) {
+                Button(onClick = { onEvent(AccountEvent.HideTranserDialog) }, modifier = Modifier.weight(1f)) {
                     Text(text = "Cancel")
                 }
             }

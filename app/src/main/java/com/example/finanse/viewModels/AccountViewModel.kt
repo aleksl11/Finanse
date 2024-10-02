@@ -90,17 +90,23 @@ class AccountViewModel(
                 )}
             }
             AccountEvent.MakeTransfer -> {
-                Thread{
-                    dao.makeTransferPartOne(state.value.accountOneName, state.value.transferAmount)
-                    dao.makeTransferPartTwo(state.value.accountTwoName, state.value.transferAmount)
-                }.start()
-
-                _state.update{it.copy(
-                    isMakingATransfer = false,
-                    accountTwoName = "",
-                    accountOneName = "",
-                    transferAmount = ""
-                )}
+                viewModelScope.launch {
+                    try {
+                        // Perform the transfer in sequence (part one and part two)
+                        dao.makeTransferPartOne(state.value.accountOneName, state.value.transferAmount)
+                        dao.makeTransferPartTwo(state.value.accountTwoName, state.value.transferAmount)
+                    } catch (e: Exception) {
+                        // Handle error if needed
+                    } finally {
+                        // Update the state once the transfer completes
+                        _state.update { it.copy(
+                            isMakingATransfer = false,
+                            accountTwoName = "",
+                            accountOneName = "",
+                            transferAmount = ""
+                        )}
+                    }
+                }
             }
             is AccountEvent.SetId -> {
                 _state.update { it.copy(
