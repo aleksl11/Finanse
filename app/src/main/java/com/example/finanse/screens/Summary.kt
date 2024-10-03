@@ -1,12 +1,10 @@
 package com.example.finanse.screens
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -14,8 +12,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -83,15 +85,20 @@ fun SummaryScreen(
     var sortedExpenses: List<Expense>
     var sortedIncomes: List<Income>
 
-    Column{
+    Column(modifier = Modifier.fillMaxSize()) {
         TopNavBar(navController, "summary","menu")
         if(incomes.isEmpty() && expenses.isEmpty()) NoRecordsInDb()
-        else LazyColumn {
+        else LazyColumn(
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.fillMaxSize()
+        ) {
             item {
                 Text(text = "Yearly expenses and incomes",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,)
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center)
             }
             item {
                 YearlyBarChart(incomes = incomes.filter { i ->
@@ -101,26 +108,38 @@ fun SummaryScreen(
                 })
             }
             item {
-                Text(text = "Detailed summary",
+                Text(
+                    text = "Detailed Summary",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,)
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center
+                )
             }
             item {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .border(1.dp, Color.Black),
+                        .padding(8.dp)
+                        .border(1.dp, Color.Gray)
+                        .padding(8.dp),
                     horizontalAlignment = Alignment.Start
                 ) {
 
                     SummaryTimePeriod.entries.forEach { timePeriod ->
-                        Row (verticalAlignment = Alignment.CenterVertically){
+                        Row (
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(vertical = 4.dp)
+                        ){
                             RadioButton(
                                 selected = chosenTimePeriod == timePeriod,
-                                onClick = { chosenTimePeriod = timePeriod }
+                                onClick = { chosenTimePeriod = timePeriod },
+                                colors = RadioButtonDefaults.colors(
+                                    selectedColor = MaterialTheme.colorScheme.primary,
+                                    unselectedColor = MaterialTheme.colorScheme.onSurface
+                                )
                             )
-                            Text(text = getTimePeriodName(timePeriod))
+                            Text(text = getTimePeriodName(timePeriod), fontSize = 16.sp)
                         }
                     }
                 }
@@ -162,12 +181,22 @@ fun SummaryScreen(
 
 @Composable
 fun NoRecordsInDb(){
-    Text(text = "No records added to database")
+    Text(
+        text = "No records added to database",
+        fontSize = 16.sp,
+        modifier = Modifier.padding(16.dp),
+        textAlign = TextAlign.Center
+    )
 }
 
 @Composable
 fun NoRecordsInLists(){
-    Text(text = "No records added to database in selected time period")
+    Text(
+        text = "No records in the selected time period",
+        fontSize = 16.sp,
+        modifier = Modifier.padding(16.dp),
+        textAlign = TextAlign.Center
+    )
 }
 
 @Composable
@@ -223,9 +252,9 @@ fun TimePeriodSummary(sortedExpenses: List<Expense>, sortedIncomes: List<Income>
         verticalArrangement = Arrangement.spacedBy(20.dp),
         horizontalAlignment = Alignment.Start
     ){
-        Text("Total incomes: $incomesTotal PLN")
-        Text("Total time expenses: $expensesTotal PLN")
-        Text("Balance: ${incomesTotal-expensesTotal} PLN")
+        Text("Total incomes: ${"%.2f".format(incomesTotal)} PLN")
+        Text("Total time expenses: ${"%.2f".format(expensesTotal)} PLN")
+        Text("Balance: ${"%.2f".format(incomesTotal-expensesTotal)} PLN")
         Text(
             "Expenses by categories",
             fontSize = 20.sp,
@@ -253,15 +282,28 @@ fun ChartLegend(categories: List<Category>){
         horizontalAlignment = Alignment.Start
     ){
         categories.forEach { c ->
-            Row (verticalAlignment = Alignment.CenterVertically){
-                Box(modifier = Modifier
-                    .background(Color(c.color))
-                    .size(40.dp)
-                    .border(1.dp, Color.Black))
-                Spacer(modifier = Modifier.width(5.dp))
-                Text(text = c.name)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Card(
+                    modifier = Modifier// Transparent background
+                        .size(30.dp)
+                        .padding(2.dp), // Padding for spacing
+                    shape = MaterialTheme.shapes.small, // Add some elevation for shadow
+                    elevation = CardDefaults.cardElevation(2.dp),
+                    colors = CardColors(Color(c.color),Color(c.color),Color(c.color),Color(c.color))
+                ){}
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 12.dp) // Add space between color box and text
+                ) {
+                    Text(text = c.name, fontSize = 20.sp)
+                }
             }
-            Spacer(modifier = Modifier.height(5.dp))
         }
     }
 }
@@ -314,9 +356,9 @@ fun YearlyBarChart(incomes: List<Income>, expenses: List<Expense>){
             monthName,
             listOf(
                 // First BarData corresponds to expenses
-                BarData(Point(5F, totalExpenses.toFloat(), "Expenses"), Color.Red),
+                BarData(Point(5F, totalExpenses.toFloat(), "Expenses"), Color.Red, "%.2f".format(totalExpenses.toDouble()/100.0)),
                 // Second BarData corresponds to incomes
-                BarData(Point(5F, totalIncomes.toFloat(), "Incomes"), Color.Green)
+                BarData(Point(5F, totalIncomes.toFloat(), "Incomes"), Color.Green, "%.2f".format(totalIncomes.toDouble()/100.0))
             )
         )
     }

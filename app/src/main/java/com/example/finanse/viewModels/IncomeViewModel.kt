@@ -63,8 +63,14 @@ class IncomeViewModel(
                 }
             }
             IncomeEvent.HideDialog -> {
-                _state.update { it.copy(
-                    isAddingIncome = false
+                _state.update{it.copy(
+                    isAddingIncome = false,
+                    amount = "",
+                    title = "",
+                    date = "",
+                    account = "",
+                    description = "",
+                    id = -1
                 )}
             }
             IncomeEvent.SaveIncome -> {
@@ -116,6 +122,7 @@ class IncomeViewModel(
                     amount = "",
                     title = "",
                     date = "",
+                    account = "",
                     description = "",
                     id = -1
                 )}

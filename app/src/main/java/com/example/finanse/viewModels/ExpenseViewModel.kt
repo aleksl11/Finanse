@@ -64,8 +64,15 @@ class ExpenseViewModel(
                 }
             }
             ExpenseEvent.HideDialog -> {
-                _state.update { it.copy(
+                _state.update{it.copy(
                     isAddingExpense = false,
+                    amount = "",
+                    title = "",
+                    date = "",
+                    category = "",
+                    account = "",
+                    description = "",
+                    id = -1
                 )}
             }
             ExpenseEvent.SaveExpense -> {
@@ -123,6 +130,7 @@ class ExpenseViewModel(
                     title = "",
                     date = "",
                     category = "",
+                    account = "",
                     description = "",
                     id = -1
                 )}
@@ -135,6 +143,7 @@ class ExpenseViewModel(
                         amount = dao.getAmount(id).toString(),
                         date = dao.getDate(id).format(DateTimeFormatter.ofPattern("dd.MM.yyyy")),
                         category = dao.getCategory(id),
+                        account = dao.getAccount(id).toString(),
                         description = dao.getDescription(id),
                     )}
                 }.start()

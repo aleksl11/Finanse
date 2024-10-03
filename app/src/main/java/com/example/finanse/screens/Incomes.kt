@@ -3,7 +3,6 @@ package com.example.finanse.screens
 import android.app.DatePickerDialog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,7 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -31,12 +29,12 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -52,6 +50,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.finanse.DisplayFormat
 import com.example.finanse.TopNavBar
 import com.example.finanse.ValidateInputs
 import com.example.finanse.events.IncomeEvent
@@ -62,6 +61,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun IncomesScreen(
     navController: NavController,
@@ -69,6 +69,7 @@ fun IncomesScreen(
     accountState: AccountState,
     onEvent: (IncomeEvent) -> Unit
 ){
+    val mAccounts = accountState.account
     Scaffold (
         floatingActionButton = {
             FloatingActionButton(
@@ -95,29 +96,62 @@ fun IncomesScreen(
             item{
                 TopNavBar(navController, "incomes","menu")
             }
-            item{
-                // Sort options row
-                Row(
+            item {
+                var expanded by remember { mutableStateOf(false) } // Control dropdown menu state
+                var selectedSortType by remember { mutableStateOf(state.incomeSortType) } // Track selected sort type
+
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState())
-                        .padding(vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ){
-                    IncomeSortType.entries.forEach { incomeSortType ->
-                        Row(
-                            modifier = Modifier
-                                .clickable {
-                                    onEvent(IncomeEvent.SortIncomes(incomeSortType))
-                                }
-                                .padding(horizontal = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ){
-                            RadioButton(
-                                selected = state.incomeSortType == incomeSortType,
-                                onClick = { onEvent(IncomeEvent.SortIncomes(incomeSortType)) }
+                        .padding(horizontal = 8.dp) // Add padding around sorting options
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically, // Align items vertically centered
+                        modifier = Modifier.padding(vertical = 8.dp) // Space around the row
+                    ) {
+                        Text(
+                            text = "Sort type: ", // Label for the dropdown
+                            fontSize = 16.sp, // Font size
+                            modifier = Modifier.padding(end = 8.dp) // Space between label and dropdown
+                        )
+
+                        ExposedDropdownMenuBox(
+                            expanded = expanded,
+                            onExpandedChange = { expanded = !expanded } // Toggle dropdown
+                        ) {
+                            // The TextField that shows the currently selected sort type
+                            OutlinedTextField(
+                                value = getSortTypeName(selectedSortType), // Show the selected sort type's name
+                                onValueChange = {},
+                                readOnly = true, // Prevent editing
+                                trailingIcon = {
+                                    Icon(
+                                        imageVector = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                                        contentDescription = null
+                                    )
+                                },
+                                singleLine = true,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .menuAnchor() // Open dropdown when clicked
                             )
-                            Text(text = getSortTypeName(incomeSortType), style = MaterialTheme.typography.bodyMedium)
+
+                            // The DropdownMenu with all sorting options
+                            DropdownMenu(
+                                expanded = expanded,
+                                onDismissRequest = { expanded = false } // Close the dropdown menu
+                            ) {
+                                IncomeSortType.entries.forEach { incomeSortType ->
+                                    DropdownMenuItem(
+                                        text = { Text(text = getSortTypeName(incomeSortType)) },
+                                        onClick = {
+                                            selectedSortType = incomeSortType
+                                            onEvent(IncomeEvent.SortIncomes(incomeSortType)) // Trigger event on selection
+                                            expanded = false // Close dropdown
+                                        }
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -145,7 +179,7 @@ fun IncomesScreen(
                             )
                             Text(
                                 text = income.date.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")) +
-                                        "\n${income.account}",
+                                        "\n${DisplayFormat().getAccountName(income.account.toString(), mAccounts)}",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -183,8 +217,8 @@ fun AddIncomeDialog(
     val text = remember { mutableStateOf("") }
     val validate = ValidateInputs()
     var expandedAccount by remember { mutableStateOf(false) }
-    val accountName = remember { mutableStateOf("") }
     val mAccounts = accountState.account
+    val accountName = remember { mutableStateOf(DisplayFormat().getAccountName(state.account, mAccounts)) }
     val icon = if (expandedAccount)
         Icons.Filled.KeyboardArrowUp
     else

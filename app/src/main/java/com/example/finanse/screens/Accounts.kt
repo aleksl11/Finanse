@@ -2,7 +2,6 @@ package com.example.finanse.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,7 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -29,12 +27,12 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -59,6 +57,7 @@ import com.example.finanse.sortTypes.AccountSortType
 import com.example.finanse.states.AccountState
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountsScreen(
     navController: NavController,
@@ -108,29 +107,62 @@ fun AccountsScreen(
             item{
                 TopNavBar(navController, "Accounts","menu")
             }
-            item{
-                // Sort options row
-                Row(
+            item {
+                var expanded by remember { mutableStateOf(false) } // Control dropdown menu state
+                var selectedSortType by remember { mutableStateOf(state.accountSortType) } // Track selected sort type
+
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState())
-                        .padding(vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ){
-                    AccountSortType.entries.forEach { accountSortType ->
-                        Row(
-                            modifier = Modifier
-                                .clickable {
-                                    onEvent(AccountEvent.SortAccounts(accountSortType))
-                                }
-                                .padding(horizontal = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ){
-                            RadioButton(
-                                selected = state.accountSortType == accountSortType,
-                                onClick = { onEvent(AccountEvent.SortAccounts(accountSortType)) }
+                        .padding(horizontal = 8.dp) // Add padding around sorting options
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically, // Align items vertically centered
+                        modifier = Modifier.padding(vertical = 8.dp) // Space around the row
+                    ) {
+                        Text(
+                            text = "Sort type: ", // Label for the dropdown
+                            fontSize = 16.sp, // Font size
+                            modifier = Modifier.padding(end = 8.dp) // Space between label and dropdown
+                        )
+
+                        ExposedDropdownMenuBox(
+                            expanded = expanded,
+                            onExpandedChange = { expanded = !expanded } // Toggle dropdown
+                        ) {
+                            // The TextField that shows the currently selected sort type
+                            OutlinedTextField(
+                                value = getSortTypeName(selectedSortType), // Show the selected sort type's name
+                                onValueChange = {},
+                                readOnly = true, // Prevent editing
+                                trailingIcon = {
+                                    Icon(
+                                        imageVector = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                                        contentDescription = null
+                                    )
+                                },
+                                singleLine = true,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .menuAnchor() // Open dropdown when clicked
                             )
-                            Text(text = getSortTypeName(accountSortType), style = MaterialTheme.typography.bodyMedium)
+
+                            // The DropdownMenu with all sorting options
+                            DropdownMenu(
+                                expanded = expanded,
+                                onDismissRequest = { expanded = false } // Close the dropdown menu
+                            ) {
+                                AccountSortType.entries.forEach { accountSortType ->
+                                    DropdownMenuItem(
+                                        text = { Text(text = getSortTypeName(accountSortType)) },
+                                        onClick = {
+                                            selectedSortType = accountSortType
+                                            onEvent(AccountEvent.SortAccounts(accountSortType)) // Trigger event on selection
+                                            expanded = false // Close dropdown
+                                        }
+                                    )
+                                }
+                            }
                         }
                     }
                 }

@@ -48,14 +48,19 @@ class AccountViewModel(
                 }
             }
             AccountEvent.HideDialog -> {
-                _state.update { it.copy(
+                _state.update{it.copy(
                     isAddingAccount = false,
+                    name = "",
+                    balance = ""
                 )}
             }
             AccountEvent.HideTranserDialog -> {
                 _state.update { it.copy(
-                    isMakingATransfer = false
-                ) }
+                    isMakingATransfer = false,
+                    accountTwoName = "",
+                    accountOneName = "",
+                    transferAmount = ""
+                )}
             }
             AccountEvent.SaveAccount -> {
                 val name = state.value.name

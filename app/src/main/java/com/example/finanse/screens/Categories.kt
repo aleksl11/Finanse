@@ -2,8 +2,6 @@ package com.example.finanse.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,28 +13,34 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -51,6 +55,7 @@ import com.github.skydoves.colorpicker.compose.ColorEnvelope
 import com.github.skydoves.colorpicker.compose.HsvColorPicker
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoriesScreen(
     navController: NavController,
@@ -83,29 +88,61 @@ fun CategoriesScreen(
                 TopNavBar(navController, "Categories", "menu")
             }
             item {
-                Row(
+                var expanded by remember { mutableStateOf(false) } // Control dropdown menu state
+                var selectedSortType by remember { mutableStateOf(state.categorySortType) } // Track selected sort type
+
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState())
-                        .padding(horizontal = 8.dp), // Add padding around sorting options
-                    verticalAlignment = Alignment.CenterVertically
+                        .padding(horizontal = 8.dp) // Add padding around sorting options
                 ) {
-                    CategorySortType.entries.forEach { categorySortType ->
-                        Row(
-                            modifier = Modifier
-                                .clickable {
-                                    onEvent(CategoryEvent.SortCategories(categorySortType))
-                                }
-                                .padding(end = 16.dp), // Add space between sorting options
-                            verticalAlignment = Alignment.CenterVertically
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically, // Align items vertically centered
+                        modifier = Modifier.padding(vertical = 8.dp) // Space around the row
+                    ) {
+                        Text(
+                            text = "Sort type: ", // Label for the dropdown
+                            fontSize = 16.sp, // Font size
+                            modifier = Modifier.padding(end = 8.dp) // Space between label and dropdown
+                        )
+
+                        ExposedDropdownMenuBox(
+                            expanded = expanded,
+                            onExpandedChange = { expanded = !expanded } // Toggle dropdown
                         ) {
-                            RadioButton(
-                                selected = state.categorySortType == categorySortType,
-                                onClick = {
-                                    onEvent(CategoryEvent.SortCategories(categorySortType))
-                                }
+                            // The TextField that shows the currently selected sort type
+                            OutlinedTextField(
+                                value = getSortTypeName(selectedSortType), // Show the selected sort type's name
+                                onValueChange = {},
+                                readOnly = true, // Prevent editing
+                                trailingIcon = {
+                                    Icon(
+                                        imageVector = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                                        contentDescription = null
+                                    )
+                                },
+                                singleLine = true,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .menuAnchor() // Open dropdown when clicked
                             )
-                            Text(text = getSortTypeName(categorySortType))
+
+                            // The DropdownMenu with all sorting options
+                            DropdownMenu(
+                                expanded = expanded,
+                                onDismissRequest = { expanded = false } // Close the dropdown menu
+                            ) {
+                                CategorySortType.entries.forEach { categorySortType ->
+                                    DropdownMenuItem(
+                                        text = { Text(text = getSortTypeName(categorySortType)) },
+                                        onClick = {
+                                            selectedSortType = categorySortType
+                                            onEvent(CategoryEvent.SortCategories(categorySortType)) // Trigger event on selection
+                                            expanded = false // Close dropdown
+                                        }
+                                    )
+                                }
+                            }
                         }
                     }
                 }

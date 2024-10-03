@@ -49,8 +49,10 @@ class CategoryViewModel(
                 }
             }
             CategoryEvent.HideDialog -> {
-                _state.update { it.copy(
-                    isAddingCategory = false
+                _state.update{it.copy(
+                    isAddingCategory = false,
+                    name = "",
+                    color = Color.White.hashCode()
                 )}
             }
             CategoryEvent.SaveCategory -> {
