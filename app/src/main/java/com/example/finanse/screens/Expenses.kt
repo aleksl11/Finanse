@@ -353,10 +353,10 @@ fun AddExpenseDialog(
                 Button(
                     onClick = {
                         if (state.title.isEmpty()) text.value = "Title must be filled in"
-                        if (state.amount.isEmpty()) text.value = "Amount field cannot be empty"
-                        if (state.category.isEmpty()) text.value = "Category must be selected"
-                        if (state.account.isEmpty()) text.value = "Account must be selected"
-                        if (validate.isDateValid(state.date)) {
+                        else if (state.amount.isEmpty()) text.value = "Amount field cannot be empty"
+                        else if (state.category.isEmpty()) text.value = "Category must be selected"
+                        else if (state.account.isEmpty()) text.value = "Account must be selected"
+                        else if (validate.isDateValid(state.date)) {
                             text.value = ""
                             onEvent(ExpenseEvent.SaveExpense)
                         } else text.value = "Incorrect date format"

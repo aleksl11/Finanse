@@ -317,9 +317,9 @@ fun AddIncomeDialog(
                 Button(
                     onClick = {
                         if (state.title.isEmpty()) text.value = "Title must be included"
-                        if (state.amount.isEmpty()) text.value = "Amount field cannot be empty"
-                        if (state.account.isEmpty()) text.value = "Account must be selected"
-                        if (validate.isDateValid(state.date)) {
+                        else if (state.amount.isEmpty()) text.value = "Amount field cannot be empty"
+                        else if (state.account.isEmpty()) text.value = "Account must be selected"
+                        else if (validate.isDateValid(state.date)) {
                             text.value = ""
                             onEvent(IncomeEvent.SaveIncome)
                         } else text.value = "Incorrect date format"

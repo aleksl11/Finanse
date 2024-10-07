@@ -153,7 +153,8 @@ fun SummaryScreen(
                         sortedIncomes = incomes.filter { i ->
                             i.date.month == dateNow.month && i.date.year == dateNow.year
                         }
-                        if(sortedExpenses.isEmpty() && sortedIncomes.isEmpty()) NoRecordsInLists()
+                        System.out.println("sorted month")
+                        if(sortedExpenses.isEmpty()) NoRecordsInLists()
                         else TimePeriodSummary(sortedExpenses = sortedExpenses, sortedIncomes = sortedIncomes, categoryState)
                     }
                     SummaryTimePeriod.THIS_YEAR -> {
@@ -163,13 +164,15 @@ fun SummaryScreen(
                         sortedIncomes = incomes.filter { i ->
                             i.date.year == dateNow.year
                         }
-                        if(sortedExpenses.isEmpty() && sortedIncomes.isEmpty()) NoRecordsInLists()
+                        System.out.println("sorted year")
+                        if(sortedExpenses.isEmpty()) NoRecordsInLists()
                         else TimePeriodSummary(sortedExpenses = sortedExpenses, sortedIncomes = sortedIncomes, categoryState)
                     }
                     SummaryTimePeriod.ALL_TIME -> {
                         sortedExpenses = expenses
                         sortedIncomes = incomes
-                        if(sortedExpenses.isEmpty() && sortedIncomes.isEmpty()) NoRecordsInLists()
+                        System.out.println("sorted all")
+                        if(sortedExpenses.isEmpty()) NoRecordsInLists()
                         else TimePeriodSummary(sortedExpenses = sortedExpenses, sortedIncomes = sortedIncomes, categoryState)
                     }
 
@@ -192,7 +195,7 @@ fun NoRecordsInDb(){
 @Composable
 fun NoRecordsInLists(){
     Text(
-        text = "No records in the selected time period",
+        text = "No expenses in the selected time period",
         fontSize = 16.sp,
         modifier = Modifier.padding(16.dp),
         textAlign = TextAlign.Center
