@@ -37,4 +37,7 @@ interface AccountDao {
     suspend fun makeTransferPartOne(accountOneName: String, transferAmount: String)
     @Query("UPDATE account SET balance = balance + :transferAmount where name = :accountTwoName ")
     suspend fun makeTransferPartTwo(accountTwoName: String, transferAmount: String)
+
+    @Query("SELECT id from account where name = :accountName")
+    suspend fun getAccountIdByName(accountName: String): Int
 }

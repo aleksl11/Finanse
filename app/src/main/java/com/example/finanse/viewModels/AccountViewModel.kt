@@ -3,7 +3,11 @@ package com.example.finanse.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.finanse.dao.AccountDao
+import com.example.finanse.dao.ExpenseDao
+import com.example.finanse.dao.IncomeDao
 import com.example.finanse.entities.Account
+import com.example.finanse.entities.Expense
+import com.example.finanse.entities.Income
 import com.example.finanse.events.AccountEvent
 import com.example.finanse.sortTypes.AccountSortType
 import com.example.finanse.states.AccountState
@@ -15,9 +19,12 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 class AccountViewModel(
-    private val dao: AccountDao
+    private val dao: AccountDao,
+    private val incomeDao: IncomeDao,
+    private val expenseDao: ExpenseDao
 ): ViewModel() {
 
     private val _accountSortType = MutableStateFlow(AccountSortType.DATE_ADDED)
@@ -95,15 +102,37 @@ class AccountViewModel(
                 )}
             }
             AccountEvent.MakeTransfer -> {
+                val date = LocalDate.now()
                 viewModelScope.launch {
+                    val accountOne = state.value.accountOneName
+                    val accountTwo = state.value.accountTwoName
+                    val amount = state.value.transferAmount.toDouble()
+
+                    val incomeAccountId = dao.getAccountIdByName(accountTwo)
+                    val expenseAccountId = dao.getAccountIdByName(accountOne)
                     try {
-                        // Perform the transfer in sequence (part one and part two)
                         dao.makeTransferPartOne(state.value.accountOneName, state.value.transferAmount)
                         dao.makeTransferPartTwo(state.value.accountTwoName, state.value.transferAmount)
                     } catch (e: Exception) {
                         // Handle error if needed
                     } finally {
-                        // Update the state once the transfer completes
+                        incomeDao.insertIncome(
+                            Income(
+                                amount = amount,
+                                title = "transfer from $accountOne",
+                                date = date,
+                                account = incomeAccountId
+                            )
+                        )
+                        expenseDao.insertExpense(
+                            Expense(
+                                amount = amount,
+                                title = "transfer to $accountTwo",
+                                date = date,
+                                category = "Other",
+                                account = expenseAccountId
+                            )
+                        )
                         _state.update { it.copy(
                             isMakingATransfer = false,
                             accountTwoName = "",

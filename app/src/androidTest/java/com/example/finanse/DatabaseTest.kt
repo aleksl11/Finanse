@@ -48,7 +48,7 @@ class DatabaseTest {
     @Test
     @Throws(Exception::class)
     fun writeIncomeAndRead() = runBlocking{
-        val income = Income(1, 10.0, "Test", LocalDate.now(), "test income")
+        val income = Income(1, 10.0, "Test", LocalDate.now(), 1,"test income")
         incomeDao.insertIncome(income)
         val list = incomeDao.getIncomesOrderedById().first()
         assertThat(list.size, equalTo(1))
@@ -58,7 +58,7 @@ class DatabaseTest {
     @Test
     @Throws(Exception::class)
     fun deleteIncome() = runBlocking{
-        val income = Income(1, 10.0, "Test", LocalDate.now(), "test income")
+        val income = Income(1, 10.0, "Test", LocalDate.now(), 1, "test income")
         incomeDao.insertIncome(income)
         var list = incomeDao.getIncomesOrderedById().first()
         assertThat(list.size, equalTo(1))
@@ -92,7 +92,7 @@ class DatabaseTest {
     fun writeExpenseAndRead() = runBlocking{
         val category = Category("test", Color.MAGENTA)
         categoryDao.insertCategory(category)
-        val expense = Expense(1, 10.0, "Test", LocalDate.now(), "test","test expense")
+        val expense = Expense(1, 10.0, "Test", LocalDate.now(), "test",1, "test expense")
         expenseDao.insertExpense(expense)
         val list = expenseDao.getExpensesOrderedById().first()
         assertThat(list.size, equalTo(1))
@@ -104,7 +104,7 @@ class DatabaseTest {
     fun deleteExpense() = runBlocking{
         val category = Category("test", Color.MAGENTA)
         categoryDao.insertCategory(category)
-        val expense = Expense(1, 10.0, "Test", LocalDate.now(), "test","test expense")
+        val expense = Expense(1, 10.0, "Test", LocalDate.now(), "test",1, "test expense")
         expenseDao.insertExpense(expense)
         var list = expenseDao.getExpensesOrderedById().first()
         assertThat(list.size, equalTo(1))

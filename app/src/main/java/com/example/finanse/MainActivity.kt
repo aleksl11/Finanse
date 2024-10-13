@@ -54,7 +54,7 @@ class MainActivity : ComponentActivity() {
         factoryProducer = {
             object: ViewModelProvider.Factory {
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return AccountViewModel(db.accountDao()) as T
+                    return AccountViewModel(db.accountDao(), db.incomeDao(), db.expenseDao()) as T
                 }
             }
         }
