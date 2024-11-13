@@ -252,7 +252,7 @@ fun AddAccountDialog(
                 Button(
                     onClick = {
                         if (state.name.isEmpty()) text.value = "Name must be included"
-                        else if (isNameInDb(state.name, mAccounts)){
+                        else if (state.id == -1 && isNameInDb(state.name, mAccounts)){
                             text.value = "Account with this name already exists"
                         }
                         else if (state.balance.isEmpty()) text.value = "Balance field cannot be empty"

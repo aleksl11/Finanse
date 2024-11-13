@@ -190,6 +190,7 @@ class AccountViewModel(
                 val id = event.id
                 Thread {
                     _state.update { it.copy(
+                        id = event.id,
                         name = dao.getName(id),
                         balance = dao.getBalance(id).toString(),
                     )}

@@ -89,7 +89,7 @@ fun SummaryScreen(
         TopNavBar(navController, "summary","menu")
         if(incomes.isEmpty() && expenses.isEmpty()) NoRecordsInDb()
         else LazyColumn(
-            contentPadding = PaddingValues(16.dp),
+            contentPadding = PaddingValues(24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier.fillMaxSize()
         ) {
