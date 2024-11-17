@@ -18,7 +18,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -50,6 +49,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.finanse.ConfirmPopup
 import com.example.finanse.DisplayFormat
 import com.example.finanse.TopNavBar
 import com.example.finanse.ValidateInputs
@@ -194,10 +194,8 @@ fun IncomesScreen(
                         }) {
                             Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit income")
                         }
-                        IconButton(onClick = {
+                        ConfirmPopup().DeleteIconButton("Confirm Delete", "Are you sure you want to delete this income?") {
                             onEvent(IncomeEvent.DeleteIncome(income))
-                        }) {
-                            Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete income")
                         }
                     }
                 }

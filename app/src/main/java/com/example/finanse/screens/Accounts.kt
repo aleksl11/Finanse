@@ -16,7 +16,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -48,6 +47,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.finanse.ConfirmPopup
 import com.example.finanse.R
 import com.example.finanse.TopNavBar
 import com.example.finanse.ValidateInputs
@@ -196,10 +196,8 @@ fun AccountsScreen(
                             Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit account")
                         }
                         if (numberOfAccounts(state) > 1) {
-                            IconButton(onClick = {
+                            ConfirmPopup().DeleteIconButton("Confirm Delete", "Are you sure you want to delete this account?") {
                                 onEvent(AccountEvent.DeleteAccount(account))
-                            }) {
-                                Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete account")
                             }
                         }
                     }

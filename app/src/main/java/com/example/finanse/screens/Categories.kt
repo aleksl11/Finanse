@@ -15,7 +15,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -47,6 +46,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.finanse.ConfirmPopup
 import com.example.finanse.TopNavBar
 import com.example.finanse.events.CategoryEvent
 import com.example.finanse.sortTypes.CategorySortType
@@ -192,13 +192,8 @@ fun CategoriesScreen(
                                     contentDescription = "Edit category"
                                 )
                             }
-                            IconButton(onClick = {
+                            ConfirmPopup().DeleteIconButton("Confirm Delete", "Are you sure you want to delete this category?") {
                                 onEvent(CategoryEvent.DeleteCategory(category))
-                            }) {
-                                Icon(
-                                    imageVector = Icons.Default.Delete,
-                                    contentDescription = "Delete category"
-                                )
                             }
                         }
                     }
