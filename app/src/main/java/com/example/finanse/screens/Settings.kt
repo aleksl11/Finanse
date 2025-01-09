@@ -23,9 +23,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.finanse.R
 import com.example.finanse.TopNavBar
 import com.example.finanse.ui.theme.ThemeMode
 import kotlinx.coroutines.launch
@@ -79,7 +81,7 @@ fun ThemeSelection(
             .padding(16.dp)
     ) {
         Text(
-            text = "Theme: ",
+            text = stringResource(R.string.theme) + ": ",
             fontSize = 16.sp,
             modifier = Modifier.padding(end = 8.dp)
         )
@@ -109,8 +111,16 @@ fun ThemeSelection(
                 onDismissRequest = { expanded = false }
             ) {
                 themeOptions.forEach { theme ->
+                    val stringResId = when (theme.name) {
+                        "LIGHT" -> R.string.light
+                        "DARK" -> R.string.dark
+                        "SYSTEM" -> R.string.system
+                        else -> {
+                            R.string.system
+                        }
+                    }
                     DropdownMenuItem(
-                        text = { Text(text = theme.name) },
+                        text = { Text(text = stringResource(stringResId)) },
                         onClick = {
                             onThemeSelected(theme)
                             expanded = false
@@ -138,7 +148,7 @@ fun LanguageSelection(
             .padding(16.dp)
     ) {
         Text(
-            text = "Language: ",
+            text = stringResource(R.string.language) + ": ",
             fontSize = 16.sp,
             modifier = Modifier.padding(end = 8.dp)
         )

@@ -12,4 +12,7 @@
     <!-- Settings -->
     <string name="theme">Theme</string>
     <string name="language">Language</string>
+    <string name="light">Light</string>
+    <string name="dark">Dark</string>
+    <string name="system">System</string>
 </resources>
