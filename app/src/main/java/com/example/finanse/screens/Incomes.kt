@@ -82,7 +82,6 @@ fun IncomesScreen(
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Add an income")
             }
         },
-        modifier = Modifier.padding(16.dp)
     ) {padding ->
         if(state.isAddingIncome) {
             AddIncomeDialog(state = state, accountState = accountState, onEvent = onEvent)

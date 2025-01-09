@@ -6,12 +6,13 @@ import androidx.room.PrimaryKey
 import java.time.LocalDate
 
 @Entity(
-    foreignKeys = [ForeignKey(
-    entity = Category::class,
-    parentColumns = arrayOf("name"),
-    childColumns = arrayOf("category"),
-    onDelete = ForeignKey.CASCADE
-),
+    foreignKeys = [
+        ForeignKey(
+            entity = Category::class,
+            parentColumns = arrayOf("name"),
+            childColumns = arrayOf("category"),
+            onDelete = ForeignKey.CASCADE
+        ),
         ForeignKey(
             entity = Account::class,
             parentColumns = arrayOf("id"),

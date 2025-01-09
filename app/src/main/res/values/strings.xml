@@ -1,3 +1,15 @@
 <resources>
     <string name="app_name">Finances</string>
+
+    <!-- Menu -->>
+    <string name="summary">Summary</string>
+    <string name="expenses">Expenses</string>
+    <string name="incomes">Incomes</string>
+    <string name="categories">Categories</string>
+    <string name="accounts">Accounts</string>
+    <string name="settings">Settings</string>
+
+    <!-- Settings -->
+    <string name="theme">Theme</string>
+    <string name="language">Language</string>
 </resources>

@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Finanse</string>
+
+    <!-- Menu -->>
+    <string name="summary">Podsumowanie</string>
+    <string name="expenses">Wydatki</string>
+    <string name="incomes">Przychody</string>
+    <string name="categories">Kategorie</string>
+    <string name="accounts">Konta</string>
+    <string name="settings">Ustawienia</string>
+    <string name="theme">Motyw</string>
+    <string name="language">Język</string>
+
+</resources>

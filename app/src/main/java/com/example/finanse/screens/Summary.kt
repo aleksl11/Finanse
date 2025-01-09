@@ -85,7 +85,10 @@ fun SummaryScreen(
     var sortedExpenses: List<Expense>
     var sortedIncomes: List<Income>
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
         TopNavBar(navController, "summary","menu")
         if(incomes.isEmpty() && expenses.isEmpty()) NoRecordsInDb()
         else LazyColumn(
@@ -359,9 +362,17 @@ fun YearlyBarChart(incomes: List<Income>, expenses: List<Expense>){
             monthName,
             listOf(
                 // First BarData corresponds to expenses
-                BarData(Point(5F, totalExpenses.toFloat(), "Expenses"), Color.Red, "%.2f".format(totalExpenses.toDouble()/100.0)),
+                BarData(
+                    point = Point(5F, totalExpenses.toFloat(), "Expenses"),
+                    color = Color.Red,
+                    label= "%.2f".format(totalExpenses.toDouble()/100.0)
+                ),
                 // Second BarData corresponds to incomes
-                BarData(Point(5F, totalIncomes.toFloat(), "Incomes"), Color.Green, "%.2f".format(totalIncomes.toDouble()/100.0))
+                BarData(
+                    point = Point(5F, totalIncomes.toFloat(), "Incomes"),
+                    color = Color.Green,
+                    label = "%.2f".format(totalIncomes.toDouble()/100.0)
+                )
             )
         )
     }
@@ -403,7 +414,8 @@ fun YearlyBarChart(incomes: List<Income>, expenses: List<Expense>){
         xAxisData = xAxisData,
         yAxisData = yAxisData,
         groupSeparatorConfig = GroupSeparatorConfig(1.dp),
-        backgroundColor = MaterialTheme.colorScheme.background
+        backgroundColor = MaterialTheme.colorScheme.background,
+        paddingTop = 8.dp
     )
     Column(
         Modifier

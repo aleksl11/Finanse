@@ -84,7 +84,6 @@ fun ExpensesScreen(
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Add an expense")
             }
         },
-        modifier = Modifier.padding(16.dp)
     ) { padding ->
         if (state.isAddingExpense) {
             AddExpenseDialog(state = state, categoryState = categoryState, accountState = accountState, onEvent = onEvent)

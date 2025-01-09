@@ -70,7 +70,6 @@ fun CategoriesScreen(
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Add a category")
             }
         },
-        modifier = Modifier.padding(16.dp)
     ) { padding ->
 
         if (state.isAddingCategory) {
@@ -80,8 +79,7 @@ fun CategoriesScreen(
         LazyColumn(
             contentPadding = padding,
             modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 16.dp), // Add consistent top padding
+                .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {

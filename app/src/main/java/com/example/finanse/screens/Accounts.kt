@@ -90,7 +90,6 @@ fun AccountsScreen(
                 }
             }
         },
-        modifier = Modifier.padding(16.dp)
     ) {padding ->
         if(state.isAddingAccount) {
             AddAccountDialog(state = state, onEvent = onEvent)
