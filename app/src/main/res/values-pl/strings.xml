@@ -1,17 +1,110 @@
 <resources>
     <string name="app_name">Finanse</string>
+    <string name="sort-by">Sortuj według</string>
+    <string name="cancel">Anuluj</string>
+    <string name="save">Zapisz</string>
 
-    <!-- Menu -->>
+    <!-- Menu -->
     <string name="summary">Podsumowanie</string>
     <string name="expenses">Wydatki</string>
     <string name="incomes">Przychody</string>
     <string name="categories">Kategorie</string>
     <string name="accounts">Konta</string>
     <string name="settings">Ustawienia</string>
+
+    <!-- Settings -->
     <string name="theme">Motyw</string>
     <string name="language">Język</string>
     <string name="light">Jasny</string>
     <string name="dark">Ciemny</string>
     <string name="system">Systemowy</string>
 
+    <!-- Accounts -->
+    <string name="add-account-desc">Dodaj konto</string>
+    <string name="edit-account-desc">Edytuj konto</string>
+    <string name="make-a-transfer-desc">Wykonaj przelew</string>
+    <string name="confirm-transfer">Przelej</string>
+    <string name="add-account-dialog">Dodaj lub Edytuj Konto</string>
+
+    <!-- Categories -->
+    <string name="add-category-desc">Dodaj kategorię</string>
+    <string name="edit-category-desc">Edytuj kategorię</string>
+    <string name="add-category-dialog">Dodaj lub Edytuj Kategorię</string>
+
+    <!-- Expenses -->
+    <string name="add-expense-desc">Dodaj wydatek</string>
+    <string name="edit-expense-desc">Edytuj wydatek</string>
+    <string name="add-expense-dialog">Dodaj lub Edytuj Wydatek</string>
+
+    <!-- Incomes -->
+    <string name="add-income-desc">Dodaj przychód</string>
+    <string name="edit-income-desc">Edytuj przychód</string>
+    <string name="add-income-dialog">Dodaj lub Edytuj Przychód</string>
+
+    <!-- Summary -->
+    <string name="yearly-summary">Roczne wydatki i przychody</string>
+    <string name="detailed-sumary">Szczegółowe podsumowanie</string>
+    <string name="empty-db-warning">Brak rekordów w bazie danych</string>
+    <string name="empty-list-warning">Brak wydatków w wybranym okresie</string>
+    <string name="total-incomes">Łączne przychody</string>
+    <string name="total-expenses">Łączne wydatki</string>
+    <string name="balance">Saldo</string>
+    <string name="category-summary">Wydatki według kategorii</string>
+
+    <!-- Sorting -->
+    <string name="sort-by-default">Domyślnie</string>
+    <string name="sort-by-name">Nazwa</string>
+    <string name="sort-by-balance">Saldo</string>
+    <string name="sort-by-amount">Kwota</string>
+    <string name="sort-by-date">Data</string>
+    <string name="sort-by-category">Kategoria</string>
+    <string name="all-time">Cały czas</string>
+    <string name="this-month">Ten miesiąc</string>
+    <string name="this-year">Ten rok</string>
+
+    <!-- Labels -->
+    <string name="amount-label">Kwota</string>
+    <string name="account-one-label">Konto pierwsze</string>
+    <string name="account-two-label">Konto drugie</string>
+    <string name="name-label">Nazwa</string>
+    <string name="balance-label">Saldo</string>
+    <string name="category-name-label">Nazwa kategorii</string>
+    <string name="title-label">Tytuł</string>
+    <string name="select-date-label">Wybierz datę</string>
+    <string name="category-label">Kategoria</string>
+    <string name="account-label">Konto</string>
+    <string name="description-label">Opis</string>
+
+    <!-- Error message -->
+    <string name="same-account-error">Nie można wykonać przelewu na to samo konto</string>
+    <string name="not-enough-balance-error">Za mało środków na koncie %accountName, aby wykonać przelew</string>
+    <string name="no-name-error">Nazwa musi być podana</string>
+    <string name="repeat-account-error">Konto o tej nazwie już istnieje</string>
+    <string name="no-balance-error">Pole saldo nie może być puste</string>
+    <string name="no-title-error">Tytuł musi być wypełniony</string>
+    <string name="no-amount-error">Pole kwota nie może być puste</string>
+    <string name="no-category-error">Kategoria musi być wybrana</string>
+    <string name="no-account-error">Konto musi być wybrane</string>
+    <string name="date-format-error">Nieprawidłowy format daty</string>
+
+    <!-- Pop-up-->
+    <string name="delete-name">Potwierdź usunięcie</string>
+    <string name="delete-message">Czy na pewno chcesz usunąć to konto?</string>
+    <string name="delete-message-category">Czy na pewno chcesz usunąć tę kategorię?</string>
+    <string name="delete-message-expense">Czy na pewno chcesz usunąć ten wydatek?</string>
+    <string name="delete-message-income">Czy na pewno chcesz usunąć ten przychód?</string>
+
+    <!-- Months -->
+    <string name="january">Styczeń</string>
+    <string name="february">Luty</string>
+    <string name="march">Marzec</string>
+    <string name="april">Kwiecień</string>
+    <string name="may">Maj</string>
+    <string name="june">Czerwiec</string>
+    <string name="july">Lipiec</string>
+    <string name="august">Sierpień</string>
+    <string name="september">Wrzesień</string>
+    <string name="october">Październik</string>
+    <string name="november">Listopad</string>
+    <string name="december">Grudzień</string>
 </resources>
