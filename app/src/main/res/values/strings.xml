@@ -1,7 +1,10 @@
 <resources>
     <string name="app_name">Finances</string>
+    <string name="sort-by">Sort by</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
 
-    <!-- Menu -->>
+    <!-- Menu -->
     <string name="summary">Summary</string>
     <string name="expenses">Expenses</string>
     <string name="incomes">Incomes</string>
@@ -15,4 +18,93 @@
     <string name="light">Light</string>
     <string name="dark">Dark</string>
     <string name="system">System</string>
+
+    <!-- Accounts -->
+    <string name="add-account-desc">Add an account</string>
+    <string name="edit-account-desc">Edit account</string>
+    <string name="make-a-transfer-desc">Make a transfer</string>
+    <string name="confirm-transfer">Transfer</string>
+    <string name="add-account-dialog">Add or Edit Account</string>
+
+    <!-- Categories -->
+    <string name="add-category-desc">Add a category</string>
+    <string name="edit-category-desc">Edit category</string>
+    <string name="add-category-dialog">Add or Edit Cateogry</string>
+
+    <!-- Expenses -->
+    <string name="add-expense-desc">Add an expense</string>
+    <string name="edit-expense-desc">Edit expense</string>
+    <string name="add-expense-dialog">Add or Edit Expense</string>
+
+    <!-- Incomes -->
+    <string name="add-income-desc">Add an income</string>
+    <string name="edit-income-desc">Edit income</string>
+    <string name="add-income-dialog">Add or Edit Income</string>
+
+    <!-- Summary -->
+    <string name="yearly-summary">Yearly expenses and incomes</string>
+    <string name="detailed-sumary">Detailed Summary</string>
+    <string name="empty-db-warning">No records added to database</string>
+    <string name="empty-list-warning">No expenses in the selected time period</string>
+    <string name="total-incomes">Total incomes</string>
+    <string name="total-expenses">Total expenses</string>
+    <string name="balance">Balance</string>
+    <string name="category-summary">Expenses by categories</string>
+
+    <!-- Sorting -->
+    <string name="sort-by-default">Default</string>
+    <string name="sort-by-name">Name</string>
+    <string name="sort-by-balance">Balance</string>
+    <string name="sort-by-amount">Amount</string>
+    <string name="sort-by-date">Date</string>
+    <string name="sort-by-category">Category</string>
+    <string name="all-time">All time</string>
+    <string name="this-month">This month</string>
+    <string name="this-year">This year</string>
+
+     <!-- Labels -->
+    <string name="amount-label">Amount</string>
+    <string name="account-one-label">Account one</string>
+    <string name="account-two-label">Account two</string>
+    <string name="name-label">Name</string>
+    <string name="balance-label">Balance</string>
+    <string name="category-name-label">Cateogry name</string>
+    <string name="title-label">Title</string>
+    <string name="select-date-label">Select date</string>
+    <string name="category-label">Category</string>
+    <string name="account-label">Account</string>
+    <string name="description-label">Description</string>
+
+    <!-- Error message -->
+    <string name="same-account-error">Cannot make transfer to the same account</string>
+    <string name="not-enough-balance-error">Not enough balance on %accountName to make the transfer</string>
+    <string name="no-name-error">Name must be included</string>
+    <string name="repeat-account-error">Account with this name already exists</string>
+    <string name="no-balance-error">Balance field cannot be empty</string>
+    <string name="no-title-error">Title must be filled in</string>
+    <string name="no-amount-error">Amount field cannot be empty</string>
+    <string name="no-category-error">Category must be selected</string>
+    <string name="no-account-error">Account must be selected</string>
+    <string name="date-format-error">Incorrect date format</string>
+
+    <!-- Pop-up-->
+    <string name="delete-name">Confirm deletion</string>
+    <string name="delete-message">Are you sure you want to delete this account?</string>
+    <string name="delete-message-category">Are you sure you want to delete this category?</string>
+    <string name="delete-message-expense">Are you sure you want to delete this expense?</string>
+    <string name="delete-message-income">Are you sure you want to delete this income?</string>
+
+    <!-- Months -->
+    <string name="january">January</string>
+    <string name="february">February</string>
+    <string name="march">March</string>
+    <string name="april">April</string>
+    <string name="may">May</string>
+    <string name="june">June</string>
+    <string name="july">July</string>
+    <string name="august">August</string>
+    <string name="september">September</string>
+    <string name="october">October</string>
+    <string name="november">November</string>
+    <string name="december">December</string>
 </resources>
