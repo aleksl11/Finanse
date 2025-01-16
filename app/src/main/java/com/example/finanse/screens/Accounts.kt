@@ -1,5 +1,6 @@
 package com.example.finanse.screens
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -42,7 +43,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -56,7 +59,6 @@ import com.example.finanse.events.AccountEvent
 import com.example.finanse.sortTypes.AccountSortType
 import com.example.finanse.states.AccountState
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountsScreen(
@@ -64,6 +66,7 @@ fun AccountsScreen(
     state: AccountState,
     onEvent: (AccountEvent) -> Unit
 ){
+    val context = LocalContext.current
     Scaffold (
         floatingActionButton = {
             Column(
@@ -77,7 +80,7 @@ fun AccountsScreen(
                     modifier = Modifier.size(56.dp),
                     containerColor = MaterialTheme.colorScheme.primary
                 ) {
-                    Icon(painter = painterResource(R.drawable.transfer_icon), contentDescription = "Make a transfer", modifier = Modifier.size(24.dp))
+                    Icon(painter = painterResource(R.drawable.transfer_icon), contentDescription = stringResource(R.string.make_a_transfer_desc), modifier = Modifier.size(24.dp))
                 }
                 FloatingActionButton(
                     onClick = { onEvent(AccountEvent.ShowDialog) },
@@ -86,16 +89,16 @@ fun AccountsScreen(
                     modifier = Modifier.size(56.dp),
                     containerColor = MaterialTheme.colorScheme.primary
                 ) {
-                    Icon(imageVector = Icons.Default.Add, contentDescription = "Add an account")
+                    Icon(imageVector = Icons.Default.Add, contentDescription = stringResource(R.string.add_account_desc))
                 }
             }
         },
     ) {padding ->
         if(state.isAddingAccount) {
-            AddAccountDialog(state = state, onEvent = onEvent)
+            AddAccountDialog(context, state = state, onEvent = onEvent)
         }
         if(state.isMakingATransfer) {
-            MakeTransferDialog(state = state, onEvent = onEvent)
+            MakeTransferDialog(context, state = state, onEvent = onEvent)
         }
 
         LazyColumn(
@@ -120,7 +123,7 @@ fun AccountsScreen(
                         modifier = Modifier.padding(vertical = 8.dp) // Space around the row
                     ) {
                         Text(
-                            text = "Sort type: ", // Label for the dropdown
+                            text = stringResource(R.string.sort_by) + ": ", // Label for the dropdown
                             fontSize = 16.sp, // Font size
                             modifier = Modifier.padding(end = 8.dp) // Space between label and dropdown
                         )
@@ -131,7 +134,7 @@ fun AccountsScreen(
                         ) {
                             // The TextField that shows the currently selected sort type
                             OutlinedTextField(
-                                value = getSortTypeName(selectedSortType), // Show the selected sort type's name
+                                value = getSortTypeName(context, selectedSortType), // Show the selected sort type's name
                                 onValueChange = {},
                                 readOnly = true, // Prevent editing
                                 trailingIcon = {
@@ -153,7 +156,7 @@ fun AccountsScreen(
                             ) {
                                 AccountSortType.entries.forEach { accountSortType ->
                                     DropdownMenuItem(
-                                        text = { Text(text = getSortTypeName(accountSortType)) },
+                                        text = { Text(text = getSortTypeName(context, accountSortType)) },
                                         onClick = {
                                             selectedSortType = accountSortType
                                             onEvent(AccountEvent.SortAccounts(accountSortType)) // Trigger event on selection
@@ -192,10 +195,10 @@ fun AccountsScreen(
                             onEvent(AccountEvent.GetData(account.id))
                             onEvent(AccountEvent.ShowDialog)
                         }) {
-                            Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit account")
+                            Icon(imageVector = Icons.Default.Edit, contentDescription = stringResource(R.string.edit_account_desc))
                         }
                         if (numberOfAccounts(state) > 1) {
-                            ConfirmPopup().DeleteIconButton("Confirm Delete", "Are you sure you want to delete this account?") {
+                            ConfirmPopup().DeleteIconButton(stringResource(R.string.delete_name), stringResource(R.string.delete_message)) {
                                 onEvent(AccountEvent.DeleteAccount(account))
                             }
                         }
@@ -209,6 +212,7 @@ fun AccountsScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddAccountDialog(
+    context: Context,
     state: AccountState,
     onEvent: (AccountEvent) -> Unit,
 ){
@@ -223,12 +227,12 @@ fun AddAccountDialog(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(text = "Add or Edit Account", fontSize = 20.sp, color = MaterialTheme.colorScheme.primary)
+            Text(text = stringResource(R.string.add_account_dialog), fontSize = 20.sp, color = MaterialTheme.colorScheme.primary)
 
             OutlinedTextField(
                 value = state.name,
                 onValueChange = { onEvent(AccountEvent.SetName(it)) },
-                label = { Text(text = "Name") },
+                label = { Text(text = stringResource(R.string.name_label)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
@@ -237,7 +241,7 @@ fun AddAccountDialog(
                 onValueChange = {
                     if (validate.isAmountValid(it)) onEvent(AccountEvent.SetBalance(it))
                 },
-                label = { Text(text = "Balance") },
+                label = { Text(text = stringResource(R.string.balance_label)) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
@@ -248,11 +252,12 @@ fun AddAccountDialog(
             ) {
                 Button(
                     onClick = {
-                        if (state.name.isEmpty()) text.value = "Name must be included"
-                        else if (state.id == -1 && isNameInDb(state.name, mAccounts)){
-                            text.value = "Account with this name already exists"
-                        }
-                        else if (state.balance.isEmpty()) text.value = "Balance field cannot be empty"
+                        if (state.name.isEmpty())
+                            text.value = context.getString(R.string.no_name_error)
+                        else if (state.id == -1 && isNameInDb(state.name, mAccounts))
+                            text.value = context.getString(R.string.repeat_account_error)
+                        else if (state.balance.isEmpty())
+                            text.value = context.getString(R.string.no_balance_error)
                         else {
                             text.value = ""
                             onEvent(AccountEvent.SaveAccount)
@@ -260,13 +265,13 @@ fun AddAccountDialog(
                     },
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text(text = "Save")
+                    Text(text = stringResource(R.string.save))
                 }
 
                 Spacer(modifier = Modifier.width(16.dp))
 
                 Button(onClick = { onEvent(AccountEvent.HideDialog) }, modifier = Modifier.weight(1f)) {
-                    Text(text = "Cancel")
+                    Text(text = stringResource(R.string.cancel))
                 }
             }
 
@@ -280,6 +285,7 @@ fun AddAccountDialog(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MakeTransferDialog(
+    context: Context,
     state: AccountState,
     onEvent: (AccountEvent) -> Unit,
 ){
@@ -305,13 +311,13 @@ fun MakeTransferDialog(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(text = "Make a transfer", fontSize = 20.sp, color = MaterialTheme.colorScheme.primary)
+            Text(text = stringResource(R.string.make_a_transfer_desc), fontSize = 20.sp, color = MaterialTheme.colorScheme.primary)
             OutlinedTextField(
                 value = state.transferAmount,
                 onValueChange = {
                     if (validate.isAmountValid(it)) onEvent(AccountEvent.SetTransferAmount(it))
                 },
-                label = { Text(text = "Amount") },
+                label = { Text(text = stringResource(R.string.amount_label)) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
@@ -319,7 +325,7 @@ fun MakeTransferDialog(
             OutlinedTextField(
                 value = state.accountOneName,
                 onValueChange = {},
-                label = { Text("Account one") },
+                label = { Text(stringResource(R.string.account_one_label)) },
                 trailingIcon = {
                     Icon(iconOne, "drop down menu arrow",
                         Modifier.clickable { expandedAccountOne = !expandedAccountOne })
@@ -344,7 +350,7 @@ fun MakeTransferDialog(
             OutlinedTextField(
                 value = state.accountTwoName,
                 onValueChange = {},
-                label = { Text("Account two") },
+                label = { Text(stringResource(R.string.account_two_label)) },
                 trailingIcon = {
                     Icon(iconTwo, "drop down menu arrow",
                         Modifier.clickable { expandedAccountTwo = !expandedAccountTwo })
@@ -372,26 +378,24 @@ fun MakeTransferDialog(
                 Button(
                     onClick = {
                         if (state.accountOneName == state.accountTwoName) {
-                            text.value = "Cannot make transfer to the same account"
+                            text.value = context.getString(R.string.same_account_error)
                         }
                         else if (state.transferAmount.toDouble() > maxTransfer.value){
-                            text.value = "Not enough balance on ${state.accountOneName} to make the transfer"
+                            text.value = context.getString(R.string.not_enough_balance_error, state.accountOneName)
                         }
                         else {
                             text.value = ""
-                            System.out.println(maxTransfer.value)
-                            System.out.println(state.transferAmount)
                             onEvent(AccountEvent.MakeTransfer)
                         }
                     },
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text(text = "Transfer")
+                    Text(text = stringResource(R.string.confirm_transfer))
                 }
                 Spacer(modifier = Modifier.width(16.dp))
 
                 Button(onClick = { onEvent(AccountEvent.HideTranserDialog) }, modifier = Modifier.weight(1f)) {
-                    Text(text = "Cancel")
+                    Text(text = stringResource(R.string.cancel))
                 }
             }
 
@@ -401,11 +405,11 @@ fun MakeTransferDialog(
         }
     }
 }
-fun getSortTypeName(name: AccountSortType): String{
+fun getSortTypeName(context: Context, name: AccountSortType): String{
     return when (name) {
-        AccountSortType.NAME-> "Name"
-        AccountSortType.DATE_ADDED -> "Default"
-        AccountSortType.BALANCE -> "Balance"
+        AccountSortType.NAME-> context.getString(R.string.sort_by_name)
+        AccountSortType.DATE_ADDED -> context.getString(R.string.sort_by_default)
+        AccountSortType.BALANCE -> context.getString(R.string.sort_by_balance)
     }
 }
 

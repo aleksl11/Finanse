@@ -22,7 +22,7 @@ import androidx.navigation.NavController
 
 @Composable
 fun TopNavBar(navController: NavController, currentScreen: String, previousScreen: String){
-    val stringResId = when (currentScreen) {
+    val stringResId = when (currentScreen.lowercase()) {
         "summary" -> R.string.summary
         "settings" -> R.string.settings
         "expenses" -> R.string.expenses

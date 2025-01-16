@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Finanse</string>
-    <string name="sort-by">Sortuj według</string>
+    <string name="sort_by">Sortuj według</string>
     <string name="cancel">Anuluj</string>
     <string name="save">Zapisz</string>
 
@@ -20,79 +20,80 @@
     <string name="system">Systemowy</string>
 
     <!-- Accounts -->
-    <string name="add-account-desc">Dodaj konto</string>
-    <string name="edit-account-desc">Edytuj konto</string>
-    <string name="make-a-transfer-desc">Wykonaj przelew</string>
-    <string name="confirm-transfer">Przelej</string>
-    <string name="add-account-dialog">Dodaj lub Edytuj Konto</string>
+    <string name="add_account_desc">Dodaj konto</string>
+    <string name="edit_account_desc">Edytuj konto</string>
+    <string name="make_a_transfer_desc">Wykonaj przelew</string>
+    <string name="confirm_transfer">Przelej</string>
+    <string name="add_account_dialog">Dodaj lub Edytuj Konto</string>
 
     <!-- Categories -->
-    <string name="add-category-desc">Dodaj kategorię</string>
-    <string name="edit-category-desc">Edytuj kategorię</string>
-    <string name="add-category-dialog">Dodaj lub Edytuj Kategorię</string>
+    <string name="add_category_desc">Dodaj kategorię</string>
+    <string name="edit_category_desc">Edytuj kategorię</string>
+    <string name="add_category_dialog">Dodaj lub Edytuj Kategorię</string>
 
     <!-- Expenses -->
-    <string name="add-expense-desc">Dodaj wydatek</string>
-    <string name="edit-expense-desc">Edytuj wydatek</string>
-    <string name="add-expense-dialog">Dodaj lub Edytuj Wydatek</string>
+    <string name="add_expense_desc">Dodaj wydatek</string>
+    <string name="edit_expense_desc">Edytuj wydatek</string>
+    <string name="add_expense_dialog">Dodaj lub Edytuj Wydatek</string>
 
     <!-- Incomes -->
-    <string name="add-income-desc">Dodaj przychód</string>
-    <string name="edit-income-desc">Edytuj przychód</string>
-    <string name="add-income-dialog">Dodaj lub Edytuj Przychód</string>
+    <string name="add_income_desc">Dodaj przychód</string>
+    <string name="edit_income_desc">Edytuj przychód</string>
+    <string name="add_income_dialog">Dodaj lub Edytuj Przychód</string>
 
     <!-- Summary -->
-    <string name="yearly-summary">Roczne wydatki i przychody</string>
-    <string name="detailed-sumary">Szczegółowe podsumowanie</string>
-    <string name="empty-db-warning">Brak rekordów w bazie danych</string>
-    <string name="empty-list-warning">Brak wydatków w wybranym okresie</string>
-    <string name="total-incomes">Łączne przychody</string>
-    <string name="total-expenses">Łączne wydatki</string>
+    <string name="yearly_summary">Roczne wydatki i przychody</string>
+    <string name="detailed_summary">Szczegółowe podsumowanie</string>
+    <string name="empty_db_warning">Brak rekordów w bazie danych</string>
+    <string name="empty_list_warning">Brak wydatków w wybranym okresie</string>
+    <string name="total_incomes">Łączne przychody</string>
+    <string name="total_expenses">Łączne wydatki</string>
     <string name="balance">Saldo</string>
-    <string name="category-summary">Wydatki według kategorii</string>
+    <string name="category_summary">Wydatki według kategorii</string>
 
     <!-- Sorting -->
-    <string name="sort-by-default">Domyślnie</string>
-    <string name="sort-by-name">Nazwa</string>
-    <string name="sort-by-balance">Saldo</string>
-    <string name="sort-by-amount">Kwota</string>
-    <string name="sort-by-date">Data</string>
-    <string name="sort-by-category">Kategoria</string>
-    <string name="all-time">Cały czas</string>
-    <string name="this-month">Ten miesiąc</string>
-    <string name="this-year">Ten rok</string>
+    <string name="sort_by_default">Domyślnie</string>
+    <string name="sort_by_name">Nazwa</string>
+    <string name="sort_by_balance">Saldo</string>
+    <string name="sort_by_amount">Kwota</string>
+    <string name="sort_by_date">Data</string>
+    <string name="sort_by_category">Kategoria</string>
+    <string name="all_time">Cały czas</string>
+    <string name="this_month">Ten miesiąc</string>
+    <string name="this_year">Ten rok</string>
 
     <!-- Labels -->
-    <string name="amount-label">Kwota</string>
-    <string name="account-one-label">Konto pierwsze</string>
-    <string name="account-two-label">Konto drugie</string>
-    <string name="name-label">Nazwa</string>
-    <string name="balance-label">Saldo</string>
-    <string name="category-name-label">Nazwa kategorii</string>
-    <string name="title-label">Tytuł</string>
-    <string name="select-date-label">Wybierz datę</string>
-    <string name="category-label">Kategoria</string>
-    <string name="account-label">Konto</string>
-    <string name="description-label">Opis</string>
+    <string name="amount_label">Kwota</string>
+    <string name="account_one_label">Konto pierwsze</string>
+    <string name="account_two_label">Konto drugie</string>
+    <string name="name_label">Nazwa</string>
+    <string name="balance_label">Saldo</string>
+    <string name="category_name_label">Nazwa kategorii</string>
+    <string name="title_label">Tytuł</string>
+    <string name="select_date_label">Wybierz datę</string>
+    <string name="category_label">Kategoria</string>
+    <string name="account_label">Konto</string>
+    <string name="description_label">Opis</string>
 
     <!-- Error message -->
-    <string name="same-account-error">Nie można wykonać przelewu na to samo konto</string>
-    <string name="not-enough-balance-error">Za mało środków na koncie %accountName, aby wykonać przelew</string>
-    <string name="no-name-error">Nazwa musi być podana</string>
-    <string name="repeat-account-error">Konto o tej nazwie już istnieje</string>
-    <string name="no-balance-error">Pole saldo nie może być puste</string>
-    <string name="no-title-error">Tytuł musi być wypełniony</string>
-    <string name="no-amount-error">Pole kwota nie może być puste</string>
-    <string name="no-category-error">Kategoria musi być wybrana</string>
-    <string name="no-account-error">Konto musi być wybrane</string>
-    <string name="date-format-error">Nieprawidłowy format daty</string>
+    <string name="same_account_error">Nie można wykonać przelewu na to samo konto</string>
+    <string name="not_enough_balance_error">Za mało środków na koncie %1$s, aby wykonać przelew</string>
+    <string name="no_name_error">Nazwa musi być podana</string>
+    <string name="repeat_account_error">Konto o tej nazwie już istnieje</string>
+    <string name="repeat_category_error">Kategoria o tej nazwie już istnieje</string>
+    <string name="no_balance_error">Pole saldo nie może być puste</string>
+    <string name="no_title_error">Tytuł musi być wypełniony</string>
+    <string name="no_amount_error">Pole kwota nie może być puste</string>
+    <string name="no_category_error">Kategoria musi być wybrana</string>
+    <string name="no_account_error">Konto musi być wybrane</string>
+    <string name="date_format_error">Nieprawidłowy format daty</string>
 
     <!-- Pop-up-->
-    <string name="delete-name">Potwierdź usunięcie</string>
-    <string name="delete-message">Czy na pewno chcesz usunąć to konto?</string>
-    <string name="delete-message-category">Czy na pewno chcesz usunąć tę kategorię?</string>
-    <string name="delete-message-expense">Czy na pewno chcesz usunąć ten wydatek?</string>
-    <string name="delete-message-income">Czy na pewno chcesz usunąć ten przychód?</string>
+    <string name="delete_name">Potwierdź usunięcie</string>
+    <string name="delete_message">Czy na pewno chcesz usunąć to konto?</string>
+    <string name="delete_message_category">Czy na pewno chcesz usunąć tę kategorię?</string>
+    <string name="delete_message_expense">Czy na pewno chcesz usunąć ten wydatek?</string>
+    <string name="delete_message_income">Czy na pewno chcesz usunąć ten przychód?</string>
 
     <!-- Months -->
     <string name="january">Styczeń</string>

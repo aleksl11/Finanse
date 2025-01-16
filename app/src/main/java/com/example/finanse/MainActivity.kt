@@ -82,6 +82,11 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val sharedPreferences = getSharedPreferences(LANGUAGE_PREFERENCE, Context.MODE_PRIVATE)
+        val selectedLanguage = sharedPreferences.getString(SELECTED_LANGUAGE, "en") ?: "en"
+        applyLanguage(selectedLanguage)
+
         setContent {
             val context = LocalContext.current
             val themeModeFlow = getThemeMode(context)
@@ -154,6 +159,13 @@ class MainActivity : ComponentActivity() {
         recreate()
     }
 
+    private fun applyLanguage(language: String) {
+        val locale = Locale(language)
+        Locale.setDefault(locale)
+        val config = resources.configuration
+        config.setLocale(locale)
+        resources.updateConfiguration(config, resources.displayMetrics)
+    }
     companion object {
         private const val SELECTED_LANGUAGE = "selected_language"
         private const val LANGUAGE_PREFERENCE = "language_preference"

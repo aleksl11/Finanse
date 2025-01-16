@@ -1,5 +1,6 @@
 package com.example.finanse.screens
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -43,11 +44,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.finanse.ConfirmPopup
+import com.example.finanse.R
 import com.example.finanse.TopNavBar
+import com.example.finanse.entities.Category
 import com.example.finanse.events.CategoryEvent
 import com.example.finanse.sortTypes.CategorySortType
 import com.example.finanse.states.CategoryState
@@ -62,18 +67,19 @@ fun CategoriesScreen(
     state: CategoryState,
     onEvent: (CategoryEvent) -> Unit
 ) {
+    val context = LocalContext.current
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(onClick = {
                 onEvent(CategoryEvent.ShowDialog)
             }) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = "Add a category")
+                Icon(imageVector = Icons.Default.Add, contentDescription = stringResource(R.string.add_category_desc))
             }
         },
     ) { padding ->
 
         if (state.isAddingCategory) {
-            AddCategoryDialog(state = state, onEvent = onEvent)
+            AddCategoryDialog(context = context, state = state, onEvent = onEvent)
         }
 
         LazyColumn(
@@ -99,7 +105,7 @@ fun CategoriesScreen(
                         modifier = Modifier.padding(vertical = 8.dp) // Space around the row
                     ) {
                         Text(
-                            text = "Sort type: ", // Label for the dropdown
+                            text = stringResource(R.string.sort_by)+": ", // Label for the dropdown
                             fontSize = 16.sp, // Font size
                             modifier = Modifier.padding(end = 8.dp) // Space between label and dropdown
                         )
@@ -110,7 +116,7 @@ fun CategoriesScreen(
                         ) {
                             // The TextField that shows the currently selected sort type
                             OutlinedTextField(
-                                value = getSortTypeName(selectedSortType), // Show the selected sort type's name
+                                value = getSortTypeName(context, selectedSortType), // Show the selected sort type's name
                                 onValueChange = {},
                                 readOnly = true, // Prevent editing
                                 trailingIcon = {
@@ -132,7 +138,7 @@ fun CategoriesScreen(
                             ) {
                                 CategorySortType.entries.forEach { categorySortType ->
                                     DropdownMenuItem(
-                                        text = { Text(text = getSortTypeName(categorySortType)) },
+                                        text = { Text(text = getSortTypeName(context, categorySortType)) },
                                         onClick = {
                                             selectedSortType = categorySortType
                                             onEvent(CategoryEvent.SortCategories(categorySortType)) // Trigger event on selection
@@ -187,10 +193,10 @@ fun CategoriesScreen(
                             }) {
                                 Icon(
                                     imageVector = Icons.Default.Edit,
-                                    contentDescription = "Edit category"
+                                    contentDescription = stringResource(R.string.edit_category_desc)
                                 )
                             }
-                            ConfirmPopup().DeleteIconButton("Confirm Delete", "Are you sure you want to delete this category?") {
+                            ConfirmPopup().DeleteIconButton(stringResource(R.string.delete_name), stringResource(R.string.delete_message_category)) {
                                 onEvent(CategoryEvent.DeleteCategory(category))
                             }
                         }
@@ -204,6 +210,7 @@ fun CategoriesScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddCategoryDialog(
+    context: Context,
     state: CategoryState,
     onEvent: (CategoryEvent) -> Unit,
 ) {
@@ -215,7 +222,7 @@ fun AddCategoryDialog(
                 .background(MaterialTheme.colorScheme.background)
                 .padding(16.dp)
         ) {
-            Text(text = "Add or Edit Category", fontSize = 20.sp, color = MaterialTheme.colorScheme.primary)
+            Text(text = stringResource(R.string.add_category_dialog), fontSize = 20.sp, color = MaterialTheme.colorScheme.primary)
 
             // Name Input Field
             TextField(
@@ -224,7 +231,7 @@ fun AddCategoryDialog(
                     onEvent(CategoryEvent.SetName(it))
                 },
                 placeholder = {
-                    Text(text = "Category Name")
+                    Text(text = stringResource(R.string.category_name_label))
                 },
                 modifier = Modifier.fillMaxWidth()
             )
@@ -263,21 +270,25 @@ fun AddCategoryDialog(
                     },
                     modifier = Modifier.padding(8.dp)
                 ) {
-                    Text(text = "Cancel")
+                    Text(text = stringResource(R.string.cancel))
                 }
 
                 Button(
                     onClick = {
+                        val mCategories = state.category
                         if (state.name.isEmpty()) {
-                            errorMessage.value = "Category must have a name"
-                        } else {
+                            errorMessage.value = context.getString(R.string.no_name_error)
+                        } else if (isNameInDb(state.name, mCategories)) {
+                            errorMessage.value = context.getString(R.string.repeat_category_error)
+                        }
+                        else{
                             errorMessage.value = ""
                             onEvent(CategoryEvent.SaveCategory)
                         }
                     },
                     modifier = Modifier.padding(8.dp)
                 ) {
-                    Text(text = "Save")
+                    Text(text = stringResource(R.string.save))
                 }
             }
 
@@ -288,9 +299,19 @@ fun AddCategoryDialog(
         }
     }
 }
-fun getSortTypeName(name: CategorySortType): String{
+fun getSortTypeName(context: Context, name: CategorySortType): String{
     return when (name) {
-        CategorySortType.NAME-> "Name"
-        CategorySortType.DATE_ADDED -> "Default"
+        CategorySortType.NAME-> context.getString(R.string.sort_by_name)
+        CategorySortType.DATE_ADDED -> context.getString(R.string.sort_by_default)
     }
+}
+
+fun isNameInDb(name: String, mCategories: List<Category>): Boolean{
+    var check = false
+    mCategories.forEach{ a ->
+        if (a.name == name ) {
+            check = true
+        }
+    }
+    return check
 }

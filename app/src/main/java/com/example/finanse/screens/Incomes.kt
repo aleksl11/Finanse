@@ -1,6 +1,7 @@
 package com.example.finanse.screens
 
 import android.app.DatePickerDialog
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -45,12 +46,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.finanse.ConfirmPopup
 import com.example.finanse.DisplayFormat
+import com.example.finanse.R
 import com.example.finanse.TopNavBar
 import com.example.finanse.ValidateInputs
 import com.example.finanse.events.IncomeEvent
@@ -70,6 +73,7 @@ fun IncomesScreen(
     onEvent: (IncomeEvent) -> Unit
 ){
     val mAccounts = accountState.account
+    val context = LocalContext.current
     Scaffold (
         floatingActionButton = {
             FloatingActionButton(
@@ -79,12 +83,12 @@ fun IncomesScreen(
                 modifier = Modifier.size(56.dp),
                 containerColor = MaterialTheme.colorScheme.primary
             ) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = "Add an income")
+                Icon(imageVector = Icons.Default.Add, contentDescription = stringResource(R.string.add_income_desc))
             }
         },
     ) {padding ->
         if(state.isAddingIncome) {
-            AddIncomeDialog(state = state, accountState = accountState, onEvent = onEvent)
+            AddIncomeDialog(context = context, state = state, accountState = accountState, onEvent = onEvent)
         }
 
         LazyColumn(
@@ -109,7 +113,7 @@ fun IncomesScreen(
                         modifier = Modifier.padding(vertical = 8.dp) // Space around the row
                     ) {
                         Text(
-                            text = "Sort type: ", // Label for the dropdown
+                            text = stringResource(R.string.sort_by) + ": ", // Label for the dropdown
                             fontSize = 16.sp, // Font size
                             modifier = Modifier.padding(end = 8.dp) // Space between label and dropdown
                         )
@@ -120,7 +124,7 @@ fun IncomesScreen(
                         ) {
                             // The TextField that shows the currently selected sort type
                             OutlinedTextField(
-                                value = getSortTypeName(selectedSortType), // Show the selected sort type's name
+                                value = getSortTypeName(context, selectedSortType), // Show the selected sort type's name
                                 onValueChange = {},
                                 readOnly = true, // Prevent editing
                                 trailingIcon = {
@@ -142,7 +146,7 @@ fun IncomesScreen(
                             ) {
                                 IncomeSortType.entries.forEach { incomeSortType ->
                                     DropdownMenuItem(
-                                        text = { Text(text = getSortTypeName(incomeSortType)) },
+                                        text = { Text(text = getSortTypeName(context, incomeSortType)) },
                                         onClick = {
                                             selectedSortType = incomeSortType
                                             onEvent(IncomeEvent.SortIncomes(incomeSortType)) // Trigger event on selection
@@ -191,9 +195,9 @@ fun IncomesScreen(
                             onEvent(IncomeEvent.GetData(income.id))
                             onEvent(IncomeEvent.ShowDialog)
                         }) {
-                            Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit income")
+                            Icon(imageVector = Icons.Default.Edit, contentDescription = stringResource(R.string.edit_income_desc))
                         }
-                        ConfirmPopup().DeleteIconButton("Confirm Delete", "Are you sure you want to delete this income?") {
+                        ConfirmPopup().DeleteIconButton(stringResource(R.string.delete_name), stringResource(R.string.delete_message_income)) {
                             onEvent(IncomeEvent.DeleteIncome(income))
                         }
                     }
@@ -207,6 +211,7 @@ fun IncomesScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddIncomeDialog(
+    context: Context,
     state: IncomeState,
     accountState: AccountState,
     onEvent: (IncomeEvent) -> Unit,
@@ -244,12 +249,12 @@ fun AddIncomeDialog(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(text = "Add or Edit Income", fontSize = 20.sp, color = MaterialTheme.colorScheme.primary)
+            Text(text = stringResource(R.string.add_income_dialog), fontSize = 20.sp, color = MaterialTheme.colorScheme.primary)
 
             OutlinedTextField(
                 value = state.title,
                 onValueChange = { onEvent(IncomeEvent.SetTitle(it)) },
-                label = { Text(text = "Title") },
+                label = { Text(text = stringResource(R.string.title_label)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
@@ -258,7 +263,7 @@ fun AddIncomeDialog(
                 onValueChange = {
                     if (validate.isAmountValid(it)) onEvent(IncomeEvent.SetAmount(it))
                 },
-                label = { Text(text = "Amount") },
+                label = { Text(text = stringResource(R.string.amount_label)) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
@@ -270,13 +275,13 @@ fun AddIncomeDialog(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(text = state.date.ifEmpty { "Select Date" }, modifier = Modifier.padding(8.dp))
-                Icon(Icons.Default.DateRange, contentDescription = "Select Date")
+                Text(text = state.date.ifEmpty { stringResource(R.string.select_date_label) }, modifier = Modifier.padding(8.dp))
+                Icon(Icons.Default.DateRange, contentDescription = stringResource(R.string.select_date_label))
             }
             OutlinedTextField(
                 value = accountName.value,
                 onValueChange = {},
-                label = { Text("Account") },
+                label = { Text(stringResource(R.string.account_label)) },
                 trailingIcon = {
                     Icon(icon, "drop down menu arrow", Modifier.clickable { expandedAccount = !expandedAccount })
                 },
@@ -303,7 +308,7 @@ fun AddIncomeDialog(
                     val description = it.ifEmpty { null }
                     onEvent(IncomeEvent.SetDescription(description))
                 },
-                label = { Text(text = "Description") },
+                label = { Text(text = stringResource(R.string.description_label)) },
                 modifier = Modifier.fillMaxWidth(),
                 maxLines = 3
             )
@@ -313,23 +318,23 @@ fun AddIncomeDialog(
             ) {
                 Button(
                     onClick = {
-                        if (state.title.isEmpty()) text.value = "Title must be included"
-                        else if (state.amount.isEmpty()) text.value = "Amount field cannot be empty"
-                        else if (state.account.isEmpty()) text.value = "Account must be selected"
+                        if (state.title.isEmpty()) text.value = context.getString(R.string.no_title_error)
+                        else if (state.amount.isEmpty()) text.value = context.getString(R.string.no_amount_error)
+                        else if (state.account.isEmpty()) text.value = context.getString(R.string.no_account_error)
                         else if (validate.isDateValid(state.date)) {
                             text.value = ""
                             onEvent(IncomeEvent.SaveIncome)
-                        } else text.value = "Incorrect date format"
+                        } else text.value = context.getString(R.string.date_format_error)
                     },
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text(text = "Save")
+                    Text(text = stringResource(R.string.save))
                 }
 
                 Spacer(modifier = Modifier.width(16.dp))
 
                 Button(onClick = { onEvent(IncomeEvent.HideDialog) }, modifier = Modifier.weight(1f)) {
-                    Text(text = "Cancel")
+                    Text(text = stringResource(R.string.cancel))
                 }
             }
 
@@ -340,10 +345,10 @@ fun AddIncomeDialog(
     }
 }
 
-fun getSortTypeName(name: IncomeSortType): String{
+fun getSortTypeName(context: Context, name: IncomeSortType): String{
     return when (name) {
-        IncomeSortType.AMOUNT-> "Amount"
-        IncomeSortType.DATE_ADDED -> "Default"
-        IncomeSortType.DATE_OF_INCOME -> "Date"
+        IncomeSortType.AMOUNT-> context.getString(R.string.sort_by_amount)
+        IncomeSortType.DATE_ADDED -> context.getString(R.string.sort_by_default)
+        IncomeSortType.DATE_OF_INCOME -> context.getString(R.string.sort_by_date)
     }
 }

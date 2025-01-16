@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Finanzas</string>
-    <string name="sort-by">Ordenar por</string>
+    <string name="sort_by">Ordenar por</string>
     <string name="cancel">Cancelar</string>
     <string name="save">Guardar</string>
 
@@ -20,79 +20,80 @@
     <string name="system">Sistema</string>
 
     <!-- Accounts -->
-    <string name="add-account-desc">Añadir una cuenta</string>
-    <string name="edit-account-desc">Editar cuenta</string>
-    <string name="make-a-transfer-desc">Realizar una transferencia</string>
-    <string name="confirm-transfer">Transferir</string>
-    <string name="add-account-dialog">Añadir o Editar Cuenta</string>
+    <string name="add_account_desc">Añadir una cuenta</string>
+    <string name="edit_account_desc">Editar cuenta</string>
+    <string name="make_a_transfer_desc">Realizar una transferencia</string>
+    <string name="confirm_transfer">Transferir</string>
+    <string name="add_account_dialog">Añadir o Editar Cuenta</string>
 
     <!-- Categories -->
-    <string name="add-category-desc">Añadir una categoría</string>
-    <string name="edit-category-desc">Editar categoría</string>
-    <string name="add-category-dialog">Añadir o Editar Categoría</string>
+    <string name="add_category_desc">Añadir una categoría</string>
+    <string name="edit_category_desc">Editar categoría</string>
+    <string name="add_category_dialog">Añadir o Editar Categoría</string>
 
     <!-- Expenses -->
-    <string name="add-expense-desc">Añadir un gasto</string>
-    <string name="edit-expense-desc">Editar gasto</string>
-    <string name="add-expense-dialog">Añadir o Editar Gasto</string>
+    <string name="add_expense_desc">Añadir un gasto</string>
+    <string name="edit_expense_desc">Editar gasto</string>
+    <string name="add_expense_dialog">Añadir o Editar Gasto</string>
 
     <!-- Incomes -->
-    <string name="add-income-desc">Añadir un ingreso</string>
-    <string name="edit-income-desc">Editar ingreso</string>
-    <string name="add-income-dialog">Añadir o Editar Ingreso</string>
+    <string name="add_income_desc">Añadir un ingreso</string>
+    <string name="edit_income_desc">Editar ingreso</string>
+    <string name="add_income_dialog">Añadir o Editar Ingreso</string>
 
     <!-- Summary -->
-    <string name="yearly-summary">Gastos e ingresos anuales</string>
-    <string name="detailed-sumary">Resumen detallado</string>
-    <string name="empty-db-warning">No hay registros en la base de datos</string>
-    <string name="empty-list-warning">No hay gastos en el período seleccionado</string>
-    <string name="total-incomes">Ingresos totales</string>
-    <string name="total-expenses">Gastos totales</string>
+    <string name="yearly_summary">Gastos e ingresos anuales</string>
+    <string name="detailed_summary">Resumen detallado</string>
+    <string name="empty_db_warning">No hay registros en la base de datos</string>
+    <string name="empty_list_warning">No hay gastos en el período seleccionado</string>
+    <string name="total_incomes">Ingresos totales</string>
+    <string name="total_expenses">Gastos totales</string>
     <string name="balance">Balance</string>
-    <string name="category-summary">Gastos por categoría</string>
+    <string name="category_summary">Gastos por categoría</string>
 
     <!-- Sorting -->
-    <string name="sort-by-default">Predeterminado</string>
-    <string name="sort-by-name">Nombre</string>
-    <string name="sort-by-balance">Balance</string>
-    <string name="sort-by-amount">Cantidad</string>
-    <string name="sort-by-date">Fecha</string>
-    <string name="sort-by-category">Categoría</string>
-    <string name="all-time">Todo el tiempo</string>
-    <string name="this-month">Este mes</string>
-    <string name="this-year">Este año</string>
+    <string name="sort_by_default">Predeterminado</string>
+    <string name="sort_by_name">Nombre</string>
+    <string name="sort_by_balance">Balance</string>
+    <string name="sort_by_amount">Cantidad</string>
+    <string name="sort_by_date">Fecha</string>
+    <string name="sort_by_category">Categoría</string>
+    <string name="all_time">Todo el tiempo</string>
+    <string name="this_month">Este mes</string>
+    <string name="this_year">Este año</string>
 
     <!-- Labels -->
-    <string name="amount-label">Cantidad</string>
-    <string name="account-one-label">Cuenta uno</string>
-    <string name="account-two-label">Cuenta dos</string>
-    <string name="name-label">Nombre</string>
-    <string name="balance-label">Balance</string>
-    <string name="category-name-label">Nombre de la categoría</string>
-    <string name="title-label">Título</string>
-    <string name="select-date-label">Seleccionar fecha</string>
-    <string name="category-label">Categoría</string>
-    <string name="account-label">Cuenta</string>
-    <string name="description-label">Descripción</string>
+    <string name="amount_label">Cantidad</string>
+    <string name="account_one_label">Cuenta uno</string>
+    <string name="account_two_label">Cuenta dos</string>
+    <string name="name_label">Nombre</string>
+    <string name="balance_label">Balance</string>
+    <string name="category_name_label">Nombre de la categoría</string>
+    <string name="title_label">Título</string>
+    <string name="select_date_label">Seleccionar fecha</string>
+    <string name="category_label">Categoría</string>
+    <string name="account_label">Cuenta</string>
+    <string name="description_label">Descripción</string>
 
     <!-- Error message -->
-    <string name="same-account-error">No se puede realizar la transferencia a la misma cuenta</string>
-    <string name="not-enough-balance-error">No hay suficiente saldo en %accountName para realizar la transferencia</string>
-    <string name="no-name-error">Debe incluir un nombre</string>
-    <string name="repeat-account-error">Ya existe una cuenta con este nombre</string>
-    <string name="no-balance-error">El campo de saldo no puede estar vacío</string>
-    <string name="no-title-error">Debe llenar el campo del título</string>
-    <string name="no-amount-error">El campo de cantidad no puede estar vacío</string>
-    <string name="no-category-error">Debe seleccionar una categoría</string>
-    <string name="no-account-error">Debe seleccionar una cuenta</string>
-    <string name="date-format-error">Formato de fecha incorrecto</string>
+    <string name="same_account_error">No se puede realizar la transferencia a la misma cuenta</string>
+    <string name="not_enough_balance_error">No hay suficiente saldo en %1$s para realizar la transferencia</string>
+    <string name="no_name_error">Debe incluir un nombre</string>
+    <string name="repeat_account_error">Ya existe una cuenta con este nombre</string>
+    <string name="repeat_category_error">Ya existe una categoría con este nombre</string>
+    <string name="no_balance_error">El campo de saldo no puede estar vacío</string>
+    <string name="no_title_error">Debe llenar el campo del título</string>
+    <string name="no_amount_error">El campo de cantidad no puede estar vacío</string>
+    <string name="no_category_error">Debe seleccionar una categoría</string>
+    <string name="no_account_error">Debe seleccionar una cuenta</string>
+    <string name="date_format_error">Formato de fecha incorrecto</string>
 
     <!-- Pop-up-->
-    <string name="delete-name">Confirmar eliminación</string>
-    <string name="delete-message">¿Está seguro de que desea eliminar esta cuenta?</string>
-    <string name="delete-message-category">¿Está seguro de que desea eliminar esta categoría?</string>
-    <string name="delete-message-expense">¿Está seguro de que desea eliminar este gasto?</string>
-    <string name="delete-message-income">¿Está seguro de que desea eliminar este ingreso?</string>
+    <string name="delete_name">Confirmar eliminación</string>
+    <string name="delete_message">¿Está seguro de que desea eliminar esta cuenta?</string>
+    <string name="delete_message_category">¿Está seguro de que desea eliminar esta categoría?</string>
+    <string name="delete_message_expense">¿Está seguro de que desea eliminar este gasto?</string>
+    <string name="delete_message_income">¿Está seguro de que desea eliminar este ingreso?</string>
 
     <!-- Months -->
     <string name="january">Enero</string>

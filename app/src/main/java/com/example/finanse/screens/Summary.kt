@@ -1,5 +1,6 @@
 package com.example.finanse.screens
 
+import android.content.Context
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,6 +28,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -48,6 +51,7 @@ import co.yml.charts.ui.barchart.models.GroupSeparatorConfig
 import co.yml.charts.ui.piechart.charts.DonutPieChart
 import co.yml.charts.ui.piechart.models.PieChartConfig
 import co.yml.charts.ui.piechart.models.PieChartData
+import com.example.finanse.R
 import com.example.finanse.TopNavBar
 import com.example.finanse.entities.Category
 import com.example.finanse.entities.Expense
@@ -60,18 +64,17 @@ import java.time.LocalDate
 import java.time.Month
 import kotlin.math.roundToInt
 
-
 @Composable
 fun SummaryScreen(
     navController: NavController,
     incomeState: IncomeState,
     expenseState: ExpenseState,
     categoryState: CategoryState
-    ){
+){
     var chosenTimePeriod by remember { mutableStateOf(SummaryTimePeriod.THIS_MONTH)}
     val incomes = incomeState.income
     val expenses = expenseState.expense
-
+    val context = LocalContext.current
     var incomesTotal = 0.0
     incomes.forEach{i ->
         incomesTotal += i.amount
@@ -97,7 +100,7 @@ fun SummaryScreen(
             modifier = Modifier.fillMaxSize()
         ) {
             item {
-                Text(text = "Yearly expenses and incomes",
+                Text(text = stringResource(R.string.yearly_summary),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.fillMaxWidth(),
@@ -112,7 +115,7 @@ fun SummaryScreen(
             }
             item {
                 Text(
-                    text = "Detailed Summary",
+                    text = stringResource(R.string.detailed_summary),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.fillMaxWidth(),
@@ -142,7 +145,7 @@ fun SummaryScreen(
                                     unselectedColor = MaterialTheme.colorScheme.onSurface
                                 )
                             )
-                            Text(text = getTimePeriodName(timePeriod), fontSize = 16.sp)
+                            Text(text = getTimePeriodName(context, timePeriod), fontSize = 16.sp)
                         }
                     }
                 }
@@ -156,7 +159,6 @@ fun SummaryScreen(
                         sortedIncomes = incomes.filter { i ->
                             i.date.month == dateNow.month && i.date.year == dateNow.year
                         }
-                        System.out.println("sorted month")
                         if(sortedExpenses.isEmpty()) NoRecordsInLists()
                         else TimePeriodSummary(sortedExpenses = sortedExpenses, sortedIncomes = sortedIncomes, categoryState)
                     }
@@ -167,14 +169,12 @@ fun SummaryScreen(
                         sortedIncomes = incomes.filter { i ->
                             i.date.year == dateNow.year
                         }
-                        System.out.println("sorted year")
                         if(sortedExpenses.isEmpty()) NoRecordsInLists()
                         else TimePeriodSummary(sortedExpenses = sortedExpenses, sortedIncomes = sortedIncomes, categoryState)
                     }
                     SummaryTimePeriod.ALL_TIME -> {
                         sortedExpenses = expenses
                         sortedIncomes = incomes
-                        System.out.println("sorted all")
                         if(sortedExpenses.isEmpty()) NoRecordsInLists()
                         else TimePeriodSummary(sortedExpenses = sortedExpenses, sortedIncomes = sortedIncomes, categoryState)
                     }
@@ -188,7 +188,7 @@ fun SummaryScreen(
 @Composable
 fun NoRecordsInDb(){
     Text(
-        text = "No records added to database",
+        text = stringResource(R.string.empty_db_warning),
         fontSize = 16.sp,
         modifier = Modifier.padding(16.dp),
         textAlign = TextAlign.Center
@@ -198,7 +198,7 @@ fun NoRecordsInDb(){
 @Composable
 fun NoRecordsInLists(){
     Text(
-        text = "No expenses in the selected time period",
+        text = stringResource(R.string.empty_list_warning),
         fontSize = 16.sp,
         modifier = Modifier.padding(16.dp),
         textAlign = TextAlign.Center
@@ -225,7 +225,7 @@ fun TimePeriodSummary(sortedExpenses: List<Expense>, sortedIncomes: List<Income>
             color = Color(getColorByCategory(categoryState.category, category)),
             label = category,
             value = ((sum/expensesTotal)*100).toFloat()
-            )
+        )
         )
     }
 
@@ -243,12 +243,12 @@ fun TimePeriodSummary(sortedExpenses: List<Expense>, sortedIncomes: List<Income>
         backgroundColor = MaterialTheme.colorScheme.background
     )
 
-/*    val categories = categoryState.category
-    val legendsConfig = LegendsConfig(
-        legendLabelList = categories.map { c ->
-            LegendLabel(Color(c.color), c.name) },
-        gridColumnCount = categories.size
-    )*/
+    /*    val categories = categoryState.category
+        val legendsConfig = LegendsConfig(
+            legendLabelList = categories.map { c ->
+                LegendLabel(Color(c.color), c.name) },
+            gridColumnCount = categories.size
+        )*/
 
     Column(
         modifier = Modifier
@@ -258,11 +258,11 @@ fun TimePeriodSummary(sortedExpenses: List<Expense>, sortedIncomes: List<Income>
         verticalArrangement = Arrangement.spacedBy(20.dp),
         horizontalAlignment = Alignment.Start
     ){
-        Text("Total incomes: ${"%.2f".format(incomesTotal)} PLN")
-        Text("Total time expenses: ${"%.2f".format(expensesTotal)} PLN")
-        Text("Balance: ${"%.2f".format(incomesTotal-expensesTotal)} PLN")
+        Text(stringResource(R.string.total_incomes) + ": ${"%.2f".format(incomesTotal)} PLN")
+        Text(stringResource(R.string.total_expenses) + ": ${"%.2f".format(expensesTotal)} PLN")
+        Text(stringResource(R.string.balance) + ": ${"%.2f".format(incomesTotal-expensesTotal)} PLN")
         Text(
-            "Expenses by categories",
+            stringResource(R.string.category_summary),
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
@@ -317,18 +317,18 @@ fun ChartLegend(categories: List<Category>){
 @Composable
 fun YearlyBarChart(incomes: List<Income>, expenses: List<Expense>){
     val monthNames = mapOf(
-        Month.JANUARY to "January",
-        Month.FEBRUARY to "February",
-        Month.MARCH to "March",
-        Month.APRIL to "April",
-        Month.MAY to "May",
-        Month.JUNE to "June",
-        Month.JULY to "July",
-        Month.AUGUST to "August",
-        Month.SEPTEMBER to "September",
-        Month.OCTOBER to "October",
-        Month.NOVEMBER to "November",
-        Month.DECEMBER to "December"
+        Month.JANUARY to stringResource(R.string.january),
+        Month.FEBRUARY to stringResource(R.string.february),
+        Month.MARCH to stringResource(R.string.march),
+        Month.APRIL to stringResource(R.string.april),
+        Month.MAY to stringResource(R.string.may),
+        Month.JUNE to stringResource(R.string.june),
+        Month.JULY to stringResource(R.string.july),
+        Month.AUGUST to stringResource(R.string.august),
+        Month.SEPTEMBER to stringResource(R.string.september),
+        Month.OCTOBER to stringResource(R.string.october),
+        Month.NOVEMBER to stringResource(R.string.november),
+        Month.DECEMBER to stringResource(R.string.december)
     )
     // Get unique months from both lists
     val uniqueMonths = (incomes.map { it.date.month } + expenses.map { it.date.month })
@@ -363,13 +363,13 @@ fun YearlyBarChart(incomes: List<Income>, expenses: List<Expense>){
             listOf(
                 // First BarData corresponds to expenses
                 BarData(
-                    point = Point(5F, totalExpenses.toFloat(), "Expenses"),
+                    point = Point(5F, totalExpenses.toFloat(), stringResource(R.string.expenses)),
                     color = Color.Red,
                     label= "%.2f".format(totalExpenses.toDouble()/100.0)
                 ),
                 // Second BarData corresponds to incomes
                 BarData(
-                    point = Point(5F, totalIncomes.toFloat(), "Incomes"),
+                    point = Point(5F, totalIncomes.toFloat(), stringResource(R.string.incomes)),
                     color = Color.Green,
                     label = "%.2f".format(totalIncomes.toDouble()/100.0)
                 )
@@ -401,7 +401,7 @@ fun YearlyBarChart(incomes: List<Income>, expenses: List<Expense>){
     val colorPaletteList =  listOf(Color.Red, Color.Green)
 
     val legendsConfig = LegendsConfig(
-        legendLabelList = listOf(LegendLabel(Color.Green, "Incomes"),LegendLabel(Color.Red, "Expenses")),
+        legendLabelList = listOf(LegendLabel(Color.Green, stringResource(R.string.incomes)),LegendLabel(Color.Red, stringResource(R.string.expenses))),
         gridColumnCount = 2
     )
     val groupBarPlotData = BarPlotData(
@@ -438,10 +438,10 @@ fun getColorByCategory(categories: List<Category>, categoryName: String): Int {
     return Color.Gray.hashCode()
 }
 
-fun getTimePeriodName(time: SummaryTimePeriod): String{
+fun getTimePeriodName(context: Context, time: SummaryTimePeriod): String{
     return when (time) {
-        SummaryTimePeriod.ALL_TIME -> "All time"
-        SummaryTimePeriod.THIS_MONTH -> "This month"
-        SummaryTimePeriod.THIS_YEAR -> "This year"
+        SummaryTimePeriod.ALL_TIME -> context.getString(R.string.all_time)
+        SummaryTimePeriod.THIS_MONTH -> context.getString(R.string.this_month)
+        SummaryTimePeriod.THIS_YEAR -> context.getString(R.string.this_year)
     }
 }

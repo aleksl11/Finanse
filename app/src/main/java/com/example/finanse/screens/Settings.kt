@@ -139,7 +139,7 @@ fun LanguageSelection(
     onLanguageChanged: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) } // Dropdown state
-    val languages = mapOf("English" to "en", "Polish" to "pl")
+    val languages = mapOf("English" to "en", "Polski" to "pl", "Español" to "es")
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
