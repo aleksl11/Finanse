@@ -176,6 +176,10 @@ fun AccountsScreen(
                         .padding(horizontal = 8.dp),
                     elevation = CardDefaults.cardElevation(4.dp),
                     shape = MaterialTheme.shapes.medium,
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface, // Background color
+                        contentColor = MaterialTheme.colorScheme.onSurface  // Text and icon color
+                    )
                 ) {
                     Row(
                         modifier = Modifier

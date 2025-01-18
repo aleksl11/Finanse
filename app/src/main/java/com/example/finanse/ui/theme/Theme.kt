@@ -17,32 +17,36 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80,
+    primary = Color(0xFF12522B),  // Deep green for primary actions
+    secondary = Color(0xFF1B7A46), // Forest green for secondary actions
+    tertiary = Color(0xFF0F3E21),  // Dark, almost black-green for accents
 
-    background = Color(0xFF000401),
-    surface = Color(0xFF000401),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFFE3E4E0),
-    onSurface = Color(0xFFE3E4E0),
+    background = Color(0xFF000000), // True black background
+    surface = Color(0xFF121212),    // Slightly elevated dark surface
+    onPrimary = Color.White,         // High contrast white on primary green
+    onSecondary = Color.White,       // White text on secondary green
+    onTertiary = Color(0xFFD3E8DA),  // Soft muted greenish-gray for subtle accents
+    onBackground = Color(0xFFE0E0E0), // Light grayish-white text on black background
+    onSurface = Color(0xFFE0E0E0),    // Matches onBackground for consistent readability
 )
+
+
+
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40,
+    primary = Color(0xFF12522B),  // Deep green remains the focal color
+    secondary = Color(0xFF4F9B66), // Muted, soft green for secondary actions
+    tertiary = Color(0xFF1B7A46),  // Slightly lighter forest green for accents
 
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
+    background = Color(0xFFF5F8F5), // Soft green-tinted white for backgrounds
+    surface = Color(0xFFFFFFFF),    // Pure white for cards and dialog surfaces
+    onPrimary = Color.White,         // High contrast white for deep green
+    onSecondary = Color.Black,       // Dark text for better readability on lighter secondary green
+    onTertiary = Color.White,        // High contrast white for tertiary green
+    onBackground = Color(0xFF1E2923), // Deep green-gray text for light backgrounds
+    onSurface = Color(0xFF1E2923),    // Matches onBackground for consistent readability
 )
+
 
 @Composable
 fun FinanseTheme(

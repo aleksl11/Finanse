@@ -95,7 +95,7 @@ class MainActivity : ComponentActivity() {
             val sharedPreferences = getSharedPreferences(LANGUAGE_PREFERENCE, Context.MODE_PRIVATE)
             val currentLanguage = sharedPreferences.getString(SELECTED_LANGUAGE, "en") ?: "en"
 
-            FinanseTheme(themeMode = themeMode) {
+            FinanseTheme(themeMode = themeMode, dynamicColor = false) {
                 val incomeState by incomeViewModel.state.collectAsState()
                 val expenseState by expenseViewModel.state.collectAsState()
                 val categoryState by categoryViewModel.state.collectAsState()

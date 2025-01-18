@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -41,6 +42,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,6 +63,7 @@ import com.example.finanse.sortTypes.ExpenseSortType
 import com.example.finanse.states.AccountState
 import com.example.finanse.states.CategoryState
 import com.example.finanse.states.ExpenseState
+import com.example.finanse.viewModels.AlbumViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
@@ -168,6 +171,10 @@ fun ExpensesScreen(
                         .padding(horizontal = 8.dp),
                     elevation = CardDefaults.cardElevation(4.dp),
                     shape = MaterialTheme.shapes.medium,
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface, // Background color
+                        contentColor = MaterialTheme.colorScheme.onSurface  // Text and icon color
+                    )
                 ) {
                     Row(
                         modifier = Modifier
@@ -236,8 +243,6 @@ fun AddExpenseDialog(
         LocalContext.current,
         { _, year, month, dayOfMonth ->
             val selectedDate = LocalDate.of(year, month + 1, dayOfMonth)
-
-            // Format the date to DD.MM.YYYY and update the state
             onEvent(ExpenseEvent.SetDate(selectedDate.format(dateFormatter)))
         },
         calendar.get(Calendar.YEAR),
@@ -246,137 +251,182 @@ fun AddExpenseDialog(
     )
 
     BasicAlertDialog(onDismissRequest = { onEvent(ExpenseEvent.HideDialog) }) {
-        Column(
+        // Wrapping the entire dialog content in `LazyColumn` for scrolling
+        LazyColumn(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.background, MaterialTheme.shapes.medium)
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(vertical = 8.dp) // Optional: Extra padding
         ) {
-            Text(text = stringResource(R.string.add_expense_dialog), fontSize = 20.sp, color = MaterialTheme.colorScheme.primary)
-
-            OutlinedTextField(
-                value = state.title,
-                onValueChange = { onEvent(ExpenseEvent.SetTitle(it)) },
-                label = { Text(text = stringResource(R.string.title_label)) },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
-            )
-
-            OutlinedTextField(
-                value = state.amount,
-                onValueChange = {
-                    if (validate.isAmountValid(it)) onEvent(ExpenseEvent.SetAmount(it))
-                },
-                label = { Text(text = stringResource(R.string.amount_label)) },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
-            )
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { datePickerDialog.show() },
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(text = state.date.ifEmpty { stringResource(R.string.select_date_label) }, modifier = Modifier.padding(8.dp))
-                Icon(Icons.Default.DateRange, contentDescription = stringResource(R.string.select_date_label))
+            item {
+                Text(
+                    text = stringResource(R.string.add_expense_dialog),
+                    fontSize = 20.sp,
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
 
-            OutlinedTextField(
-                value = state.category,
-                onValueChange = { onEvent(ExpenseEvent.SetCategory(it)) },
-                label = { Text(stringResource(R.string.category_label)) },
-                trailingIcon = {
-                    Icon(icon, "drop down menu arrow", Modifier.clickable { expanded = !expanded })
-                },
-                readOnly = true,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
-            ) {
-                mCategories.forEach { c ->
-                    DropdownMenuItem(
-                        onClick = {
-                            expanded = false
-                            onEvent(ExpenseEvent.SetCategory(c.name))
-                        },
-                        text = { Text(text = c.name) }
-                    )
-                }
+            // Title Input
+            item {
+                OutlinedTextField(
+                    value = state.title,
+                    onValueChange = { onEvent(ExpenseEvent.SetTitle(it)) },
+                    label = { Text(text = stringResource(R.string.title_label)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
             }
 
-            OutlinedTextField(
-                value = accountName.value,
-                onValueChange = {},
-                label = { Text(stringResource(R.string.account_label)) },
-                trailingIcon = {
-                    Icon(icon, "drop down menu arrow", Modifier.clickable { expandedAccount = !expandedAccount })
-                },
-                readOnly = true,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            DropdownMenu(
-                expanded = expandedAccount,
-                onDismissRequest = { expandedAccount = false }
-            ) {
-                mAccounts.forEach { a ->
-                    DropdownMenuItem(
-                        onClick = {
-                            expandedAccount = false
-                            onEvent(ExpenseEvent.SetAccount(a.id.toString()))
-                            accountName.value = a.name
-                        },
-                        text = { Text(text = a.name) }
-                    )
-                }
-            }
-
-            OutlinedTextField(
-                value = state.description ?: "",
-                onValueChange = {
-                    val description = it.ifEmpty { null }
-                    onEvent(ExpenseEvent.SetDescription(description))
-                },
-                label = { Text(text = stringResource(R.string.description_label)) },
-                modifier = Modifier.fillMaxWidth(),
-                maxLines = 3
-            )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                Button(
-                    onClick = {
-                        if (state.title.isEmpty()) text.value = context.getString(R.string.no_title_error)
-                        else if (state.amount.isEmpty()) text.value = context.getString(R.string.no_amount_error)
-                        else if (state.category.isEmpty()) text.value = context.getString(R.string.no_category_error)
-                        else if (state.account.isEmpty()) text.value = context.getString(R.string.no_account_error)
-                        else if (validate.isDateValid(state.date)) {
-                            text.value = ""
-                            onEvent(ExpenseEvent.SaveExpense)
-                        } else text.value = context.getString(R.string.date_format_error)
+            // Amount Input
+            item {
+                OutlinedTextField(
+                    value = state.amount,
+                    onValueChange = {
+                        if (validate.isAmountValid(it)) onEvent(ExpenseEvent.SetAmount(it))
                     },
-                    modifier = Modifier.weight(1f)
+                    label = { Text(text = stringResource(R.string.amount_label)) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+            }
+
+            // Date Picker
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { datePickerDialog.show() },
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(text = stringResource(R.string.save))
-                }
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                Button(onClick = { onEvent(ExpenseEvent.HideDialog) }, modifier = Modifier.weight(1f)) {
-                    Text(text = stringResource(R.string.cancel))
+                    Text(
+                        text = state.date.ifEmpty { stringResource(R.string.select_date_label) },
+                        modifier = Modifier.padding(8.dp)
+                    )
+                    Icon(Icons.Default.DateRange, contentDescription = stringResource(R.string.select_date_label))
                 }
             }
 
+            // Category Dropdown
+            item {
+                OutlinedTextField(
+                    value = state.category,
+                    onValueChange = { onEvent(ExpenseEvent.SetCategory(it)) },
+                    label = { Text(stringResource(R.string.category_label)) },
+                    trailingIcon = {
+                        Icon(icon, "drop down menu arrow", Modifier.clickable { expanded = !expanded })
+                    },
+                    readOnly = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    mCategories.forEach { c ->
+                        DropdownMenuItem(
+                            onClick = {
+                                expanded = false
+                                onEvent(ExpenseEvent.SetCategory(c.name))
+                            },
+                            text = { Text(text = c.name) }
+                        )
+                    }
+                }
+            }
+
+            // Account Dropdown
+            item {
+                OutlinedTextField(
+                    value = accountName.value,
+                    onValueChange = {},
+                    label = { Text(stringResource(R.string.account_label)) },
+                    trailingIcon = {
+                        Icon(icon, "drop down menu arrow", Modifier.clickable { expandedAccount = !expandedAccount })
+                    },
+                    readOnly = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                DropdownMenu(
+                    expanded = expandedAccount,
+                    onDismissRequest = { expandedAccount = false }
+                ) {
+                    mAccounts.forEach { a ->
+                        DropdownMenuItem(
+                            onClick = {
+                                expandedAccount = false
+                                onEvent(ExpenseEvent.SetAccount(a.id.toString()))
+                                accountName.value = a.name
+                            },
+                            text = { Text(text = a.name) }
+                        )
+                    }
+                }
+            }
+
+            // Description Input
+            item {
+                OutlinedTextField(
+                    value = state.description ?: "",
+                    onValueChange = {
+                        val description = it.ifEmpty { null }
+                        onEvent(ExpenseEvent.SetDescription(description))
+                    },
+                    label = { Text(text = stringResource(R.string.description_label)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    maxLines = 3
+                )
+            }
+
+            //Photos
+            item {
+                val coroutineScope = rememberCoroutineScope()
+                val coroutineContext = coroutineScope.coroutineContext
+                AlbumScreen(viewModel = AlbumViewModel(coroutineContext))
+            }
+
+            // Error Message
             if (text.value.isNotEmpty()) {
-                Text(text = text.value, color = MaterialTheme.colorScheme.error)
+                item {
+                    Text(text = text.value, color = MaterialTheme.colorScheme.error)
+                }
+            }
+
+            // Buttons
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    Button(
+                        onClick = {
+                            if (state.title.isEmpty()) text.value = context.getString(R.string.no_title_error)
+                            else if (state.amount.isEmpty()) text.value = context.getString(R.string.no_amount_error)
+                            else if (state.category.isEmpty()) text.value = context.getString(R.string.no_category_error)
+                            else if (state.account.isEmpty()) text.value = context.getString(R.string.no_account_error)
+                            else if (validate.isDateValid(state.date)) {
+                                text.value = ""
+                                onEvent(ExpenseEvent.SaveExpense)
+                            } else text.value = context.getString(R.string.date_format_error)
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(text = stringResource(R.string.save))
+                    }
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    Button(
+                        onClick = { onEvent(ExpenseEvent.HideDialog) },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(text = stringResource(R.string.cancel))
+                    }
+                }
             }
         }
     }

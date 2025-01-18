@@ -74,6 +74,13 @@ fun ThemeSelection(
     val themeOptions = ThemeMode.entries
     var expanded by remember { mutableStateOf(false) }
 
+    val currentThemeNameResId = when (currentThemeMode.name) {
+        "LIGHT" -> R.string.light
+        "DARK" -> R.string.dark
+        "SYSTEM" -> R.string.system
+        else -> R.string.system
+    }
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -91,7 +98,7 @@ fun ThemeSelection(
             onExpandedChange = { expanded = !expanded }
         ) {
             OutlinedTextField(
-                value = currentThemeMode.name,
+                value = stringResource(currentThemeNameResId),
                 onValueChange = {},
                 readOnly = true,
                 trailingIcon = {

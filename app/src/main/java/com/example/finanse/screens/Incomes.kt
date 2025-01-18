@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -41,6 +42,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,6 +62,7 @@ import com.example.finanse.events.IncomeEvent
 import com.example.finanse.sortTypes.IncomeSortType
 import com.example.finanse.states.AccountState
 import com.example.finanse.states.IncomeState
+import com.example.finanse.viewModels.AlbumViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
@@ -166,6 +169,10 @@ fun IncomesScreen(
                         .padding(horizontal = 8.dp),
                     elevation = CardDefaults.cardElevation(4.dp),
                     shape = MaterialTheme.shapes.medium,
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface, // Background color
+                        contentColor = MaterialTheme.colorScheme.onSurface  // Text and icon color
+                    )
                 ) {
                     Row(
                         modifier = Modifier
@@ -243,103 +250,145 @@ fun AddIncomeDialog(
     )
 
     BasicAlertDialog(onDismissRequest = { onEvent(IncomeEvent.HideDialog) }) {
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.background, MaterialTheme.shapes.medium)
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(vertical = 8.dp) // Optional: Extra padding
         ) {
-            Text(text = stringResource(R.string.add_income_dialog), fontSize = 20.sp, color = MaterialTheme.colorScheme.primary)
-
-            OutlinedTextField(
-                value = state.title,
-                onValueChange = { onEvent(IncomeEvent.SetTitle(it)) },
-                label = { Text(text = stringResource(R.string.title_label)) },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
-            )
-            OutlinedTextField(
-                value = state.amount,
-                onValueChange = {
-                    if (validate.isAmountValid(it)) onEvent(IncomeEvent.SetAmount(it))
-                },
-                label = { Text(text = stringResource(R.string.amount_label)) },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
-            )
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { datePickerDialog.show() },
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(text = state.date.ifEmpty { stringResource(R.string.select_date_label) }, modifier = Modifier.padding(8.dp))
-                Icon(Icons.Default.DateRange, contentDescription = stringResource(R.string.select_date_label))
+            item {
+                Text(
+                    text = stringResource(R.string.add_income_dialog),
+                    fontSize = 20.sp,
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
-            OutlinedTextField(
-                value = accountName.value,
-                onValueChange = {},
-                label = { Text(stringResource(R.string.account_label)) },
-                trailingIcon = {
-                    Icon(icon, "drop down menu arrow", Modifier.clickable { expandedAccount = !expandedAccount })
-                },
-                readOnly = true,
-                modifier = Modifier.fillMaxWidth()
-            )
-            DropdownMenu(
-                expanded = expandedAccount,
-                onDismissRequest = { expandedAccount = false }
-            ) {
-                mAccounts.forEach { a ->
-                    DropdownMenuItem(onClick = {
-                        expandedAccount = false
-                        onEvent(IncomeEvent.SetAccount(a.id.toString()))
-                        accountName.value = a.name
+            item {
+                OutlinedTextField(
+                    value = state.title,
+                    onValueChange = { onEvent(IncomeEvent.SetTitle(it)) },
+                    label = { Text(text = stringResource(R.string.title_label)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+            }
+            item {
+                OutlinedTextField(
+                    value = state.amount,
+                    onValueChange = {
+                        if (validate.isAmountValid(it)) onEvent(IncomeEvent.SetAmount(it))
                     },
-                        text = { Text(text = a.name) }
+                    label = { Text(text = stringResource(R.string.amount_label)) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+            }
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { datePickerDialog.show() },
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = state.date.ifEmpty { stringResource(R.string.select_date_label) },
+                        modifier = Modifier.padding(8.dp)
+                    )
+                    Icon(
+                        Icons.Default.DateRange,
+                        contentDescription = stringResource(R.string.select_date_label)
                     )
                 }
             }
-            OutlinedTextField(
-                value = state.description ?: "",
-                onValueChange = {
-                    val description = it.ifEmpty { null }
-                    onEvent(IncomeEvent.SetDescription(description))
-                },
-                label = { Text(text = stringResource(R.string.description_label)) },
-                modifier = Modifier.fillMaxWidth(),
-                maxLines = 3
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                Button(
-                    onClick = {
-                        if (state.title.isEmpty()) text.value = context.getString(R.string.no_title_error)
-                        else if (state.amount.isEmpty()) text.value = context.getString(R.string.no_amount_error)
-                        else if (state.account.isEmpty()) text.value = context.getString(R.string.no_account_error)
-                        else if (validate.isDateValid(state.date)) {
-                            text.value = ""
-                            onEvent(IncomeEvent.SaveIncome)
-                        } else text.value = context.getString(R.string.date_format_error)
+            item {
+                OutlinedTextField(
+                    value = accountName.value,
+                    onValueChange = {},
+                    label = { Text(stringResource(R.string.account_label)) },
+                    trailingIcon = {
+                        Icon(
+                            icon,
+                            "drop down menu arrow",
+                            Modifier.clickable { expandedAccount = !expandedAccount })
                     },
-                    modifier = Modifier.weight(1f)
+                    readOnly = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                DropdownMenu(
+                    expanded = expandedAccount,
+                    onDismissRequest = { expandedAccount = false }
                 ) {
-                    Text(text = stringResource(R.string.save))
+                    mAccounts.forEach { a ->
+                        DropdownMenuItem(onClick = {
+                            expandedAccount = false
+                            onEvent(IncomeEvent.SetAccount(a.id.toString()))
+                            accountName.value = a.name
+                        },
+                            text = { Text(text = a.name) }
+                        )
+                    }
                 }
+            }
+            item {
+                OutlinedTextField(
+                    value = state.description ?: "",
+                    onValueChange = {
+                        val description = it.ifEmpty { null }
+                        onEvent(IncomeEvent.SetDescription(description))
+                    },
+                    label = { Text(text = stringResource(R.string.description_label)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    maxLines = 3
+                )
+            }
 
-                Spacer(modifier = Modifier.width(16.dp))
+            item {
+                val coroutineScope = rememberCoroutineScope()
+                val coroutineContext = coroutineScope.coroutineContext
+                AlbumScreen(viewModel = AlbumViewModel(coroutineContext))
+            }
 
-                Button(onClick = { onEvent(IncomeEvent.HideDialog) }, modifier = Modifier.weight(1f)) {
-                    Text(text = stringResource(R.string.cancel))
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    Button(
+                        onClick = {
+                            if (state.title.isEmpty()) text.value =
+                                context.getString(R.string.no_title_error)
+                            else if (state.amount.isEmpty()) text.value =
+                                context.getString(R.string.no_amount_error)
+                            else if (state.account.isEmpty()) text.value =
+                                context.getString(R.string.no_account_error)
+                            else if (validate.isDateValid(state.date)) {
+                                text.value = ""
+                                onEvent(IncomeEvent.SaveIncome)
+                            } else text.value = context.getString(R.string.date_format_error)
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(text = stringResource(R.string.save))
+                    }
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    Button(
+                        onClick = { onEvent(IncomeEvent.HideDialog) },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(text = stringResource(R.string.cancel))
+                    }
                 }
             }
 
             if (text.value.isNotEmpty()) {
-                Text(text = text.value, color = MaterialTheme.colorScheme.error)
+                item {
+                    Text(text = text.value, color = MaterialTheme.colorScheme.error)
+                }
             }
         }
     }
