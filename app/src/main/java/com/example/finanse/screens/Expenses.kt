@@ -50,6 +50,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -168,7 +169,10 @@ fun ExpensesScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 8.dp),
+                        .padding(horizontal = 8.dp)
+                        .clickable {
+                            navController.navigate("expenseDetails/${expense.id}")
+                        },
                     elevation = CardDefaults.cardElevation(4.dp),
                     shape = MaterialTheme.shapes.medium,
                     colors = CardDefaults.cardColors(
@@ -197,7 +201,13 @@ fun ExpensesScreen(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             expense.description?.let {
-                                Text(text = it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(
+                                    text = it,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis
+                                )
                             }
                         }
                         IconButton(onClick = {

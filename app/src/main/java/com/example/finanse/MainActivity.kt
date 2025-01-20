@@ -19,7 +19,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.finanse.screens.AccountsScreen
 import com.example.finanse.screens.CategoriesScreen
+import com.example.finanse.screens.ExpenseDetails
 import com.example.finanse.screens.ExpensesScreen
+import com.example.finanse.screens.IncomeDetails
 import com.example.finanse.screens.IncomesScreen
 import com.example.finanse.screens.Menu
 import com.example.finanse.screens.SettingsScreen
@@ -136,6 +138,24 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("account"){
                             AccountsScreen(navController, accountState, accountViewModel::onEvent)
+                        }
+                        composable("expenseDetails/{expenseId}") { backStackEntry ->
+                            val expenseId = backStackEntry.arguments?.getString("expenseId") ?: return@composable
+                            val expense = expenseState.expense.find { it.id == expenseId.toInt() } // Find the expense by ID
+                            if (expense != null) {
+                                ExpenseDetails(expense, navController, accountState)
+                            } else {
+                                // TODO:Handle case where expense
+                            }
+                        }
+                        composable("incomeDetails/{incomeId}") { backStackEntry ->
+                            val incomeId = backStackEntry.arguments?.getString("incomeId") ?: return@composable
+                            val income = incomeState.income.find { it.id == incomeId.toInt() } // Find the income by ID
+                            if (income != null) {
+                                IncomeDetails(income, navController, accountState)
+                            } else {
+                                // TODO:Handle case where income is not found
+                            }
                         }
                     }
                 }
