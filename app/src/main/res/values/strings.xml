@@ -108,4 +108,11 @@
     <string name="october">October</string>
     <string name="november">November</string>
     <string name="december">December</string>
+    <string name="delete">Delete</string>
+    <string name="selected_pictures">Selected Pictures</string>
+    <string name="pick_picture">Pick a picture</string>
+    <string name="take_picture">Take a photo</string>
+    <string name="expenseDetails">Expense Details</string>
+    <string name="date_label">Date</string>
+    <string name="incomeDetails">Income Details</string>
 </resources>

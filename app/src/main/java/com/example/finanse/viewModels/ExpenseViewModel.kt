@@ -1,5 +1,7 @@
 package com.example.finanse.viewModels
 
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.finanse.dao.AccountDao
@@ -7,7 +9,9 @@ import com.example.finanse.dao.ExpenseDao
 import com.example.finanse.entities.Expense
 import com.example.finanse.events.ExpenseEvent
 import com.example.finanse.sortTypes.ExpenseSortType
+import com.example.finanse.states.AlbumState
 import com.example.finanse.states.ExpenseState
+import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -46,6 +50,8 @@ class ExpenseViewModel(
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ExpenseState())
 
+    private val _albumState = mutableStateOf(AlbumState())
+    val albumState: State<AlbumState> get() = _albumState
     fun onEvent(event: ExpenseEvent){
         when(event){
             is ExpenseEvent.DeleteExpense -> {
@@ -82,11 +88,14 @@ class ExpenseViewModel(
                 val description = state.value.description
                 val category = state.value.category
                 val account = state.value.account.toInt()
-
+                val photoPaths = state.value.photoPaths
 
                 if(amount.isNaN() || title.isBlank() || category.isBlank()){
                     return
                 }
+
+                val photosJson = if (photoPaths?.isNotEmpty() == true) Gson().toJson(photoPaths) else null
+
                 if (state.value.id == -1) {
                     val expense = Expense(
                         amount = amount,
@@ -94,7 +103,8 @@ class ExpenseViewModel(
                         date = LocalDate.parse(date, DateTimeFormatter.ofPattern("dd.MM.yyyy")),
                         category = category,
                         account = account,
-                        description = description
+                        description = description,
+                        photos = photosJson
                     )
                     viewModelScope.launch {
                         dao.insertExpense(expense)
@@ -110,7 +120,8 @@ class ExpenseViewModel(
                         date = LocalDate.parse(date, DateTimeFormatter.ofPattern("dd.MM.yyyy")),
                         category = category,
                         account = account,
-                        description = description
+                        description = description,
+                        photos = photosJson
                     )
                     viewModelScope.launch {
                         val difference = withContext(Dispatchers.IO) {
@@ -132,7 +143,8 @@ class ExpenseViewModel(
                     category = "",
                     account = "",
                     description = "",
-                    id = -1
+                    id = -1,
+                    photoPaths = null
                 )}
             }
             is ExpenseEvent.GetData -> {
@@ -181,6 +193,11 @@ class ExpenseViewModel(
             is ExpenseEvent.SetTitle -> {
                 _state.update { it.copy(
                     title = event.title
+                ) }
+            }
+            is ExpenseEvent.SetPhotoPaths -> {
+                _state.update { it.copy(
+                    photoPaths = event.photoPaths
                 ) }
             }
             is ExpenseEvent.ShowDialog -> {

@@ -1,11 +1,7 @@
 package com.example.finanse.viewModels
 
 
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.ImageDecoder
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.content.FileProvider
@@ -14,6 +10,7 @@ import com.example.finanse.events.AlbumEvent
 import com.example.finanse.states.AlbumState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import java.io.File
 import kotlin.coroutines.CoroutineContext
 
@@ -26,7 +23,6 @@ class AlbumViewModel(private val coroutineContext: CoroutineContext): ViewModel(
     // endregion
 
     // region Intents
-    @RequiresApi(Build.VERSION_CODES.P)
     fun onEvent(event: AlbumEvent) {
         when (event) {
             is AlbumEvent.OnPermissionGrantedWith -> {
@@ -55,13 +51,13 @@ class AlbumViewModel(private val coroutineContext: CoroutineContext): ViewModel(
                         inputStream?.close()
 
                         if (bytes != null) {
-                            val bitmapOptions = BitmapFactory.Options()
-                            bitmapOptions.inMutable = true
-                            val bitmap: Bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size, bitmapOptions)
-                            newImages.add(bitmap.asImageBitmap())
-                        } else {
-                            // error reading the bytes from the image url
-                            println("The image that was picked could not be read from the device at this url: $eachImageUrl")
+                            // Save the image to the cache directory
+                            val tempFile = File(event.compositionContext.cacheDir, "image_${System.currentTimeMillis()}.jpg")
+                            tempFile.writeBytes(bytes)
+
+                            // Add the image to selectedPictures
+                            val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size).asImageBitmap()
+                            newImages.add(bitmap)
                         }
                     }
 
@@ -71,27 +67,48 @@ class AlbumViewModel(private val coroutineContext: CoroutineContext): ViewModel(
                         tempFileUrl = null
                     )
                     _albumViewState.value = newCopy
-                } else {
-                    println("noting picked")
                 }
-
             }
             is AlbumEvent.OnImageSavedWith -> {
                 val tempImageUrl = _albumViewState.value.tempFileUrl
                 if (tempImageUrl != null) {
-                    val source = ImageDecoder.createSource(event.compositionContext.contentResolver, tempImageUrl)
+                    val inputStream = event.compositionContext.contentResolver.openInputStream(tempImageUrl)
+                    val bytes = inputStream?.readBytes()
+                    inputStream?.close()
 
-                    val currentPictures = _albumViewState.value.selectedPictures.toMutableList()
-                    currentPictures.add(ImageDecoder.decodeBitmap(source).asImageBitmap())
+                    if (bytes != null) {
+                        // Save the image to the cache directory
+                        val tempFile = File(event.compositionContext.cacheDir, "image_${System.currentTimeMillis()}.jpg")
+                        tempFile.writeBytes(bytes)
 
-                    _albumViewState.value = _albumViewState.value.copy(tempFileUrl = null,
-                        selectedPictures = currentPictures)
+                        // Add the image to selectedPictures
+                        val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size).asImageBitmap()
+                        val currentState = _albumViewState.value
+                        val updatedState = currentState.copy(
+                            tempFileUrl = null,
+                            selectedPictures = currentState.selectedPictures + bitmap
+                        )
+
+                        _albumViewState.value = updatedState
+                    }
                 }
             }
             is AlbumEvent.OnImageSavingCanceled -> {
                 _albumViewState.value = _albumViewState.value.copy(tempFileUrl = null)
             }
+            is AlbumEvent.OnDeletePicture -> {
+                val pictureToDelete = _albumViewState.value.selectedPictures[event.index]
+                val cacheDir = event.compositionContext.cacheDir
+                val tempFile = File(cacheDir, "image_${pictureToDelete.hashCode()}.jpg")
+                if (tempFile.exists()) {
+                    tempFile.delete()
+                }
+                _albumViewState.update { state ->
+                    state.copy(selectedPictures = state.selectedPictures.toMutableList().apply {
+                        removeAt(event.index)
+                    })
+                }
+            }
         }
     }
-    // endregion
 }

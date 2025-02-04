@@ -13,10 +13,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.finanse.DisplayFormat
+import com.example.finanse.R
 import com.example.finanse.TopNavBar
 import com.example.finanse.entities.Expense
 import com.example.finanse.states.AccountState
@@ -33,7 +35,7 @@ fun ExpenseDetails(expense: Expense, navController: NavController, accountState:
             verticalArrangement = Arrangement.spacedBy(16.dp), // Add spacing between items
         ) {
             item {
-                TopNavBar(navController, "Expense Details", "Expenses")
+                TopNavBar(navController, "expenseDetails", "expenses")
             }
             item {
                 Card(
@@ -53,7 +55,7 @@ fun ExpenseDetails(expense: Expense, navController: NavController, accountState:
                         verticalArrangement = Arrangement.spacedBy(12.dp) // Add spacing between rows
                     ) {
                         Text(
-                            text = "Title:",
+                            text = stringResource(R.string.title_label)+":",
                             style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp), // Increased font size
                             color = MaterialTheme.colorScheme.primary
                         )
@@ -63,7 +65,7 @@ fun ExpenseDetails(expense: Expense, navController: NavController, accountState:
                         )
 
                         Text(
-                            text = "Amount:",
+                            text = stringResource(R.string.amount_label)+":",
                             style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp),
                             color = MaterialTheme.colorScheme.primary
                         )
@@ -73,7 +75,7 @@ fun ExpenseDetails(expense: Expense, navController: NavController, accountState:
                         )
 
                         Text(
-                            text = "Date:",
+                            text = stringResource(R.string.date_label)+":",
                             style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp),
                             color = MaterialTheme.colorScheme.primary
                         )
@@ -83,7 +85,7 @@ fun ExpenseDetails(expense: Expense, navController: NavController, accountState:
                         )
 
                         Text(
-                            text = "Account:",
+                            text = stringResource(R.string.account_label)+":",
                             style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp),
                             color = MaterialTheme.colorScheme.primary
                         )
@@ -93,7 +95,7 @@ fun ExpenseDetails(expense: Expense, navController: NavController, accountState:
                         )
 
                         Text(
-                            text = "Category:",
+                            text = stringResource(R.string.category_label)+":",
                             style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp),
                             color = MaterialTheme.colorScheme.primary
                         )
@@ -104,7 +106,7 @@ fun ExpenseDetails(expense: Expense, navController: NavController, accountState:
 
                         expense.description?.let {
                             Text(
-                                text = "Description:",
+                                text = stringResource(R.string.description_label)+":",
                                 style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp),
                                 color = MaterialTheme.colorScheme.primary
                             )

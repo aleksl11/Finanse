@@ -2,6 +2,9 @@ package com.example.finanse.screens
 
 import android.app.DatePickerDialog
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -62,9 +65,13 @@ import com.example.finanse.ValidateInputs
 import com.example.finanse.events.ExpenseEvent
 import com.example.finanse.sortTypes.ExpenseSortType
 import com.example.finanse.states.AccountState
+import com.example.finanse.states.AlbumState
 import com.example.finanse.states.CategoryState
 import com.example.finanse.states.ExpenseState
 import com.example.finanse.viewModels.AlbumViewModel
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
@@ -76,6 +83,7 @@ fun ExpensesScreen(
     state: ExpenseState,
     categoryState: CategoryState,
     accountState: AccountState,
+    albumState: AlbumState,
     onEvent: (ExpenseEvent) -> Unit
 ) {
     val mAccounts = accountState.account
@@ -94,7 +102,7 @@ fun ExpensesScreen(
         },
     ) { padding ->
         if (state.isAddingExpense) {
-            AddExpenseDialog(context = context, state = state, categoryState = categoryState, accountState = accountState, onEvent = onEvent)
+            AddExpenseDialog(context = context, state = state, categoryState = categoryState, accountState = accountState, albumState = albumState, onEvent = onEvent)
         }
 
         LazyColumn(
@@ -234,6 +242,7 @@ fun AddExpenseDialog(
     state: ExpenseState,
     categoryState: CategoryState,
     accountState: AccountState,
+    albumState: AlbumState,
     onEvent: (ExpenseEvent) -> Unit,
 ) {
     val text = remember { mutableStateOf("") }
@@ -420,6 +429,25 @@ fun AddExpenseDialog(
                             else if (state.account.isEmpty()) text.value = context.getString(R.string.no_account_error)
                             else if (validate.isDateValid(state.date)) {
                                 text.value = ""
+
+                                val cacheDir = context.cacheDir
+                                val cachedImages = cacheDir.listFiles { file ->
+                                    file.name.endsWith(".jpg") // Assuming images are saved with .jpg extension
+                                }?.toList() ?: emptyList()
+                                Log.d("MoveImage", "Selected pictures: ${cachedImages.size}")
+                                // Move images from cache to internal storage
+                                val newPaths = mutableListOf<String>()
+                                for (imageFile in cachedImages) {
+                                    val bitmap = BitmapFactory.decodeFile(imageFile.absolutePath)
+                                    val newPath = moveImageToInternalStorage(context, bitmap)
+                                    if (newPath != null) {
+                                        newPaths.add(newPath)
+                                    }
+                                }
+
+                                // Update state with new paths
+                                onEvent(ExpenseEvent.SetPhotoPaths(newPaths))
+                                cleanCache(cacheDir)
                                 onEvent(ExpenseEvent.SaveExpense)
                             } else text.value = context.getString(R.string.date_format_error)
                         },
@@ -442,11 +470,37 @@ fun AddExpenseDialog(
     }
 }
 
+fun cleanCache(cacheDir: File) {
+    cacheDir.listFiles { file ->
+        file.name.endsWith(".jpg") // Assuming images are saved with .jpg extension
+    }?.forEach { it.delete() }
+}
+
 fun getSortTypeName(context: Context, name: ExpenseSortType): String{
     return when (name) {
         ExpenseSortType.AMOUNT-> context.getString(R.string.sort_by_amount)
         ExpenseSortType.CATEGORY -> context.getString(R.string.sort_by_category)
         ExpenseSortType.DATE_ADDED -> context.getString(R.string.sort_by_default)
         ExpenseSortType.DATE_OF_INCOME -> context.getString(R.string.sort_by_date)
+    }
+}
+
+fun moveImageToInternalStorage(context: Context, bitmap: Bitmap): String? {
+    val internalDir = File(context.filesDir, "Expenses")
+    if (!internalDir.exists()) internalDir.mkdirs()
+
+    val fileName = "expense_${System.currentTimeMillis()}.jpg"
+    val destinationFile = File(internalDir, fileName)
+
+    return try {
+        // Saving Bitmap to file
+        val outputStream = FileOutputStream(destinationFile)
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
+        outputStream.close()
+
+        destinationFile.absolutePath // Return the new file path
+    } catch (e: IOException) {
+        e.printStackTrace()
+        null
     }
 }

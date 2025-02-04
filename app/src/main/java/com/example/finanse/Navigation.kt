@@ -29,6 +29,8 @@ fun TopNavBar(navController: NavController, currentScreen: String, previousScree
         "incomes" -> R.string.incomes
         "categories" -> R.string.categories
         "accounts" -> R.string.accounts
+        "expensedetails" -> R.string.expenseDetails
+        "incomedetails" -> R.string.incomeDetails
         else -> {R.string.app_name}
     }
     Box(

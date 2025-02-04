@@ -30,4 +30,5 @@ data class Expense(
     val category: String,
     val account: Int,
     val description: String? = null,
+    val photos: String? = null //JSON
 )

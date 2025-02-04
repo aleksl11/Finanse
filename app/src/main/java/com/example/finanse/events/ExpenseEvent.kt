@@ -1,12 +1,11 @@
 package com.example.finanse.events
 
 import com.example.finanse.entities.Expense
-
 import com.example.finanse.sortTypes.ExpenseSortType
 
 
 sealed interface ExpenseEvent {
-    object SaveExpense: ExpenseEvent
+    object SaveExpense : ExpenseEvent
     data class  SetId(val id: Int): ExpenseEvent
     data class  SetAmount(val amount: String): ExpenseEvent
     data class  SetTitle(val title: String): ExpenseEvent
@@ -14,6 +13,8 @@ sealed interface ExpenseEvent {
     data class  SetCategory(val category: String): ExpenseEvent
     data class  SetAccount(val account: String): ExpenseEvent
     data class  SetDescription(val description: String?): ExpenseEvent
+
+    data class SetPhotoPaths(val photoPaths: List<String>?): ExpenseEvent
 
     object ShowDialog: ExpenseEvent
 

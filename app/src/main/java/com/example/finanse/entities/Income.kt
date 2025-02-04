@@ -23,4 +23,5 @@ data class Income(
     val date: LocalDate,
     val account: Int,
     val description: String? = null,
+    val photos: String? = null
     )

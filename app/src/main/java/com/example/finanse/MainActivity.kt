@@ -26,6 +26,7 @@ import com.example.finanse.screens.IncomesScreen
 import com.example.finanse.screens.Menu
 import com.example.finanse.screens.SettingsScreen
 import com.example.finanse.screens.SummaryScreen
+import com.example.finanse.states.AlbumState
 import com.example.finanse.ui.theme.FinanseTheme
 import com.example.finanse.ui.theme.ThemeMode
 import com.example.finanse.ui.theme.getThemeMode
@@ -81,7 +82,7 @@ class MainActivity : ComponentActivity() {
             }
         }
     )
-
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -118,7 +119,8 @@ class MainActivity : ComponentActivity() {
                             IncomesScreen(navController, incomeState, accountState, incomeViewModel::onEvent)
                         }
                         composable("expenses"){
-                            ExpensesScreen(navController, expenseState, categoryState, accountState, expenseViewModel::onEvent)
+                            val albumState = AlbumState()
+                            ExpensesScreen(navController, expenseState, categoryState, accountState, albumState, expenseViewModel::onEvent)
                         }
                         composable("categories"){
                             CategoriesScreen(navController, categoryState, categoryViewModel::onEvent)
