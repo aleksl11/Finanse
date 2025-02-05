@@ -2,6 +2,8 @@ package com.example.finanse.screens
 
 import android.app.DatePickerDialog
 import android.content.Context
+import android.graphics.BitmapFactory
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -56,6 +58,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.finanse.ConfirmPopup
 import com.example.finanse.DisplayFormat
+import com.example.finanse.InternalStorage
 import com.example.finanse.R
 import com.example.finanse.TopNavBar
 import com.example.finanse.ValidateInputs
@@ -376,6 +379,26 @@ fun AddIncomeDialog(
                                 context.getString(R.string.no_account_error)
                             else if (validate.isDateValid(state.date)) {
                                 text.value = ""
+
+                                val cacheDir = context.cacheDir
+                                val cachedImages = cacheDir.listFiles { file ->
+                                    file.name.endsWith(".jpg") // Assuming images are saved with .jpg extension
+                                }?.toList() ?: emptyList()
+                                Log.d("MoveImage", "Selected pictures: ${cachedImages.size}")
+                                // Move images from cache to internal storage
+                                val newPaths = mutableListOf<String>()
+                                for (imageFile in cachedImages) {
+                                    val bitmap = BitmapFactory.decodeFile(imageFile.absolutePath)
+                                    val newPath = InternalStorage().moveImageToInternalStorage(context, bitmap, "Income")
+                                    if (newPath != null) {
+                                        newPaths.add(newPath)
+                                    }
+                                }
+
+                                // Update state with new paths
+                                onEvent(IncomeEvent.SetPhotoPaths(newPaths))
+                                InternalStorage().cleanCache(cacheDir)
+
                                 onEvent(IncomeEvent.SaveIncome)
                             } else text.value = context.getString(R.string.date_format_error)
                         },

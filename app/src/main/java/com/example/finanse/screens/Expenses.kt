@@ -2,7 +2,6 @@ package com.example.finanse.screens
 
 import android.app.DatePickerDialog
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.compose.foundation.background
@@ -59,6 +58,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.finanse.ConfirmPopup
 import com.example.finanse.DisplayFormat
+import com.example.finanse.InternalStorage
 import com.example.finanse.R
 import com.example.finanse.TopNavBar
 import com.example.finanse.ValidateInputs
@@ -69,9 +69,6 @@ import com.example.finanse.states.AlbumState
 import com.example.finanse.states.CategoryState
 import com.example.finanse.states.ExpenseState
 import com.example.finanse.viewModels.AlbumViewModel
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
@@ -439,7 +436,7 @@ fun AddExpenseDialog(
                                 val newPaths = mutableListOf<String>()
                                 for (imageFile in cachedImages) {
                                     val bitmap = BitmapFactory.decodeFile(imageFile.absolutePath)
-                                    val newPath = moveImageToInternalStorage(context, bitmap)
+                                    val newPath = InternalStorage().moveImageToInternalStorage(context, bitmap, "Expense")
                                     if (newPath != null) {
                                         newPaths.add(newPath)
                                     }
@@ -447,7 +444,7 @@ fun AddExpenseDialog(
 
                                 // Update state with new paths
                                 onEvent(ExpenseEvent.SetPhotoPaths(newPaths))
-                                cleanCache(cacheDir)
+                                InternalStorage().cleanCache(cacheDir)
                                 onEvent(ExpenseEvent.SaveExpense)
                             } else text.value = context.getString(R.string.date_format_error)
                         },
@@ -470,37 +467,11 @@ fun AddExpenseDialog(
     }
 }
 
-fun cleanCache(cacheDir: File) {
-    cacheDir.listFiles { file ->
-        file.name.endsWith(".jpg") // Assuming images are saved with .jpg extension
-    }?.forEach { it.delete() }
-}
-
 fun getSortTypeName(context: Context, name: ExpenseSortType): String{
     return when (name) {
         ExpenseSortType.AMOUNT-> context.getString(R.string.sort_by_amount)
         ExpenseSortType.CATEGORY -> context.getString(R.string.sort_by_category)
         ExpenseSortType.DATE_ADDED -> context.getString(R.string.sort_by_default)
         ExpenseSortType.DATE_OF_INCOME -> context.getString(R.string.sort_by_date)
-    }
-}
-
-fun moveImageToInternalStorage(context: Context, bitmap: Bitmap): String? {
-    val internalDir = File(context.filesDir, "Expenses")
-    if (!internalDir.exists()) internalDir.mkdirs()
-
-    val fileName = "expense_${System.currentTimeMillis()}.jpg"
-    val destinationFile = File(internalDir, fileName)
-
-    return try {
-        // Saving Bitmap to file
-        val outputStream = FileOutputStream(destinationFile)
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
-        outputStream.close()
-
-        destinationFile.absolutePath // Return the new file path
-    } catch (e: IOException) {
-        e.printStackTrace()
-        null
     }
 }

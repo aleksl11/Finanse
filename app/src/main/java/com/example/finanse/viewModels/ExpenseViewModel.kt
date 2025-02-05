@@ -78,6 +78,7 @@ class ExpenseViewModel(
                     category = "",
                     account = "",
                     description = "",
+                    photoPaths = null,
                     id = -1
                 )}
             }

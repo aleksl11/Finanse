@@ -11,6 +11,7 @@ sealed interface IncomeEvent {
     data class  SetDate(val date: String): IncomeEvent
     data class  SetAccount(val account: String): IncomeEvent
     data class  SetDescription(val description: String?): IncomeEvent
+    data class  SetPhotoPaths(val photoPaths: List<String>?): IncomeEvent
 
     object ShowDialog: IncomeEvent
     object HideDialog: IncomeEvent

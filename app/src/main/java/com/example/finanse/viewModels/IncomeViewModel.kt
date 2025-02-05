@@ -8,6 +8,7 @@ import com.example.finanse.entities.Income
 import com.example.finanse.events.IncomeEvent
 import com.example.finanse.sortTypes.IncomeSortType
 import com.example.finanse.states.IncomeState
+import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -70,6 +71,7 @@ class IncomeViewModel(
                     date = "",
                     account = "",
                     description = "",
+                    photoPaths = null,
                     id = -1
                 )}
             }
@@ -79,17 +81,22 @@ class IncomeViewModel(
                 val date = state.value.date
                 val description = state.value.description
                 val account = state.value.account.toInt()
+                val photoPaths = state.value.photoPaths
 
                 if(amount.isNaN() || title.isBlank()){
                     return
                 }
+
+                val photosJson = if (photoPaths?.isNotEmpty() == true) Gson().toJson(photoPaths) else null
+
                 if (state.value.id == -1) {
                     val income = Income(
                         amount = amount,
                         title = title,
                         date = LocalDate.parse(date, DateTimeFormatter.ofPattern("dd.MM.yyyy")),
                         account = account,
-                        description = description
+                        description = description,
+                        photos = photosJson
                     )
                     viewModelScope.launch {
                         dao.insertIncome(income)
@@ -104,7 +111,8 @@ class IncomeViewModel(
                         title = title,
                         date = LocalDate.parse(date, DateTimeFormatter.ofPattern("dd.MM.yyyy")),
                         account = account,
-                        description = description
+                        description = description,
+                        photos = photosJson
                     )
                     viewModelScope.launch {
                         val difference = withContext(Dispatchers.IO) {
@@ -124,6 +132,7 @@ class IncomeViewModel(
                     date = "",
                     account = "",
                     description = "",
+                    photoPaths = null,
                     id = -1
                 )}
             }
@@ -162,6 +171,11 @@ class IncomeViewModel(
             is IncomeEvent.SetDescription -> {
                 _state.update { it.copy(
                     description = event.description
+                ) }
+            }
+            is IncomeEvent.SetPhotoPaths -> {
+                _state.update { it.copy(
+                    photoPaths = event.photoPaths
                 ) }
             }
             is IncomeEvent.SetTitle -> {
