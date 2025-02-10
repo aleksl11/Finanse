@@ -1,4 +1,5 @@
 plugins {
+    id("com.google.gms.google-services")
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
 
@@ -86,5 +87,13 @@ dependencies {
     implementation("androidx.core:core-splashscreen:1.0.1")
 
     implementation("com.google.code.gson:gson:2.8.6")
+
+    //firebase & google services
+    implementation("com.google.firebase:firebase-auth:22.3.1")
+    implementation("com.google.firebase:firebase-storage:20.3.0")
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
+    implementation(platform("androidx.compose:compose-bom:2023.08.00"))
+    implementation("com.google.accompanist:accompanist-systemuicontroller:0.32.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
 }

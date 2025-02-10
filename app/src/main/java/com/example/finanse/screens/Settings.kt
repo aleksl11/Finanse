@@ -1,13 +1,23 @@
 package com.example.finanse.screens
 
+import android.content.Context
+import android.content.Intent
+import android.util.Log
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -23,6 +33,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -30,6 +41,11 @@ import androidx.navigation.NavController
 import com.example.finanse.R
 import com.example.finanse.TopNavBar
 import com.example.finanse.ui.theme.ThemeMode
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.launch
 
 @Composable
@@ -41,6 +57,31 @@ fun SettingsScreen(
     onLanguageChanged: (String) -> Unit
 ){
     val coroutineScope = rememberCoroutineScope()
+    val auth = FirebaseAuth.getInstance()
+    var user by remember {
+        mutableStateOf(auth.currentUser)
+    }
+    val context = LocalContext.current
+
+    val signInLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+        try {
+            val account = task.getResult(ApiException::class.java)
+            val credential = GoogleAuthProvider.getCredential(account.idToken, null)
+            auth.signInWithCredential(credential)
+                .addOnSuccessListener { authResult ->
+                    user = authResult.user
+                }
+                .addOnFailureListener { e ->
+                    Log.e("Auth", "Sign-in failed", e)
+                }
+        } catch (e: ApiException) {
+            Log.e("Auth", "Google Sign-In Failed", e)
+        }
+    }
+
 
     Column{
         TopNavBar(navController, "settings","menu")
@@ -60,6 +101,21 @@ fun SettingsScreen(
                     currentLanguage,
                     onLanguageChanged
                 )
+            }
+            item {
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Sign-In Button
+                Button(onClick = {
+                    if (user == null) {
+                        signInWithGoogle(context, signInLauncher)
+                    } else {
+                        auth.signOut()
+                        user = null
+                    }
+                }) {
+                    Text(if (user == null) "Sign In with Google" else "Sign Out (${user?.email})")
+                }
             }
         }
     }
@@ -196,4 +252,14 @@ fun LanguageSelection(
             }
         }
     }
+}
+
+fun signInWithGoogle(context: Context, launcher: ManagedActivityResultLauncher<Intent, ActivityResult>) {
+    val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+        .requestIdToken("488381489727-a7r7s1tok0kd2tld6cic2d6jib7qpqnk.apps.googleusercontent.com")
+        .requestEmail()
+        .build()
+
+    val googleSignInClient = GoogleSignIn.getClient(context, gso)
+    launcher.launch(googleSignInClient.signInIntent) // ✅ Use the launcher instead of registerForActivityResult
 }
