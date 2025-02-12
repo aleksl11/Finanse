@@ -1,6 +1,9 @@
 package com.example.finanse.screens
 
 import android.Manifest
+import android.graphics.BitmapFactory
+import android.os.FileObserver
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -28,9 +31,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -39,6 +46,7 @@ import com.example.finanse.R
 import com.example.finanse.events.AlbumEvent
 import com.example.finanse.states.AlbumState
 import com.example.finanse.viewModels.AlbumViewModel
+import java.io.File
 
 
 @Composable
@@ -54,7 +62,6 @@ fun AlbumScreen(viewModel: AlbumViewModel) {
         if (isImageSaved) {
             viewModel.onEvent(AlbumEvent.OnImageSavedWith(currentContext))
         } else {
-            // handle image saving error or cancellation
             viewModel.onEvent(AlbumEvent.OnImageSavingCanceled)
         }
     }
@@ -63,7 +70,7 @@ fun AlbumScreen(viewModel: AlbumViewModel) {
         if (permissionGranted) {
             viewModel.onEvent(AlbumEvent.OnPermissionGrantedWith(currentContext))
         } else {
-            // handle permission denied such as:
+            Toast.makeText(currentContext, "Permission denied", Toast.LENGTH_SHORT).show()
             viewModel.onEvent(AlbumEvent.OnPermissionDenied)
         }
     }
@@ -72,6 +79,26 @@ fun AlbumScreen(viewModel: AlbumViewModel) {
         viewState.tempFileUrl?.let {
             cameraLauncher.launch(it)
         }
+    }
+
+    val cacheDir = currentContext.cacheDir
+    val imageFiles = remember { mutableStateListOf<File>() }
+
+    val fileObserver = remember {
+        object : FileObserver(cacheDir.path, CREATE or DELETE or MOVED_TO or MOVED_FROM) {
+            override fun onEvent(event: Int, path: String?) {
+                if (path != null && path.endsWith(".jpg")) {
+                    val updatedList = cacheDir.listFiles()?.filter { it.extension == "jpg" } ?: emptyList()
+                    imageFiles.clear()
+                    imageFiles.addAll(updatedList)
+                }
+            }
+        }.apply { startWatching() }
+    }
+
+    LaunchedEffect(Unit) {
+        val initialFiles = cacheDir.listFiles()?.filter { it.extension == "jpg" } ?: emptyList()
+        imageFiles.addAll(initialFiles)
     }
 
     Column(modifier = Modifier) {
@@ -93,30 +120,36 @@ fun AlbumScreen(viewModel: AlbumViewModel) {
         }
         Spacer(modifier = Modifier.height(16.dp))
         Text(text = stringResource(R.string.selected_pictures))
+
         LazyRow(
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(0.dp, 1200.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            userScrollEnabled = false
+            userScrollEnabled = true
         ) {
-            itemsIndexed(viewState.selectedPictures) { index, picture ->
+            itemsIndexed(imageFiles) { index, file ->
+                val bitmap = remember(file.path) {
+                    getBitmapFromFile(file)
+                }
+
                 Box(
                     modifier = Modifier
                         .padding(8.dp)
                         .size(50.dp) // The Box defines the size of the image
                 ) {
-                    Image(
-                        modifier = Modifier
-                            .matchParentSize(), // The Image fills the entire Box
-                        bitmap = picture,
-                        contentDescription = null,
-                        contentScale = ContentScale.Fit
-                    )
+                    bitmap?.let {
+                        Image(
+                            modifier = Modifier.matchParentSize(), // The Image fills the entire Box
+                            bitmap = it,
+                            contentDescription = null,
+                            contentScale = ContentScale.Fit
+                        )
+                    }
                     IconButton(
                         onClick = {
                             // Trigger delete event
-                            viewModel.onEvent(AlbumEvent.OnDeletePicture(index, currentContext))
+                            viewModel.onEvent(AlbumEvent.OnDeletePicture(file.name, currentContext))
                         },
                         modifier = Modifier
                             .size(16.dp) // Ensure the IconButton has a smaller size
@@ -131,5 +164,15 @@ fun AlbumScreen(viewModel: AlbumViewModel) {
                 }
             }
         }
+    }
+}
+
+fun getBitmapFromFile(file: File): ImageBitmap? {
+    return try {
+        val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+        bitmap?.asImageBitmap()
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
     }
 }

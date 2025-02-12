@@ -115,4 +115,5 @@
     <string name="expenseDetails">Expense Details</string>
     <string name="date_label">Date</string>
     <string name="incomeDetails">Income Details</string>
+    <string name="photos_label">Photos</string>
 </resources>

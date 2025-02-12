@@ -65,7 +65,6 @@ import com.example.finanse.ValidateInputs
 import com.example.finanse.events.ExpenseEvent
 import com.example.finanse.sortTypes.ExpenseSortType
 import com.example.finanse.states.AccountState
-import com.example.finanse.states.AlbumState
 import com.example.finanse.states.CategoryState
 import com.example.finanse.states.ExpenseState
 import com.example.finanse.viewModels.AlbumViewModel
@@ -80,7 +79,6 @@ fun ExpensesScreen(
     state: ExpenseState,
     categoryState: CategoryState,
     accountState: AccountState,
-    albumState: AlbumState,
     onEvent: (ExpenseEvent) -> Unit
 ) {
     val mAccounts = accountState.account
@@ -99,7 +97,13 @@ fun ExpensesScreen(
         },
     ) { padding ->
         if (state.isAddingExpense) {
-            AddExpenseDialog(context = context, state = state, categoryState = categoryState, accountState = accountState, albumState = albumState, onEvent = onEvent)
+            AddExpenseDialog(
+                context = context,
+                state = state,
+                categoryState = categoryState,
+                accountState = accountState,
+                onEvent = onEvent
+            )
         }
 
         LazyColumn(
@@ -217,7 +221,7 @@ fun ExpensesScreen(
                         }
                         IconButton(onClick = {
                             onEvent(ExpenseEvent.SetId(expense.id))
-                            onEvent(ExpenseEvent.GetData(expense.id))
+                            onEvent(ExpenseEvent.GetData(expense.id, context))
                             onEvent(ExpenseEvent.ShowDialog)
                         }) {
                             Icon(imageVector = Icons.Default.Edit, contentDescription = stringResource(R.string.edit_expense_desc))
@@ -239,7 +243,6 @@ fun AddExpenseDialog(
     state: ExpenseState,
     categoryState: CategoryState,
     accountState: AccountState,
-    albumState: AlbumState,
     onEvent: (ExpenseEvent) -> Unit,
 ) {
     val text = remember { mutableStateOf("") }
@@ -266,7 +269,7 @@ fun AddExpenseDialog(
         calendar.get(Calendar.DAY_OF_MONTH)
     )
 
-    BasicAlertDialog(onDismissRequest = { onEvent(ExpenseEvent.HideDialog) }) {
+    BasicAlertDialog(onDismissRequest = { onEvent(ExpenseEvent.HideDialog(context)) }) {
         // Wrapping the entire dialog content in `LazyColumn` for scrolling
         LazyColumn(
             modifier = Modifier
@@ -456,7 +459,7 @@ fun AddExpenseDialog(
                     Spacer(modifier = Modifier.width(16.dp))
 
                     Button(
-                        onClick = { onEvent(ExpenseEvent.HideDialog) },
+                        onClick = { onEvent(ExpenseEvent.HideDialog(context)) },
                         modifier = Modifier.weight(1f)
                     ) {
                         Text(text = stringResource(R.string.cancel))

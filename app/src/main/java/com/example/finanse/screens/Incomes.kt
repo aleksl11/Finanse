@@ -212,7 +212,7 @@ fun IncomesScreen(
                         }
                         IconButton(onClick = {
                             onEvent(IncomeEvent.SetId(income.id))
-                            onEvent(IncomeEvent.GetData(income.id))
+                            onEvent(IncomeEvent.GetData(income.id, context))
                             onEvent(IncomeEvent.ShowDialog)
                         }) {
                             Icon(imageVector = Icons.Default.Edit, contentDescription = stringResource(R.string.edit_income_desc))
@@ -262,7 +262,7 @@ fun AddIncomeDialog(
         calendar.get(Calendar.DAY_OF_MONTH)
     )
 
-    BasicAlertDialog(onDismissRequest = { onEvent(IncomeEvent.HideDialog) }) {
+    BasicAlertDialog(onDismissRequest = { onEvent(IncomeEvent.HideDialog(context)) }) {
         LazyColumn(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.background, MaterialTheme.shapes.medium)
@@ -410,7 +410,7 @@ fun AddIncomeDialog(
                     Spacer(modifier = Modifier.width(16.dp))
 
                     Button(
-                        onClick = { onEvent(IncomeEvent.HideDialog) },
+                        onClick = { onEvent(IncomeEvent.HideDialog(context)) },
                         modifier = Modifier.weight(1f)
                     ) {
                         Text(text = stringResource(R.string.cancel))

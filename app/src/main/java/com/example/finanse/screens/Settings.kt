@@ -261,5 +261,5 @@ fun signInWithGoogle(context: Context, launcher: ManagedActivityResultLauncher<I
         .build()
 
     val googleSignInClient = GoogleSignIn.getClient(context, gso)
-    launcher.launch(googleSignInClient.signInIntent) // ✅ Use the launcher instead of registerForActivityResult
+    launcher.launch(googleSignInClient.signInIntent)
 }

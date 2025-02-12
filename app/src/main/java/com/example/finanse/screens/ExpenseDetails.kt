@@ -21,6 +21,7 @@ import com.example.finanse.DisplayFormat
 import com.example.finanse.R
 import com.example.finanse.TopNavBar
 import com.example.finanse.entities.Expense
+import com.example.finanse.photos.PhotoGallery
 import com.example.finanse.states.AccountState
 import java.time.format.DateTimeFormatter
 
@@ -114,6 +115,15 @@ fun ExpenseDetails(expense: Expense, navController: NavController, accountState:
                                 text = it,
                                 style = MaterialTheme.typography.headlineSmall.copy(fontSize = 20.sp)
                             )
+                        }
+
+                        expense.photos?.let {
+                            Text(
+                                text = stringResource(R.string.photos_label)+":",
+                                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            PhotoGallery(it)
                         }
                     }
                 }

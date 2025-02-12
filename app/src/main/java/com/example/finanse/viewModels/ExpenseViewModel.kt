@@ -1,9 +1,12 @@
 package com.example.finanse.viewModels
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.finanse.InternalStorage
 import com.example.finanse.dao.AccountDao
 import com.example.finanse.dao.ExpenseDao
 import com.example.finanse.entities.Expense
@@ -22,7 +25,10 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.IOException
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 class ExpenseViewModel(
@@ -69,13 +75,15 @@ class ExpenseViewModel(
                     dao.deleteExpense(event.expense)
                 }
             }
-            ExpenseEvent.HideDialog -> {
+            is ExpenseEvent.HideDialog -> {
+                val cacheDir = event.context.cacheDir
+                InternalStorage().cleanCache(cacheDir)
                 _state.update{it.copy(
                     isAddingExpense = false,
                     amount = "",
                     title = "",
-                    date = "",
-                    category = "",
+                    date = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")),
+                    category = "Other",
                     account = "",
                     description = "",
                     photoPaths = null,
@@ -140,10 +148,10 @@ class ExpenseViewModel(
                     isAddingExpense = false,
                     amount = "",
                     title = "",
-                    date = "",
-                    category = "",
+                    date = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")),
+                    category = "Other",
                     account = "",
-                    description = "",
+                    description = null,
                     id = -1,
                     photoPaths = null
                 )}
@@ -151,6 +159,9 @@ class ExpenseViewModel(
             is ExpenseEvent.GetData -> {
                 val id = event.id
                 Thread {
+                    val photoString = dao.getPhotos(id)
+                    val photosToList = if (!photoString.isNullOrBlank()) Gson().fromJson(photoString, Array<String>::class.java).toList() else null
+                    moveExpensePhotosToCache(event.context, photosToList)
                     _state.update { it.copy(
                         title = dao.getTitle(id),
                         amount = dao.getAmount(id).toString(),
@@ -208,6 +219,23 @@ class ExpenseViewModel(
             }
             is ExpenseEvent.SortExpenses -> {
                 _expenseSortType.value = event.expenseSortType
+            }
+        }
+    }
+}
+
+fun moveExpensePhotosToCache(context: Context, photosToList: List<String>?) {
+    val cacheDir = context.cacheDir
+
+    photosToList?.forEach { photoPath ->
+        val originalFile = File(photoPath)
+        if (originalFile.exists()) {
+            try {
+                val newFile = File(cacheDir, originalFile.name)
+                originalFile.copyTo(newFile, overwrite = true)
+            } catch (e: IOException) {
+                Toast.makeText(context, "Error loading photos", Toast.LENGTH_SHORT).show()
+                e.printStackTrace()
             }
         }
     }

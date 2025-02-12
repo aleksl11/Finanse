@@ -26,7 +26,8 @@ interface IncomeDao {
     fun getAccount(id: Int): Int
     @Query("SELECT description FROM income where id = :id ")
     fun getDescription(id: Int): String
-
+    @Query("SELECT photos FROM income where id = :id ")
+    fun getPhotos(id: Int): String
     @Query("SELECT * FROM income ORDER BY id ASC")
     fun getIncomesOrderedById(): Flow<List<Income>>
 

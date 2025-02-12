@@ -28,7 +28,8 @@ interface ExpenseDao {
     fun getAccount(id: Int): Int
     @Query("SELECT description FROM expense where id = :id ")
     fun getDescription(id: Int): String
-
+    @Query("SELECT photos FROM expense where id = :id ")
+    fun getPhotos(id: Int): String
 
     @Query("SELECT * FROM expense ORDER BY id ASC")
     fun getExpensesOrderedById(): Flow<List<Expense>>

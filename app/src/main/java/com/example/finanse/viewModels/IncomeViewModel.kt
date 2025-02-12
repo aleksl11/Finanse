@@ -1,7 +1,11 @@
 package com.example.finanse.viewModels
 
+import android.content.Context
+import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.finanse.InternalStorage
 import com.example.finanse.dao.AccountDao
 import com.example.finanse.dao.IncomeDao
 import com.example.finanse.entities.Income
@@ -19,7 +23,10 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.IOException
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 class IncomeViewModel(
@@ -63,14 +70,16 @@ class IncomeViewModel(
                     dao.deleteIncome(event.income)
                 }
             }
-            IncomeEvent.HideDialog -> {
+            is IncomeEvent.HideDialog -> {
+                val cacheDir = event.context.cacheDir
+                InternalStorage().cleanCache(cacheDir)
                 _state.update{it.copy(
                     isAddingIncome = false,
                     amount = "",
                     title = "",
-                    date = "",
+                    date = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")),
                     account = "",
-                    description = "",
+                    description = null,
                     photoPaths = null,
                     id = -1
                 )}
@@ -86,7 +95,7 @@ class IncomeViewModel(
                 if(amount.isNaN() || title.isBlank()){
                     return
                 }
-
+                Log.d("IncomeDebug", "PhotoPaths: ${state.value.photoPaths}")
                 val photosJson = if (photoPaths?.isNotEmpty() == true) Gson().toJson(photoPaths) else null
 
                 if (state.value.id == -1) {
@@ -129,9 +138,9 @@ class IncomeViewModel(
                     isAddingIncome = false,
                     amount = "",
                     title = "",
-                    date = "",
+                    date = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")),
                     account = "",
-                    description = "",
+                    description = null,
                     photoPaths = null,
                     id = -1
                 )}
@@ -139,12 +148,16 @@ class IncomeViewModel(
             is IncomeEvent.GetData -> {
                 val id = event.id
                 Thread {
+                    val photoString = dao.getPhotos(id)
+                    val photosToList = if (!photoString.isNullOrBlank()) Gson().fromJson(photoString, Array<String>::class.java).toList() else null
+                    moveIncomePhotosToCache(event.context, photosToList)
                     _state.update { it.copy(
                         title = dao.getTitle(id),
                         amount = dao.getAmount(id).toString(),
                         date = dao.getDate(id).format(DateTimeFormatter.ofPattern("dd.MM.yyyy")),
                         description = dao.getDescription(id),
-                        account = dao.getAccount(id).toString()
+                        account = dao.getAccount(id).toString(),
+                        photoPaths = null
                     )}
                 }.start()
             }
@@ -190,6 +203,23 @@ class IncomeViewModel(
             }
             is IncomeEvent.SortIncomes -> {
                 _incomeSortType.value = event.incomeSortType
+            }
+        }
+    }
+}
+
+fun moveIncomePhotosToCache(context: Context, photosToList: List<String>?) {
+    val cacheDir = context.cacheDir
+
+    photosToList?.forEach { photoPath ->
+        val originalFile = File(photoPath)
+        if (originalFile.exists()) {
+            try {
+                val newFile = File(cacheDir, originalFile.name)
+                originalFile.copyTo(newFile, overwrite = true)
+            } catch (e: IOException) {
+                Toast.makeText(context, "Error loading photos", Toast.LENGTH_SHORT).show()
+                e.printStackTrace()
             }
         }
     }

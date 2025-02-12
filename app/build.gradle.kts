@@ -96,4 +96,6 @@ dependencies {
     implementation("com.google.accompanist:accompanist-systemuicontroller:0.32.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
+    //photos
+    implementation("io.coil-kt:coil-compose:2.6.0")
 }

@@ -1,5 +1,6 @@
 package com.example.finanse.events
 
+import android.content.Context
 import com.example.finanse.entities.Expense
 import com.example.finanse.sortTypes.ExpenseSortType
 
@@ -18,9 +19,9 @@ sealed interface ExpenseEvent {
 
     object ShowDialog: ExpenseEvent
 
-    object HideDialog: ExpenseEvent
+    data class HideDialog(val context: Context): ExpenseEvent
 
     data class SortExpenses(val expenseSortType: ExpenseSortType): ExpenseEvent
     data class DeleteExpense(val expense: Expense): ExpenseEvent
-    data class GetData(val id: Int) : ExpenseEvent
+    data class GetData(val id: Int, val context: Context) : ExpenseEvent
 }

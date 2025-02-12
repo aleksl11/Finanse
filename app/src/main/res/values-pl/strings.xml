@@ -108,11 +108,13 @@
     <string name="october">Październik</string>
     <string name="november">Listopad</string>
     <string name="december">Grudzień</string>
-    <string name="delete">Delete</string>
-    <string name="selected_pictures">Selected Pictures</string>
-    <string name="pick_picture">Wybierz zdjęcie</string>
-    <string name="take_picture">Zrób zdjęcie</string>
+
+    <string name="delete">Usuń</string>
+    <string name="selected_pictures">Wybrane Zdjęcia</string>
+    <string name="pick_picture">Wybierz Zdjęcie</string>
+    <string name="take_picture">Zrób Zdjęcie</string>
     <string name="expenseDetails">Szczegóły Wydatku</string>
     <string name="date_label">Data</string>
-    <string name="incomeDetails">Sczegóły Przychodu</string>
+    <string name="incomeDetails">Szczegóły Dochodu</string>
+    <string name="photos_label">Zdjęcia</string>
 </resources>

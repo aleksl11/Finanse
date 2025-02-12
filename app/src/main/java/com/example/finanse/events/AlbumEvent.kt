@@ -9,5 +9,5 @@ sealed interface AlbumEvent {
     data class OnImageSavedWith (val compositionContext: Context): AlbumEvent
     data object OnImageSavingCanceled: AlbumEvent
     data class OnFinishPickingImagesWith(val compositionContext: Context, val imageUrls: List<Uri>): AlbumEvent
-    data class OnDeletePicture(val index: Int, val compositionContext: Context): AlbumEvent
+    data class OnDeletePicture(val title: String, val compositionContext: Context): AlbumEvent
 }

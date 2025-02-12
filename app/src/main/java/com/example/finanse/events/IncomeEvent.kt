@@ -1,5 +1,6 @@
 package com.example.finanse.events
 
+import android.content.Context
 import com.example.finanse.entities.Income
 import com.example.finanse.sortTypes.IncomeSortType
 
@@ -14,9 +15,9 @@ sealed interface IncomeEvent {
     data class  SetPhotoPaths(val photoPaths: List<String>?): IncomeEvent
 
     object ShowDialog: IncomeEvent
-    object HideDialog: IncomeEvent
+    data class HideDialog(val context: Context): IncomeEvent
 
-    data class GetData(val id: Int): IncomeEvent
+    data class GetData(val id: Int, val context: Context): IncomeEvent
     data class SortIncomes(val incomeSortType: IncomeSortType): IncomeEvent
     data class DeleteIncome(val income: Income): IncomeEvent
 }

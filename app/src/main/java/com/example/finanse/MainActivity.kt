@@ -120,7 +120,7 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("expenses"){
                             val albumState = AlbumState()
-                            ExpensesScreen(navController, expenseState, categoryState, accountState, albumState, expenseViewModel::onEvent)
+                            ExpensesScreen(navController, expenseState, categoryState, accountState, expenseViewModel::onEvent)
                         }
                         composable("categories"){
                             CategoriesScreen(navController, categoryState, categoryViewModel::onEvent)
