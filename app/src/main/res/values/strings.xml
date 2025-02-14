@@ -116,4 +116,9 @@
     <string name="date_label">Date</string>
     <string name="incomeDetails">Income Details</string>
     <string name="photos_label">Photos</string>
+    <string name="sign_in">Sign In with Google</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="backup_data">Backup data to account</string>
+    <string name="delete_data">Delete data backup</string>
+    <string name="restore_data">Restore data from backup</string>
 </resources>

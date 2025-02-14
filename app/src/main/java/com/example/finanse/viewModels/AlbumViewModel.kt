@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
 import com.example.finanse.events.AlbumEvent
+import com.example.finanse.screens.getBitmapFromFile
 import com.example.finanse.states.AlbumState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,19 +30,17 @@ class AlbumViewModel(private val coroutineContext: CoroutineContext): ViewModel(
     fun onEvent(event: AlbumEvent) {
         when (event) {
             is AlbumEvent.OnPermissionGrantedWith -> {
-                val tempFile = File.createTempFile(
-                    "temp_image_file_", /* prefix */
-                    ".jpg", /* suffix */
-                    event.compositionContext.cacheDir  /* cache directory */
-                )
+                val tempFile = File(event.compositionContext.cacheDir, "image_${System.currentTimeMillis()}.jpg")
 
                 val uri = FileProvider.getUriForFile(
                     event.compositionContext,
-                    "com.example.finanse.provider", /* needs to match the provider information in the manifest */
+                    "com.example.finanse.provider",
                     tempFile
                 )
+
                 _albumViewState.value = _albumViewState.value.copy(tempFileUrl = uri)
             }
+
             is AlbumEvent.OnPermissionDenied -> {
                 Log.d("Permission Denied","User did not grant permission to use the camera")
             }
@@ -70,45 +69,27 @@ class AlbumViewModel(private val coroutineContext: CoroutineContext): ViewModel(
                 }
             }
             is AlbumEvent.OnImageSavedWith -> {
-                val tempImageUrl = _albumViewState.value.tempFileUrl
-                if (tempImageUrl != null) {
-                    val bitmap = getBitmapFromUri(event.compositionContext, tempImageUrl)
+                val tempImageUrl = _albumViewState.value.tempFileUrl ?: return
 
-//                    if (bitmap != null) {
-//                        val tempFile = File(event.compositionContext.cacheDir, "image_${System.currentTimeMillis()}.jpg")
-//
-//                        // Avoid duplicate saving if the file already exists
-//                        if (!tempFile.exists()) {
-//                            tempFile.outputStream().use { outputStream ->
-//                                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
-//                            }
-//                        }
-//
-//                        _albumViewState.value = _albumViewState.value.copy(
-//                            tempFileUrl = null, // Reset temp file URL after saving
-//                            selectedPictures = _albumViewState.value.selectedPictures + bitmap.asImageBitmap()
-//                        )
-//                    }
+                val file = File(event.compositionContext.cacheDir, File(tempImageUrl.path!!).name)
 
+                if (file.exists()) {
+                    val bitmap = getBitmapFromFile(file)
                     if (bitmap != null) {
-                        // Instead of creating a new file, directly use the existing temp file
-                        val tempFile = File(tempImageUrl.path!!)
-
-                        if (tempFile.exists()) {
-                            _albumViewState.value = _albumViewState.value.copy(
-                                tempFileUrl = null, // Reset temp file URL after saving
-                                selectedPictures = _albumViewState.value.selectedPictures + bitmap.asImageBitmap()
-                            )
-                        }
+                        _albumViewState.value = _albumViewState.value.copy(
+                            tempFileUrl = null,
+                            selectedPictures = _albumViewState.value.selectedPictures + bitmap
+                        )
                     }
                 }
             }
+
             is AlbumEvent.OnImageSavingCanceled -> {
                 val tempImageUrl = _albumViewState.value.tempFileUrl
-                if (tempImageUrl != null) {
-                    val tempFile = File(tempImageUrl.path!!)
-                    if (tempFile.exists()) {
-                        tempFile.delete() // Delete the empty file
+                tempImageUrl?.let {
+                    val file = File(it.path!!)
+                    if (file.exists()) {
+                        file.delete()
                     }
                 }
                 _albumViewState.value = _albumViewState.value.copy(tempFileUrl = null)
@@ -134,4 +115,10 @@ fun getBitmapFromUri(context: Context, uri: Uri): Bitmap? {
         e.printStackTrace()
         null
     }
+}
+
+fun createImageFile(context: Context): File {
+    val file = File(context.cacheDir, "image_${System.currentTimeMillis()}.jpg")
+    file.createNewFile() // Ensure it exists
+    return file
 }

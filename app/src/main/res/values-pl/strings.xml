@@ -117,4 +117,9 @@
     <string name="date_label">Data</string>
     <string name="incomeDetails">Szczegóły Dochodu</string>
     <string name="photos_label">Zdjęcia</string>
+    <string name="sign_in">Zaloguj z kontem Google</string>
+    <string name="sign_out">Wyloguj się</string>
+    <string name="backup_data">Stwórz kopię zapasową</string>
+    <string name="delete_data">Usuń kopię zapasową</string>
+    <string name="restore_data">Restore data from backup</string>
 </resources>

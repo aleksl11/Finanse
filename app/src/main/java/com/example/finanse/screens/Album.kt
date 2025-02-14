@@ -75,12 +75,6 @@ fun AlbumScreen(viewModel: AlbumViewModel) {
         }
     }
 
-    LaunchedEffect(key1 = viewState.tempFileUrl) {
-        viewState.tempFileUrl?.let {
-            cameraLauncher.launch(it)
-        }
-    }
-
     val cacheDir = currentContext.cacheDir
     val imageFiles = remember { mutableStateListOf<File>() }
 
@@ -96,9 +90,10 @@ fun AlbumScreen(viewModel: AlbumViewModel) {
         }.apply { startWatching() }
     }
 
-    LaunchedEffect(Unit) {
-        val initialFiles = cacheDir.listFiles()?.filter { it.extension == "jpg" } ?: emptyList()
-        imageFiles.addAll(initialFiles)
+    LaunchedEffect(viewState.tempFileUrl) {
+        viewState.tempFileUrl?.let {
+            cameraLauncher.launch(it)
+        }
     }
 
     Column(modifier = Modifier) {
