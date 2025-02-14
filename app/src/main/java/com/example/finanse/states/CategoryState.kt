@@ -9,5 +9,5 @@ data class CategoryState(
     val name: String = "",
     val color: Int = Color.White.hashCode(),
     val isAddingCategory: Boolean = false,
-    val categorySortType: CategorySortType = CategorySortType.DATE_ADDED
+    val categorySortType: CategorySortType = CategorySortType.DATE_ADDED,
 )

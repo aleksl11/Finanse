@@ -60,6 +60,7 @@ import com.github.skydoves.colorpicker.compose.ColorEnvelope
 import com.github.skydoves.colorpicker.compose.HsvColorPicker
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 
+private var isEditing = false
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoriesScreen(
@@ -192,6 +193,7 @@ fun CategoriesScreen(
                         if (category.name !in defaultCategories) {
                             IconButton(onClick = {
                                 onEvent(CategoryEvent.GetData(category.name))
+                                isEditing = true
                                 onEvent(CategoryEvent.ShowDialog)
                             }) {
                                 Icon(
@@ -281,11 +283,12 @@ fun AddCategoryDialog(
                         val mCategories = state.category
                         if (state.name.isEmpty()) {
                             errorMessage.value = context.getString(R.string.no_name_error)
-                        } else if (isNameInDb(state.name, mCategories)) {
+                        } else if (isNameInDb(state.name, mCategories) && !isEditing) {
                             errorMessage.value = context.getString(R.string.repeat_category_error)
                         }
                         else{
                             errorMessage.value = ""
+                            isEditing = false
                             onEvent(CategoryEvent.SaveCategory)
                         }
                     },
