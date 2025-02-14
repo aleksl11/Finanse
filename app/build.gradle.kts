@@ -4,6 +4,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
 
     id("com.google.devtools.ksp")
+    kotlin("kapt")
 }
 
 android {
@@ -48,6 +49,7 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            pickFirsts += "/META-INF/DEPENDENCIES"
         }
     }
 }
@@ -68,8 +70,6 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2023.08.00"))
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
@@ -90,11 +90,17 @@ dependencies {
 
     //firebase & google services
     implementation("com.google.firebase:firebase-auth:22.3.1")
-    implementation("com.google.firebase:firebase-storage:20.3.0")
     implementation("com.google.android.gms:play-services-auth:20.7.0")
-    implementation(platform("androidx.compose:compose-bom:2023.08.00"))
     implementation("com.google.accompanist:accompanist-systemuicontroller:0.32.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+
+    //drive
+    implementation("com.google.apis:google-api-services-drive:v3-rev20220815-2.0.0")
+    implementation("com.google.api-client:google-api-client:2.0.0")
+    implementation("com.google.api-client:google-api-client-android:1.32.1")
+    implementation("com.google.oauth-client:google-oauth-client-jetty:1.34.1")
+    implementation("com.google.auth:google-auth-library-oauth2-http:1.19.0")
+    implementation("com.google.http-client:google-http-client-android:1.42.0")
 
     //photos
     implementation("io.coil-kt:coil-compose:2.6.0")
