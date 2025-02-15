@@ -121,5 +121,17 @@
     <string name="sign_out">Wyloguj się</string>
     <string name="backup_data">Stwórz kopię zapasową</string>
     <string name="delete_data">Usuń kopię zapasową</string>
-    <string name="restore_data">Restore data from backup</string>
+    <string name="restore_data">Przywróć dane z kopii zapasowej</string>
+    <string name="delete_button">Usuń</string>
+    <string name="cancel_button">Anuluj</string>
+    <string name="confirm_button">Potwierdź</string>
+    <string name="creating_backup_toast">Rozpoczęto tworzenie kopii zapasowej</string>
+    <string name="backup_created_toast">Tworzenie kopii zakończone</string>
+    <string name="backup_failed_toast">Nie udało się utworzyć kopii zapasowej</string>
+    <string name="restoring_started_toast">Przywracanie danych</string>
+    <string name="no_file_toast">Nie znaleziono pliku kopii zapasowej</string>
+    <string name="restored_toast">Przywracanie zakończone. Uruchom ponownie aplikację, aby zastosować zmiany w bazie danych</string>
+    <string name="restore_failed_toast">Nie udało się przywrócić danych</string>
+    <string name="delete_toast">Kopia zapasowa usunięta</string>
+    <string name="delete_failed_toast">Nie udało się usunąć kopii zapasowej</string>
 </resources>

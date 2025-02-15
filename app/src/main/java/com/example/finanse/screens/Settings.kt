@@ -39,6 +39,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.finanse.ConfirmPopup
 import com.example.finanse.MainDatabase
 import com.example.finanse.R
 import com.example.finanse.TopNavBar
@@ -141,22 +142,31 @@ fun SettingsScreen(
                 item {
                     Spacer(modifier = Modifier.height(20.dp))
                     Row {
-                        Button(onClick = {
+                        ConfirmPopup().ConfirmButtonAction(stringResource(R.string.backup_data), "Are you sure you want to create a backup?") {
                             backupData(context)
-                        }) {
-                            Text(text = stringResource(R.string.backup_data))
                         }
-                        Button(onClick = {
+//                        Button(onClick = {
+//                            backupData(context)
+//                        }) {
+//                            Text(text = stringResource(R.string.backup_data))
+//                        }
+                        ConfirmPopup().ConfirmButtonAction(stringResource(R.string.delete_data), "Are you sure you want to delete backup?") {
                             deleteBackup(context)
-                        }) {
-                            Text(text = stringResource(R.string.delete_data))
                         }
+//                        Button(onClick = {
+//                            deleteBackup(context)
+//                        }) {
+//                            Text(text = stringResource(R.string.delete_data))
+//                        }
                     }
-                    Button(onClick = {
+                    ConfirmPopup().ConfirmButtonAction(stringResource(R.string.restore_data), "Are you sure you want to restore data?") {
                         restoreBackup(context)
-                    }) {
-                        Text(text = stringResource(R.string.restore_data))
                     }
+//                    Button(onClick = {
+//                        restoreBackup(context)
+//                    }) {
+//                        Text(text = stringResource(R.string.restore_data))
+//                    }
                 }
             }
         }
@@ -316,6 +326,9 @@ private const val BACKUP_FILE_NAME = "backup.zip"
 fun backupData(context: Context) {
     CoroutineScope(Dispatchers.IO).launch {
         try {
+            withContext(Dispatchers.Main) {
+                Toast.makeText(context, context.getString(R.string.creating_backup_toast), Toast.LENGTH_SHORT).show()
+            }
             val zipFile = createBackupZip(context)
 
             val driveService = getDriveService(context)
@@ -341,12 +354,12 @@ fun backupData(context: Context) {
             }
             zipFile.delete()
             withContext(Dispatchers.Main) {
-                Toast.makeText(context, "Backup completed", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.backup_created_toast), Toast.LENGTH_SHORT).show()
             }
         } catch (e: Exception) {
             e.printStackTrace()
             withContext(Dispatchers.Main) {
-                Toast.makeText(context, "Backup failed", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.backup_failed_toast), Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -355,11 +368,19 @@ fun backupData(context: Context) {
 fun restoreBackup(context: Context) {
     CoroutineScope(Dispatchers.IO).launch {
         try {
-            MainDatabase.getInstance(context).close()
+            withContext(Dispatchers.Main) {
+                Toast.makeText(context, context.getString(R.string.restoring_started_toast), Toast.LENGTH_SHORT).show()
+            }
+            MainDatabase.destroyInstance()
 
             val driveService = getDriveService(context)
 
-            val backupFileId = getBackupFileId(driveService) ?: return@launch
+            val backupFileId = getBackupFileId(driveService) ?: run {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(context, context.getString(R.string.no_file_toast), Toast.LENGTH_SHORT).show()
+                }
+                return@launch
+            }
 
             val outputStream = ByteArrayOutputStream()
             driveService.files().get(backupFileId)
@@ -370,13 +391,15 @@ fun restoreBackup(context: Context) {
             restoreFromZip(context, zipFile)
 
             zipFile.delete()
+            MainDatabase.getInstance(context)
             withContext(Dispatchers.Main) {
-                Toast.makeText(context, "Restore completed", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.restored_toast), Toast.LENGTH_LONG).show()
             }
         } catch (e: Exception) {
             e.printStackTrace()
+            MainDatabase.getInstance(context)
             withContext(Dispatchers.Main) {
-                Toast.makeText(context, "Restore failed", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.restore_failed_toast), Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -391,12 +414,12 @@ fun deleteBackup(context: Context) {
                 driveService.files().delete(backupFileId).execute()
             }
             withContext(Dispatchers.Main) {
-                Toast.makeText(context, "Backup deleted", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.delete_toast), Toast.LENGTH_SHORT).show()
             }
         } catch (e: Exception) {
             e.printStackTrace()
             withContext(Dispatchers.Main) {
-                Toast.makeText(context, "Delete failed", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.delete_failed_toast), Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -418,7 +441,7 @@ private fun getDriveService(context: Context): Drive {
         GsonFactory(),
         credential
     )
-        .setApplicationName("FInanse")
+        .setApplicationName("Finanse")
         .build()
 }
 

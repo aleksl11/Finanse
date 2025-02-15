@@ -121,4 +121,16 @@
     <string name="backup_data">Backup data to account</string>
     <string name="delete_data">Delete data backup</string>
     <string name="restore_data">Restore data from backup</string>
+    <string name="delete_button">Delete</string>
+    <string name="cancel_button">Cancel</string>
+    <string name="confirm_button">Confirm</string>
+    <string name="creating_backup_toast">Creating backup started</string>
+    <string name="backup_created_toast">Backup completed</string>
+    <string name="backup_failed_toast">Backup failed</string>
+    <string name="restoring_started_toast">Restoring data</string>
+    <string name="no_file_toast">No backup file found</string>
+    <string name="restored_toast">Restore completed. Please restart the app for changes to database to apply</string>
+    <string name="restore_failed_toast">Restore failed</string>
+    <string name="delete_toast">Backup deleted</string>
+    <string name="delete_failed_toast">Delete failed</string>
 </resources>

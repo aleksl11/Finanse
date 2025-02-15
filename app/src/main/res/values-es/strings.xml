@@ -117,9 +117,21 @@
     <string name="date_label">Fecha</string>
     <string name="incomeDetails">Detalles de Ingreso</string>
     <string name="photos_label">Fotos</string>
-    <string name="sign_in">Sign In with Google</string>
-    <string name="sign_out">Sign Out</string>
-    <string name="backup_data">Backup data to account</string>
-    <string name="delete_data">Delete data backup</string>
-    <string name="restore_data">Restore data from backup</string>
+    <string name="sign_in">Iniciar sesión con Google</string>
+    <string name="sign_out">Cerrar sesión</string>
+    <string name="backup_data">Guardar copia de seguridad en la cuenta</string>
+    <string name="delete_data">Eliminar copia de seguridad</string>
+    <string name="restore_data">Restaurar datos desde la copia de seguridad</string>
+    <string name="delete_button">Eliminar</string>
+    <string name="cancel_button">Cancelar</string>
+    <string name="confirm_button">Confirmar</string>
+    <string name="creating_backup_toast">Iniciando creación de copia de seguridad</string>
+    <string name="backup_created_toast">Copia de seguridad completada</string>
+    <string name="backup_failed_toast">Error al crear la copia de seguridad</string>
+    <string name="restoring_started_toast">Restaurando datos</string>
+    <string name="no_file_toast">No se encontró ningún archivo de copia de seguridad</string>
+    <string name="restored_toast">Restauración completada. Reinicia la aplicación para aplicar los cambios en la base de datos</string>
+    <string name="restore_failed_toast">Error al restaurar los datos</string>
+    <string name="delete_toast">Copia de seguridad eliminada</string>
+    <string name="delete_failed_toast">Error al eliminar la copia de seguridad</string>
 </resources>

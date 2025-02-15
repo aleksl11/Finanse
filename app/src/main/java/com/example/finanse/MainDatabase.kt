@@ -108,5 +108,9 @@ abstract class MainDatabase: RoomDatabase() {
                     }
                 }
             }).build()
+        fun destroyInstance() {
+            instance?.close()  // Closes the underlying database
+            instance = null
+        }
     }
 }
