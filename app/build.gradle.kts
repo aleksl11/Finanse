@@ -104,4 +104,7 @@ dependencies {
 
     //photos
     implementation("io.coil-kt:coil-compose:2.6.0")
+
+    //charts
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 }

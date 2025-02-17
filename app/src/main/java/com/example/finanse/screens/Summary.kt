@@ -10,12 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
@@ -39,7 +34,6 @@ import co.yml.charts.axis.AxisData
 import co.yml.charts.common.components.Legends
 import co.yml.charts.common.model.LegendLabel
 import co.yml.charts.common.model.LegendsConfig
-import co.yml.charts.common.model.PlotType
 import co.yml.charts.common.model.Point
 import co.yml.charts.ui.barchart.GroupBarChart
 import co.yml.charts.ui.barchart.models.BarData
@@ -48,9 +42,7 @@ import co.yml.charts.ui.barchart.models.BarStyle
 import co.yml.charts.ui.barchart.models.GroupBar
 import co.yml.charts.ui.barchart.models.GroupBarChartData
 import co.yml.charts.ui.barchart.models.GroupSeparatorConfig
-import co.yml.charts.ui.piechart.charts.DonutPieChart
-import co.yml.charts.ui.piechart.models.PieChartConfig
-import co.yml.charts.ui.piechart.models.PieChartData
+import com.example.finanse.Chart
 import com.example.finanse.R
 import com.example.finanse.TopNavBar
 import com.example.finanse.entities.Category
@@ -60,6 +52,9 @@ import com.example.finanse.sortTypes.SummaryTimePeriod
 import com.example.finanse.states.CategoryState
 import com.example.finanse.states.ExpenseState
 import com.example.finanse.states.IncomeState
+import com.github.mikephil.charting.data.PieData
+import com.github.mikephil.charting.data.PieDataSet
+import com.github.mikephil.charting.data.PieEntry
 import java.time.LocalDate
 import java.time.Month
 import kotlin.math.roundToInt
@@ -219,36 +214,21 @@ fun TimePeriodSummary(sortedExpenses: List<Expense>, sortedIncomes: List<Income>
     val expensesGrouped = sortedExpenses.groupBy { it.category }
         .mapValues { e -> e.value.sumOf { it.amount } }
 
-    val pieChartDataList: MutableList<PieChartData.Slice> = mutableListOf()
+    val pieEntries = mutableListOf<PieEntry>()
+    val colors = mutableListOf<Int>()
+
     expensesGrouped.forEach { (category, sum) ->
-        pieChartDataList.add(PieChartData.Slice(
-            color = Color(getColorByCategory(categoryState.category, category)),
-            label = category,
-            value = ((sum/expensesTotal)*100).toFloat()
-        )
-        )
+        val percent = ((sum / expensesTotal) * 100).toFloat()
+        pieEntries.add(PieEntry(percent, category, sum))
+        colors.add(getColorByCategory(categoryState.category, category))
     }
 
-    val pieChartData = PieChartData(
-        slices = pieChartDataList,
-        plotType = PlotType.Pie
-    )
-
-    val pieChartConfig = PieChartConfig(
-        labelColor = Color.Black,
-        labelVisible = true,
-        isAnimationEnable = true,
-        showSliceLabels = false,
-        animationDuration = 1500,
-        backgroundColor = MaterialTheme.colorScheme.background
-    )
-
-    /*    val categories = categoryState.category
-        val legendsConfig = LegendsConfig(
-            legendLabelList = categories.map { c ->
-                LegendLabel(Color(c.color), c.name) },
-            gridColumnCount = categories.size
-        )*/
+    val dataSet = PieDataSet(pieEntries, "").apply {
+        this.colors = colors
+        valueTextSize = 12f
+        sliceSpace = 2f
+        setDrawValues(false)
+    }
 
     Column(
         modifier = Modifier
@@ -267,50 +247,7 @@ fun TimePeriodSummary(sortedExpenses: List<Expense>, sortedIncomes: List<Income>
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
         )
-        DonutPieChart(
-            modifier = Modifier
-                .width(400.dp)
-                .height(400.dp)
-                .padding(5.dp),
-            pieChartData,
-            pieChartConfig
-        )
-        ChartLegend(categories = categoryState.category)
-        /*Legends(
-            legendsConfig = legendsConfig
-        )*/
-    }
-}
-
-@Composable
-fun ChartLegend(categories: List<Category>){
-    Column (
-        horizontalAlignment = Alignment.Start
-    ){
-        categories.forEach { c ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Card(
-                    modifier = Modifier// Transparent background
-                        .size(30.dp)
-                        .padding(2.dp), // Padding for spacing
-                    shape = MaterialTheme.shapes.small, // Add some elevation for shadow
-                    elevation = CardDefaults.cardElevation(2.dp),
-                    colors = CardColors(Color(c.color),Color(c.color),Color(c.color),Color(c.color))
-                ){}
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 12.dp) // Add space between color box and text
-                ) {
-                    Text(text = c.name, fontSize = 20.sp)
-                }
-            }
-        }
+        Chart().PieChart(data = PieData(dataSet))
     }
 }
 
