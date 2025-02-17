@@ -81,8 +81,6 @@ dependencies {
     ksp("androidx.room:room-compiler:${room_version}")
 
     implementation("com.github.skydoves:colorpicker-compose:1.0.8")
-    implementation("co.yml:ycharts:2.1.0")
-
     implementation ("androidx.datastore:datastore-preferences:1.1.1")
     implementation("androidx.core:core-splashscreen:1.0.1")
 

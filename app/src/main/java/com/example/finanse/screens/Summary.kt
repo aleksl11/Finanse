@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
@@ -23,6 +22,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -30,18 +30,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import co.yml.charts.axis.AxisData
-import co.yml.charts.common.components.Legends
-import co.yml.charts.common.model.LegendLabel
-import co.yml.charts.common.model.LegendsConfig
-import co.yml.charts.common.model.Point
-import co.yml.charts.ui.barchart.GroupBarChart
-import co.yml.charts.ui.barchart.models.BarData
-import co.yml.charts.ui.barchart.models.BarPlotData
-import co.yml.charts.ui.barchart.models.BarStyle
-import co.yml.charts.ui.barchart.models.GroupBar
-import co.yml.charts.ui.barchart.models.GroupBarChartData
-import co.yml.charts.ui.barchart.models.GroupSeparatorConfig
 import com.example.finanse.Chart
 import com.example.finanse.R
 import com.example.finanse.TopNavBar
@@ -52,12 +40,13 @@ import com.example.finanse.sortTypes.SummaryTimePeriod
 import com.example.finanse.states.CategoryState
 import com.example.finanse.states.ExpenseState
 import com.example.finanse.states.IncomeState
+import com.github.mikephil.charting.data.BarData
+import com.github.mikephil.charting.data.BarDataSet
+import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
 import java.time.LocalDate
-import java.time.Month
-import kotlin.math.roundToInt
 
 @Composable
 fun SummaryScreen(
@@ -103,9 +92,9 @@ fun SummaryScreen(
             }
             item {
                 YearlyBarChart(incomes = incomes.filter { i ->
-                    i.date.year == dateNow.year
+                    i.date.year == 2024
                 }, expenses = expenses.filter { e ->
-                    e.date.year == dateNow.year
+                    e.date.year == 2024
                 })
             }
             item {
@@ -253,120 +242,42 @@ fun TimePeriodSummary(sortedExpenses: List<Expense>, sortedIncomes: List<Income>
 
 @Composable
 fun YearlyBarChart(incomes: List<Income>, expenses: List<Expense>){
-    val monthNames = mapOf(
-        Month.JANUARY to stringResource(R.string.january),
-        Month.FEBRUARY to stringResource(R.string.february),
-        Month.MARCH to stringResource(R.string.march),
-        Month.APRIL to stringResource(R.string.april),
-        Month.MAY to stringResource(R.string.may),
-        Month.JUNE to stringResource(R.string.june),
-        Month.JULY to stringResource(R.string.july),
-        Month.AUGUST to stringResource(R.string.august),
-        Month.SEPTEMBER to stringResource(R.string.september),
-        Month.OCTOBER to stringResource(R.string.october),
-        Month.NOVEMBER to stringResource(R.string.november),
-        Month.DECEMBER to stringResource(R.string.december)
-    )
-    // Get unique months from both lists
-    val uniqueMonths = (incomes.map { it.date.month } + expenses.map { it.date.month })
-        .distinct() // Remove duplicates
-        .sorted()   // Sort by month
+    val monthlyIncomeMap = incomes.groupBy { it.date.monthValue - 1 }
+        .mapValues { it.value.sumOf { income -> income.amount } }
+    val monthlyExpenseMap = expenses.groupBy { it.date.monthValue - 1 }
+        .mapValues { it.value.sumOf { expense -> expense.amount } }
 
-    val monthlyIncomeMap = incomes
-        .groupBy { it.date.month }
-        .mapValues { (_, incomeList) ->
-            incomeList.sumOf { it.amount }
-        }
-    val monthlyExpenseMap = expenses
-        .groupBy { it.date.month }
-        .mapValues { (_, expenseList) ->
-            expenseList.sumOf { it.amount }
-        }
+    val entriesIncome = ArrayList<BarEntry>()
+    val entriesExpense = ArrayList<BarEntry>()
+    val barWidth = 0.4f  // Reduce bar width to fit within the group
 
-    val uniqueMonthsMap: Map<Int, Month> = uniqueMonths.mapIndexed { index, month ->
-        index to (month ?: Month.DECEMBER)
-    }.toMap()
-    val monthIndexMap: Map<Int, String> = uniqueMonths.mapIndexed { index, month ->
-        index to (monthNames[month] ?: "error")
-    }.toMap()
+    val barSpace = 0.05f
 
-    val groupBarData: List<GroupBar> = uniqueMonthsMap.values.map { month ->
-        val monthName = monthNames[month] ?: "error"
-        val totalExpenses = monthlyExpenseMap[month]?.times(100) ?: 0f
-        val totalIncomes = monthlyIncomeMap[month]?.times(100) ?: 0f
 
-        GroupBar(
-            monthName,
-            listOf(
-                // First BarData corresponds to expenses
-                BarData(
-                    point = Point(5F, totalExpenses.toFloat(), stringResource(R.string.expenses)),
-                    color = Color.Red,
-                    label= "%.2f".format(totalExpenses.toDouble()/100.0)
-                ),
-                // Second BarData corresponds to incomes
-                BarData(
-                    point = Point(5F, totalIncomes.toFloat(), stringResource(R.string.incomes)),
-                    color = Color.Green,
-                    label = "%.2f".format(totalIncomes.toDouble()/100.0)
-                )
-            )
-        )
+    for (i in 0 until 12) {
+        val income = monthlyIncomeMap[i]?.toFloat() ?: 0f
+        val expense = monthlyExpenseMap[i]?.toFloat() ?: 0f
+
+        val startX = i.toFloat()  // Use direct index for clarity
+
+        entriesIncome.add(BarEntry(startX, income))
+        entriesExpense.add(BarEntry(startX, expense))
     }
 
-    val maxIncome = monthlyIncomeMap.values.maxOrNull() ?: 0.0
-    val maxExpense = monthlyExpenseMap.values.maxOrNull() ?: 0.0
-    val maxRange = if (maxIncome>maxExpense) maxIncome.roundToInt().times(10) else maxExpense.roundToInt().times(10)
-
-    val yStepSize = 10
-    val xAxisData = AxisData.Builder()
-        .axisStepSize(30.dp)
-        .bottomPadding(5.dp)
-        .startDrawPadding(15.dp)
-        .labelData { index -> monthIndexMap[index] ?: "error" }
-        .axisLabelColor(MaterialTheme.colorScheme.primary)
-        .axisLineColor(MaterialTheme.colorScheme.primary)
-        .build()
-    val yAxisData = AxisData.Builder()
-        .steps(yStepSize)
-        .labelAndAxisLinePadding(20.dp)
-        .axisOffset(20.dp)
-        .labelData { index -> (index * (maxRange / yStepSize)/10).toString() }
-        .axisLabelColor(MaterialTheme.colorScheme.primary)
-        .axisLineColor(MaterialTheme.colorScheme.primary)
-        .build()
-    val colorPaletteList =  listOf(Color.Red, Color.Green)
-
-    val legendsConfig = LegendsConfig(
-        legendLabelList = listOf(LegendLabel(Color.Green, stringResource(R.string.incomes)),LegendLabel(Color.Red, stringResource(R.string.expenses))),
-        gridColumnCount = 2
-    )
-    val groupBarPlotData = BarPlotData(
-        groupBarList = groupBarData,
-        barStyle = BarStyle(barWidth = 35.dp),
-        barColorPaletteList = colorPaletteList
-    )
-    val groupBarChartData = GroupBarChartData(
-        barPlotData = groupBarPlotData,
-        xAxisData = xAxisData,
-        yAxisData = yAxisData,
-        groupSeparatorConfig = GroupSeparatorConfig(1.dp),
-        backgroundColor = MaterialTheme.colorScheme.background,
-        paddingTop = 8.dp
-    )
-    Column(
-        Modifier
-            .height(450.dp)
-    ) {
-        GroupBarChart(
-            modifier = Modifier
-                .height(400.dp),
-            groupBarChartData = groupBarChartData
-        )
-        Legends(
-            legendsConfig = legendsConfig
-        )
+    val incomeDataSet = BarDataSet(entriesIncome, stringResource(R.string.incomes)).apply {
+        color = Color.Green.toArgb()
+        valueTextSize = 12f
+        setDrawValues(true)
     }
+    val expenseDataSet = BarDataSet(entriesExpense, stringResource(R.string.expenses)).apply {
+        color = Color.Red.toArgb()
+        valueTextSize = 12f
+        setDrawValues(true)
+    }
+
+    val barData = BarData(incomeDataSet, expenseDataSet)
+
+    Chart().BarChart(barData)
 }
 
 fun getColorByCategory(categories: List<Category>, categoryName: String): Int {
