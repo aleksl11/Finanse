@@ -71,9 +71,13 @@ fun CategoriesScreen(
     val context = LocalContext.current
     Scaffold(
         floatingActionButton = {
-            FloatingActionButton(onClick = {
-                onEvent(CategoryEvent.ShowDialog)
-            }) {
+            FloatingActionButton(
+                onClick = { onEvent(CategoryEvent.ShowDialog) },
+                shape = MaterialTheme.shapes.medium,
+                contentColor = Color.White,
+                modifier = Modifier.size(56.dp),
+                containerColor = MaterialTheme.colorScheme.primary
+            ) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = stringResource(R.string.add_category_desc))
             }
         },

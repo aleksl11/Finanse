@@ -113,7 +113,7 @@ class MainActivity : ComponentActivity() {
                             Menu(navController)
                         }
                         composable("summary"){
-                            SummaryScreen(navController, incomeState, expenseState, categoryState)
+                            SummaryScreen(navController, incomeState, expenseState, categoryState, accountState)
                         }
                         composable("incomes"){
                             IncomesScreen(navController, incomeState, accountState, incomeViewModel::onEvent)

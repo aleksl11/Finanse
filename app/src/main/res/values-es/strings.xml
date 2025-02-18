@@ -134,4 +134,7 @@
     <string name="restore_failed_toast">Error al restaurar los datos</string>
     <string name="delete_toast">Copia de seguridad eliminada</string>
     <string name="delete_failed_toast">Error al eliminar la copia de seguridad</string>
+    <string name="choose_account">Elegir cuenta</string>
+    <string name="all_accounts">Todas las cuentas</string>
+    <string name="select_slice">Selecciona un segmento</string>
 </resources>

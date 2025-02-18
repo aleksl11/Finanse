@@ -127,7 +127,9 @@ fun SettingsScreen(
                 Spacer(modifier = Modifier.height(20.dp))
 
                 // Sign-In Button
-                Button(onClick = {
+                Button(
+                    modifier = Modifier.padding(16.dp),
+                    onClick = {
                     if (user == null) {
                         signInWithGoogle(context, signInLauncher)
                     } else {
@@ -140,33 +142,29 @@ fun SettingsScreen(
             }
             if (user!= null){
                 item {
-                    Spacer(modifier = Modifier.height(20.dp))
-                    Row {
-                        ConfirmPopup().ConfirmButtonAction(stringResource(R.string.backup_data), "Are you sure you want to create a backup?") {
+                    Column(
+                        modifier = Modifier.fillMaxWidth()
+                            .padding(16.dp),
+                    ) {
+                        ConfirmPopup().ConfirmButtonAction(
+                            stringResource(R.string.backup_data),
+                            "Are you sure you want to create a backup?"
+                        ) {
                             backupData(context)
                         }
-//                        Button(onClick = {
-//                            backupData(context)
-//                        }) {
-//                            Text(text = stringResource(R.string.backup_data))
-//                        }
-                        ConfirmPopup().ConfirmButtonAction(stringResource(R.string.delete_data), "Are you sure you want to delete backup?") {
+                        ConfirmPopup().ConfirmButtonAction(
+                            stringResource(R.string.delete_data),
+                            "Are you sure you want to delete backup?"
+                        ) {
                             deleteBackup(context)
                         }
-//                        Button(onClick = {
-//                            deleteBackup(context)
-//                        }) {
-//                            Text(text = stringResource(R.string.delete_data))
-//                        }
+                        ConfirmPopup().ConfirmButtonAction(
+                            stringResource(R.string.restore_data),
+                            "Are you sure you want to restore data?"
+                        ) {
+                            restoreBackup(context)
+                        }
                     }
-                    ConfirmPopup().ConfirmButtonAction(stringResource(R.string.restore_data), "Are you sure you want to restore data?") {
-                        restoreBackup(context)
-                    }
-//                    Button(onClick = {
-//                        restoreBackup(context)
-//                    }) {
-//                        Text(text = stringResource(R.string.restore_data))
-//                    }
                 }
             }
         }

@@ -77,7 +77,7 @@ class Chart {
                     }
 
                     override fun onNothingSelected() {
-                        chart.centerText = "Select a slice"
+                        chart.centerText = context.getText(R.string.select_slice)
                     }
                 })
                 chart.data = data
@@ -153,6 +153,18 @@ class Chart {
                     animateY(1000)
                     marker = MyMarkerView(context)
                 }
+            },
+            update = { chart ->
+                // Update the chart's data and styling whenever the input data changes
+                data.dataSets.forEach { it.setDrawValues(false) }
+                data.barWidth = barWidth
+                chart.data = data
+
+                chart.setFitBars(true)
+                chart.groupBars(0f, groupSpace, barSpace)
+                chart.resetZoom()
+                chart.invalidate()
+                chart.animateY(1000)
             }
         )
     }

@@ -133,4 +133,7 @@
     <string name="restore_failed_toast">Restore failed</string>
     <string name="delete_toast">Backup deleted</string>
     <string name="delete_failed_toast">Delete failed</string>
+    <string name="choose_account">Choose account</string>
+    <string name="all_accounts">All accounts</string>
+    <string name="select_slice">Select a slice</string>
 </resources>

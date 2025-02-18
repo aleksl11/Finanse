@@ -10,7 +10,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
@@ -33,10 +43,12 @@ import androidx.navigation.NavController
 import com.example.finanse.Chart
 import com.example.finanse.R
 import com.example.finanse.TopNavBar
+import com.example.finanse.entities.Account
 import com.example.finanse.entities.Category
 import com.example.finanse.entities.Expense
 import com.example.finanse.entities.Income
 import com.example.finanse.sortTypes.SummaryTimePeriod
+import com.example.finanse.states.AccountState
 import com.example.finanse.states.CategoryState
 import com.example.finanse.states.ExpenseState
 import com.example.finanse.states.IncomeState
@@ -48,23 +60,42 @@ import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
 import java.time.LocalDate
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SummaryScreen(
     navController: NavController,
     incomeState: IncomeState,
     expenseState: ExpenseState,
-    categoryState: CategoryState
+    categoryState: CategoryState,
+    accountState: AccountState
 ){
     var chosenTimePeriod by remember { mutableStateOf(SummaryTimePeriod.THIS_MONTH)}
-    val incomes = incomeState.income
+    var year by remember { mutableStateOf(LocalDate.now().year) }
+    val accounts = listOf(Account(id = -1, name = stringResource(R.string.all_accounts), balance = 0.0)) + accountState.account
+    var selectedAccount by remember { mutableStateOf(accounts.first()) }
+    var expanded by remember { mutableStateOf(false) }
+    val incomes  = incomeState.income
     val expenses = expenseState.expense
+    val filteredIncomes = remember(selectedAccount, incomeState.income) {
+        if (selectedAccount.id == -1)
+            incomeState.income
+        else
+            incomeState.income.filter { it.account == selectedAccount.id }
+    }
+    val filteredExpenses = remember(selectedAccount, expenseState.expense) {
+        if (selectedAccount.id == -1)
+            expenseState.expense
+        else
+            expenseState.expense.filter { it.account == selectedAccount.id }
+    }
+
     val context = LocalContext.current
     var incomesTotal = 0.0
-    incomes.forEach{i ->
+    filteredIncomes.forEach{i ->
         incomesTotal += i.amount
     }
     var expensesTotal = 0.0
-    expenses.forEach{e ->
+    filteredExpenses.forEach{e ->
         expensesTotal += e.amount
     }
 
@@ -84,18 +115,85 @@ fun SummaryScreen(
             modifier = Modifier.fillMaxSize()
         ) {
             item {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically, // Align items vertically centered
+                    modifier = Modifier.padding(vertical = 8.dp) // Space around the row
+                ) {
+                    Text(
+                        text = stringResource(R.string.choose_account) + ": ", // Label for the dropdown
+                        fontSize = 16.sp, // Font size
+                        modifier = Modifier.padding(end = 8.dp) // Space between label and dropdown
+                    )
+
+                    ExposedDropdownMenuBox(
+                        expanded = expanded,
+                        onExpandedChange = { expanded = !expanded } // Toggle dropdown
+                    ) {
+                        // The TextField that shows the currently selected sort type
+                        OutlinedTextField(
+                            value = selectedAccount.name, // Show the selected sort type's name
+                            onValueChange = {},
+                            readOnly = true, // Prevent editing
+                            trailingIcon = {
+                                Icon(
+                                    imageVector = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                                    contentDescription = null
+                                )
+                            },
+                            singleLine = true,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .menuAnchor() // Open dropdown when clicked
+                        )
+                        DropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false } // Close the dropdown menu
+                        ) {
+                            accounts.forEach { account ->
+                                DropdownMenuItem(
+                                    text = { Text(text = account.name) },
+                                    onClick = {
+                                        selectedAccount = account
+                                        expanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            item {
                 Text(text = stringResource(R.string.yearly_summary),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center)
             }
+            item{
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ){
+                    Button(onClick = { year -=1 }) {
+                        Text(text = "<")
+                    }
+                    Text(text = "$year", modifier = Modifier.padding(horizontal = 16.dp))
+                    Button(
+                        enabled = year<LocalDate.now().year,
+                        onClick = {
+                        year +=1
+                    }) {
+                        Text(text = ">")
+                    }
+                }
+            }
             item {
-                YearlyBarChart(incomes = incomes.filter { i ->
-                    i.date.year == 2024
-                }, expenses = expenses.filter { e ->
-                    e.date.year == 2024
-                })
+                YearlyBarChart(
+                    year = year,
+                    incomes = filteredIncomes,
+                    expenses = filteredExpenses
+                )
             }
             item {
                 Text(
@@ -137,10 +235,10 @@ fun SummaryScreen(
             item{
                 when(chosenTimePeriod){
                     SummaryTimePeriod.THIS_MONTH -> {
-                        sortedExpenses = expenses.filter { e ->
+                        sortedExpenses = filteredExpenses.filter { e ->
                             e.date.month == dateNow.month && e.date.year == dateNow.year
                         }
-                        sortedIncomes = incomes.filter { i ->
+                        sortedIncomes = filteredIncomes.filter { i ->
                             i.date.month == dateNow.month && i.date.year == dateNow.year
                         }
                         if(sortedExpenses.isEmpty()) NoRecordsInLists()
@@ -157,8 +255,8 @@ fun SummaryScreen(
                         else TimePeriodSummary(sortedExpenses = sortedExpenses, sortedIncomes = sortedIncomes, categoryState)
                     }
                     SummaryTimePeriod.ALL_TIME -> {
-                        sortedExpenses = expenses
-                        sortedIncomes = incomes
+                        sortedExpenses = filteredExpenses
+                        sortedIncomes = filteredIncomes
                         if(sortedExpenses.isEmpty()) NoRecordsInLists()
                         else TimePeriodSummary(sortedExpenses = sortedExpenses, sortedIncomes = sortedIncomes, categoryState)
                     }
@@ -241,10 +339,13 @@ fun TimePeriodSummary(sortedExpenses: List<Expense>, sortedIncomes: List<Income>
 }
 
 @Composable
-fun YearlyBarChart(incomes: List<Income>, expenses: List<Expense>){
-    val monthlyIncomeMap = incomes.groupBy { it.date.monthValue - 1 }
+fun YearlyBarChart(year: Int, incomes: List<Income>, expenses: List<Expense>){
+    val filteredIncomes = incomes.filter { it.date.year == year }
+    val filteredExpenses = expenses.filter { it.date.year == year }
+
+    val monthlyIncomeMap = filteredIncomes.groupBy { it.date.monthValue - 1 }
         .mapValues { it.value.sumOf { income -> income.amount } }
-    val monthlyExpenseMap = expenses.groupBy { it.date.monthValue - 1 }
+    val monthlyExpenseMap = filteredExpenses.groupBy { it.date.monthValue - 1 }
         .mapValues { it.value.sumOf { expense -> expense.amount } }
 
     val entriesIncome = ArrayList<BarEntry>()

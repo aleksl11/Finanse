@@ -105,129 +105,151 @@ fun ExpensesScreen(
                 onEvent = onEvent
             )
         }
+        Column {
+            TopNavBar(navController, "Expenses", "menu")
+            LazyColumn(
+                contentPadding = padding,
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                item {
+                    var expanded by remember { mutableStateOf(false) } // Control dropdown menu state
+                    var selectedSortType by remember { mutableStateOf(state.expenseSortType) } // Track selected sort type
 
-        LazyColumn(
-            contentPadding = padding,
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            item {
-                TopNavBar(navController, "Expenses", "menu")
-            }
-            item {
-                var expanded by remember { mutableStateOf(false) } // Control dropdown menu state
-                var selectedSortType by remember { mutableStateOf(state.expenseSortType) } // Track selected sort type
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp) // Add padding around sorting options
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically, // Align items vertically centered
-                        modifier = Modifier.padding(vertical = 8.dp) // Space around the row
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp) // Add padding around sorting options
                     ) {
-                        Text(
-                            text = stringResource(R.string.sort_by) + ": ", // Label for the dropdown
-                            fontSize = 16.sp, // Font size
-                            modifier = Modifier.padding(end = 8.dp) // Space between label and dropdown
-                        )
-
-                        ExposedDropdownMenuBox(
-                            expanded = expanded,
-                            onExpandedChange = { expanded = !expanded } // Toggle dropdown
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically, // Align items vertically centered
+                            modifier = Modifier.padding(vertical = 8.dp) // Space around the row
                         ) {
-                            // The TextField that shows the currently selected sort type
-                            OutlinedTextField(
-                                value = getSortTypeName(context, selectedSortType), // Show the selected sort type's name
-                                onValueChange = {},
-                                readOnly = true, // Prevent editing
-                                trailingIcon = {
-                                    Icon(
-                                        imageVector = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
-                                        contentDescription = null
-                                    )
-                                },
-                                singleLine = true,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .menuAnchor() // Open dropdown when clicked
+                            Text(
+                                text = stringResource(R.string.sort_by) + ": ", // Label for the dropdown
+                                fontSize = 16.sp, // Font size
+                                modifier = Modifier.padding(end = 8.dp) // Space between label and dropdown
                             )
 
-                            // The DropdownMenu with all sorting options
-                            DropdownMenu(
+                            ExposedDropdownMenuBox(
                                 expanded = expanded,
-                                onDismissRequest = { expanded = false } // Close the dropdown menu
+                                onExpandedChange = { expanded = !expanded } // Toggle dropdown
                             ) {
-                                ExpenseSortType.entries.forEach { expenseSortType ->
-                                    DropdownMenuItem(
-                                        text = { Text(text = getSortTypeName(context, expenseSortType)) },
-                                        onClick = {
-                                            selectedSortType = expenseSortType
-                                            onEvent(ExpenseEvent.SortExpenses(expenseSortType)) // Trigger event on selection
-                                            expanded = false // Close dropdown
-                                        }
-                                    )
+                                // The TextField that shows the currently selected sort type
+                                OutlinedTextField(
+                                    value = getSortTypeName(
+                                        context,
+                                        selectedSortType
+                                    ), // Show the selected sort type's name
+                                    onValueChange = {},
+                                    readOnly = true, // Prevent editing
+                                    trailingIcon = {
+                                        Icon(
+                                            imageVector = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                                            contentDescription = null
+                                        )
+                                    },
+                                    singleLine = true,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .menuAnchor() // Open dropdown when clicked
+                                )
+
+                                // The DropdownMenu with all sorting options
+                                DropdownMenu(
+                                    expanded = expanded,
+                                    onDismissRequest = {
+                                        expanded = false
+                                    } // Close the dropdown menu
+                                ) {
+                                    ExpenseSortType.entries.forEach { expenseSortType ->
+                                        DropdownMenuItem(
+                                            text = {
+                                                Text(
+                                                    text = getSortTypeName(
+                                                        context,
+                                                        expenseSortType
+                                                    )
+                                                )
+                                            },
+                                            onClick = {
+                                                selectedSortType = expenseSortType
+                                                onEvent(ExpenseEvent.SortExpenses(expenseSortType)) // Trigger event on selection
+                                                expanded = false // Close dropdown
+                                            }
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
-            items(state.expense) { expense ->
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp)
-                        .clickable {
-                            navController.navigate("expenseDetails/${expense.id}")
-                        },
-                    elevation = CardDefaults.cardElevation(4.dp),
-                    shape = MaterialTheme.shapes.medium,
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface, // Background color
-                        contentColor = MaterialTheme.colorScheme.onSurface  // Text and icon color
-                    )
-                ) {
-                    Row(
+                items(state.expense) { expense ->
+                    Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp)
+                            .padding(horizontal = 8.dp)
+                            .clickable {
+                                navController.navigate("expenseDetails/${expense.id}")
+                            },
+                        elevation = CardDefaults.cardElevation(4.dp),
+                        shape = MaterialTheme.shapes.medium,
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surface, // Background color
+                            contentColor = MaterialTheme.colorScheme.onSurface  // Text and icon color
+                        )
                     ) {
-                        Column(
-                            modifier = Modifier.weight(1f)
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
                         ) {
-                            Text(
-                                text = "${expense.title}: ${"%.2f".format(expense.amount)}",
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Text(
-                                text = expense.date.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")) +
-                                        "\n${DisplayFormat().getAccountName(expense.account.toString(), mAccounts)}" +
-                                        "\n${expense.category}",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            expense.description?.let {
+                            Column(
+                                modifier = Modifier.weight(1f)
+                            ) {
                                 Text(
-                                    text = it,
+                                    text = "${expense.title}: ${"%.2f".format(expense.amount)}",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = expense.date.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")) +
+                                            "\n${
+                                                DisplayFormat().getAccountName(
+                                                    expense.account.toString(),
+                                                    mAccounts
+                                                )
+                                            }" +
+                                            "\n${expense.category}",
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    maxLines = 2,
-                                    overflow = TextOverflow.Ellipsis
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                expense.description?.let {
+                                    Text(
+                                        text = it,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 2,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
+                            IconButton(onClick = {
+                                onEvent(ExpenseEvent.SetId(expense.id))
+                                onEvent(ExpenseEvent.GetData(expense.id, context))
+                                onEvent(ExpenseEvent.ShowDialog)
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.Edit,
+                                    contentDescription = stringResource(R.string.edit_expense_desc)
                                 )
                             }
-                        }
-                        IconButton(onClick = {
-                            onEvent(ExpenseEvent.SetId(expense.id))
-                            onEvent(ExpenseEvent.GetData(expense.id, context))
-                            onEvent(ExpenseEvent.ShowDialog)
-                        }) {
-                            Icon(imageVector = Icons.Default.Edit, contentDescription = stringResource(R.string.edit_expense_desc))
-                        }
-                        ConfirmPopup().DeleteIconButton(stringResource(R.string.delete_name), stringResource(R.string.delete_message_expense)) {
-                            onEvent(ExpenseEvent.DeleteExpense(expense))
+                            ConfirmPopup().DeleteIconButton(
+                                stringResource(R.string.delete_name),
+                                stringResource(R.string.delete_message_expense)
+                            ) {
+                                onEvent(ExpenseEvent.DeleteExpense(expense))
+                            }
                         }
                     }
                 }
