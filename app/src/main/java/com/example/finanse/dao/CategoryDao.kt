@@ -15,7 +15,16 @@ interface CategoryDao {
     @Insert
     suspend fun insertFirstCategories(categories: List<Category>)
     @Delete
-    suspend fun deleteCategory(category: Category)
+    suspend fun deleteCategory(category: Category) {
+        updateExpensesCategoryToOther(category.name)
+        deleteCategoryFromDb(category.name)
+    }
+
+    @Query("UPDATE expense SET category = 'Other' WHERE category = :categoryName")
+    suspend fun updateExpensesCategoryToOther(categoryName: String)
+
+    @Query("DELETE FROM category WHERE name = :categoryName")
+    suspend fun deleteCategoryFromDb(categoryName: String)
 
     @Query("SELECT color FROM category where name = :name")
     fun getColor(name: String): Int

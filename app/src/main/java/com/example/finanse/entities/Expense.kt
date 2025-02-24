@@ -11,7 +11,7 @@ import java.time.LocalDate
             entity = Category::class,
             parentColumns = arrayOf("name"),
             childColumns = arrayOf("category"),
-            onDelete = ForeignKey.CASCADE
+            onDelete = ForeignKey.SET_DEFAULT
         ),
         ForeignKey(
             entity = Account::class,
@@ -27,7 +27,7 @@ data class Expense(
     val amount: Double,
     val title: String,
     val date: LocalDate,
-    val category: String,
+    val category: String = "Other",
     val account: Int,
     val description: String? = null,
     val photos: String? = null //JSON
